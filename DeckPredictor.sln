@@ -5,6 +5,11 @@ VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeckPredictor", "DeckPredictor\DeckPredictor.csproj", "{88D8EBB0-95E5-4779-9CD5-401BBE5538E8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeckPredictorTests", "DeckPredictorTests\DeckPredictorTests.csproj", "{00BD9AF3-0049-4E11-BB99-71E940548BC9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{88D8EBB0-95E5-4779-9CD5-401BBE5538E8} = {88D8EBB0-95E5-4779-9CD5-401BBE5538E8}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -15,6 +20,10 @@ Global
 		{88D8EBB0-95E5-4779-9CD5-401BBE5538E8}.Debug|x86.Build.0 = Debug|x86
 		{88D8EBB0-95E5-4779-9CD5-401BBE5538E8}.Release|x86.ActiveCfg = Release|x86
 		{88D8EBB0-95E5-4779-9CD5-401BBE5538E8}.Release|x86.Build.0 = Release|x86
+		{00BD9AF3-0049-4E11-BB99-71E940548BC9}.Debug|x86.ActiveCfg = Debug|x86
+		{00BD9AF3-0049-4E11-BB99-71E940548BC9}.Debug|x86.Build.0 = Debug|x86
+		{00BD9AF3-0049-4E11-BB99-71E940548BC9}.Release|x86.ActiveCfg = Release|x86
+		{00BD9AF3-0049-4E11-BB99-71E940548BC9}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
