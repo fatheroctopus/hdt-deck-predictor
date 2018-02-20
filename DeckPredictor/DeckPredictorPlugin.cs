@@ -9,7 +9,7 @@ namespace DeckPredictor
 {
 	public class DeckPredictorPlugin : IPlugin
 	{
-		private static string DataDirectory = Path.Combine(Config.AppDataPath, "DeckPredictor");
+		public static readonly string DataDirectory = Path.Combine(Config.AppDataPath, "DeckPredictor");
 		private static string ConfigPath = Path.Combine(DataDirectory, "config.xml");
 
 		private PluginConfig config_;
@@ -45,6 +45,8 @@ namespace DeckPredictor
 
 		public void OnLoad()
 		{
+			Log.Initialize();
+			Log.Info("Starting");
 			if (!Directory.Exists(DataDirectory))
 			{
 				Directory.CreateDirectory(DataDirectory);
@@ -71,7 +73,9 @@ namespace DeckPredictor
 		{
 			if (File.Exists(ConfigPath))
 			{
-				config_ = PluginConfig.Load(new StreamReader(ConfigPath));
+				var reader = new StreamReader(ConfigPath);
+				config_ = PluginConfig.Load(reader);
+				reader.Close();
 			}
 			else
 			{
@@ -81,7 +85,9 @@ namespace DeckPredictor
 
 		private void SaveConfig()
 		{
-			config_.Save(new StreamWriter(ConfigPath));
+			var writer = new StreamWriter(ConfigPath);
+			config_.Save(writer);
+			writer.Close();
 		}
 	}
 }

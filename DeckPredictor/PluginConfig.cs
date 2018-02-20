@@ -18,15 +18,16 @@ namespace DeckPredictor
 
 		public static PluginConfig Load(StreamReader reader) {
 			var serializer = new XmlSerializer(typeof(PluginConfig));
+			PluginConfig config = null;
 			try
 			{
-				return (PluginConfig)serializer.Deserialize(reader);
+				config = (PluginConfig)serializer.Deserialize(reader);
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
-				// TODO: Log
-				return null;
+				Log.Error(ex);
 			}
+			return config;
 		}
 
 		public void Save(StreamWriter writer) {
@@ -35,9 +36,9 @@ namespace DeckPredictor
 			{
 				serializer.Serialize(writer, this);
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
-				// TODO: Log
+				Log.Error(ex);
 			}
 		}
 	}
