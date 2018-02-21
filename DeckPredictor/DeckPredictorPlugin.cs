@@ -13,7 +13,6 @@ namespace DeckPredictor
 	public class DeckPredictorPlugin : IPlugin
 	{
 		public static readonly string DataDirectory = Path.Combine(Config.AppDataPath, "DeckPredictor");
-		private static readonly string ConfigPath = Path.Combine(DataDirectory, "config.xml");
 
 		private PluginConfig _config;
 
@@ -55,17 +54,16 @@ namespace DeckPredictor
 				Directory.CreateDirectory(DataDirectory);
 			}
 
-			LoadConfig();
+			_config = PluginConfig.Load();
 
 			var metaRetriever = new MetaRetriever();
 			var task = Task.Run<List<Deck>>(async () => await metaRetriever.RetrieveMetaDecks(_config));
 			List<Deck> metaDecks = task.Result;
-
-			SaveConfig();
 		}
 
 		public void OnUnload()
 		{
+			_config.Save();
 		}
 
 		public void OnUpdate()
@@ -75,27 +73,6 @@ namespace DeckPredictor
 		public Version Version
 		{
 			get { return new Version(0, 1, 1); }
-		}
-
-		private void LoadConfig()
-		{
-			if (File.Exists(ConfigPath))
-			{
-				var reader = new StreamReader(ConfigPath);
-				_config = PluginConfig.Load(reader);
-				reader.Close();
-			}
-			else
-			{
-				_config = new PluginConfig();
-			}
-		}
-
-		private void SaveConfig()
-		{
-			var writer = new StreamWriter(ConfigPath);
-			_config.Save(writer);
-			writer.Close();
 		}
 	}
 }

@@ -57,7 +57,7 @@ namespace DeckPredictor
 				}
 				else
 				{
-					Log.Debug("Cached meta file is only " + daysSinceLastDownload + " days old.")
+					Log.Debug("Cached meta file is only " + daysSinceLastDownload + " days old.");
 				}
 			}
 
@@ -86,6 +86,7 @@ namespace DeckPredictor
 
 				config.CurrentMetaFileVersion = newMetaVersion;
 				config.CurrentMetaFileDownloadTime = DateTime.Now;
+				config.Save();
 			}
 
 			Log.Debug("Loading meta file");
