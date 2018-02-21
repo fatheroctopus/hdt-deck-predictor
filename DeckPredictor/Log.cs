@@ -11,10 +11,10 @@ namespace DeckPredictor
 {
 	public class Log
 	{
-		private static string LogDirectory = Path.Combine(DeckPredictorPlugin.DataDirectory, "Logs");
-		private static string LogPrefix = "log";
-		private static string LogSuffix = ".txt";
-		private static string LogFile = Path.Combine(LogDirectory, LogPrefix + LogSuffix);
+		private static readonly string LogDirectory = Path.Combine(DeckPredictorPlugin.DataDirectory, "Logs");
+		private static readonly string LogPrefix = "log";
+		private static readonly string LogSuffix = ".txt";
+		private static readonly string LogFile = Path.Combine(LogDirectory, LogPrefix + LogSuffix);
 
 		private const int MaxLogFileAge = 2;
 		private const int KeepOldLogs = 5;

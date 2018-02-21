@@ -11,6 +11,7 @@ namespace DeckPredictor
 	public class PluginConfig
 	{
 		public string CurrentMetaFileVersion { get; set;  }
+		public DateTime CurrentMetaFileDownloadTime { get; set; }
 
 		public PluginConfig() {
 			this.CurrentMetaFileVersion = "1";
