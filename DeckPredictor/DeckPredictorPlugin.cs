@@ -56,6 +56,7 @@ namespace DeckPredictor
 
 			_config = PluginConfig.Load();
 
+			// Synchronously retrieve our meta decks and keep them in memory.
 			var metaRetriever = new MetaRetriever();
 			var task = Task.Run<List<Deck>>(async () => await metaRetriever.RetrieveMetaDecks(_config));
 			List<Deck> metaDecks = task.Result;

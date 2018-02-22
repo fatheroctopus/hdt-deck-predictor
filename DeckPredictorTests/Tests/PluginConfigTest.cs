@@ -3,7 +3,7 @@ using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using DeckPredictor;
 
-namespace DeckPredictorTests
+namespace DeckPredictorTests.Tests
 {
 	[TestClass]
 	public class PluginConfigTest

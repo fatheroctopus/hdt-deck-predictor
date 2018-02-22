@@ -36,6 +36,9 @@
       <HintPath>..\..\Hearthstone-Deck-Tracker\Hearthstone Deck Tracker\bin\x86\Debug\HearthDb.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="HearthMirror">
+      <HintPath>..\..\Hearthstone-Deck-Tracker\Hearthstone Deck Tracker\bin\x86\Debug\HearthMirror.dll</HintPath>
+    </Reference>
     <Reference Include="HearthstoneDeckTracker, Version=1.1.7.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Hearthstone-Deck-Tracker\Hearthstone Deck Tracker\bin\x86\Debug\HearthstoneDeckTracker.exe</HintPath>
@@ -54,6 +57,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Predictor.cs" />
     <Compile Include="MetaRetriever.cs" />
     <Compile Include="IMetaRetriever.cs" />
     <Compile Include="Log.cs" />
