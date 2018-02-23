@@ -15,6 +15,7 @@ namespace DeckPredictor
 	public class Predictor
 	{
 		private List<Deck> _metaDecks;
+		private IGame _game;
 
 		public Predictor(List<Deck> metaDecks)
 		{
@@ -23,12 +24,13 @@ namespace DeckPredictor
 
 		public void GameStart(IGame game)
 		{
-
+			_game = game;
 		}
 
 		public ReadOnlyCollection<Deck> GetPossibleDecks()
 		{
-			return new ReadOnlyCollection<Deck>(new List<Deck>());
+			var classDecks = _metaDecks.Where(x => x.Class == _game.Opponent.Class).ToList();
+			return new ReadOnlyCollection<Deck>(classDecks);
 		}
 	}
 }
