@@ -15,6 +15,7 @@ namespace DeckPredictor
 	public class Predictor
 	{
 		private List<Deck> _metaDecks;
+		private List<Deck> _possibleDecks;
 		private IGame _game;
 
 		public Predictor(List<Deck> metaDecks)
@@ -22,15 +23,31 @@ namespace DeckPredictor
 			_metaDecks = metaDecks;
 		}
 
-		public void GameStart(IGame game)
+		public void OnGameStart(IGame game)
 		{
 			_game = game;
+			// Only want decks for the opponent's class.
+			_possibleDecks = _metaDecks.Where(x => x.Class == _game.Opponent.Class).ToList();
 		}
 
 		public ReadOnlyCollection<Deck> GetPossibleDecks()
 		{
-			var classDecks = _metaDecks.Where(x => x.Class == _game.Opponent.Class).ToList();
-			return new ReadOnlyCollection<Deck>(classDecks);
+			return new ReadOnlyCollection<Deck>(_possibleDecks);
+		}
+
+		public void OnOpponentPlay(Card cardPlayed) {
+			_possibleDecks = _possibleDecks
+				.Where(deck =>
+				{
+					foreach (Card card in _game.Opponent.RevealedCards)
+					{
+						if (deck.Cards.FirstOrDefault(x => x.Id == card.Id) == null)
+						{
+							return false;
+						}
+					}
+					return true;
+				}).ToList();
 		}
 	}
 }

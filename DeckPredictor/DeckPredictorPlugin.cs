@@ -15,6 +15,7 @@ namespace DeckPredictor
 		public static readonly string DataDirectory = Path.Combine(Config.AppDataPath, "DeckPredictor");
 
 		private PluginConfig _config;
+		private Predictor _predictor;
 
 		public string Author
 		{
@@ -60,6 +61,11 @@ namespace DeckPredictor
 			var metaRetriever = new MetaRetriever();
 			var task = Task.Run<List<Deck>>(async () => await metaRetriever.RetrieveMetaDecks(_config));
 			List<Deck> metaDecks = task.Result;
+
+			_predictor = new Predictor(metaDecks);
+			GameEvents.OnGameStart.Add(
+				() => _predictor.OnGameStart(Hearthstone_Deck_Tracker.Core.Game));
+			GameEvents.OnOpponentPlay.Add(_predictor.OnOpponentPlay);
 		}
 
 		public void OnUnload()

@@ -15,12 +15,44 @@ namespace DeckPredictorTests.Mocks
 {
 	public class MockGame : IGame
 	{
+		private int _nextEntityId;
+
 		public MockGame()
 		{
 			Player = new Player(this, true);
 			Opponent = new Player(this, false);
 			Entities = new Dictionary<int, Entity>();
+
+			// Setup basic game entities.
+			var gameEntity = CreateNewEntity(null);
+			gameEntity.Name = "GameEntity";
+			var heroPlayer = CreateNewEntity("HERO_01");
+			heroPlayer.SetTag(GameTag.CARDTYPE, (int)CardType.HERO);
+			heroPlayer.SetTag(GameTag.CONTROLLER, heroPlayer.Id);
+			Player.Id = heroPlayer.Id;
+			var heroOpponent = CreateNewEntity("HERO_02");
+			heroOpponent.SetTag(GameTag.CARDTYPE, (int)CardType.HERO);
+			heroOpponent.SetTag(GameTag.CONTROLLER, heroOpponent.Id);
+			Opponent.Id = heroOpponent.Id;
+			var opponentEntity = CreateNewEntity("");
+			opponentEntity.SetTag(GameTag.PLAYER_ID, heroOpponent.Id);
 		}
+
+		public void AddOpponentCard(string cardId, CardType cardType)
+		{
+			var card = CreateNewEntity(cardId);
+			card.SetTag(GameTag.CONTROLLER, Opponent.Id);
+			card.SetTag(GameTag.CARDTYPE, (int)cardType);
+		}
+
+		private Entity CreateNewEntity(string cardId)
+		{
+			int id = _nextEntityId++;
+			var entity = new Entity(id) { CardId = cardId };
+			Entities.Add(id, entity);
+			return entity;
+		}
+
 		public Player Player { get; set; }
 		public Player Opponent { get; set; }
 		public Entity GameEntity { get; set; }
