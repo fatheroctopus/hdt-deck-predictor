@@ -62,9 +62,9 @@ namespace DeckPredictor
 			var task = Task.Run<List<Deck>>(async () => await metaRetriever.RetrieveMetaDecks(_config));
 			List<Deck> metaDecks = task.Result;
 
-			_predictor = new Predictor(metaDecks);
-			GameEvents.OnGameStart.Add(
-				() => _predictor.OnGameStart(Hearthstone_Deck_Tracker.Core.Game));
+			_predictor = new Predictor(Hearthstone_Deck_Tracker.Core.Game, metaDecks);
+			GameEvents.OnGameStart.Add(_predictor.OnGameStart);
+			GameEvents.OnOpponentDraw.Add(_predictor.OnOpponentDraw);
 			GameEvents.OnOpponentPlay.Add(_predictor.OnOpponentPlay);
 		}
 

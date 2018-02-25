@@ -15,75 +15,71 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void OnGameStart_EmptyMetaDecks()
 		{
-			var predictor = new Predictor(new List<Deck>());
-			predictor.OnGameStart(new MockGame());
+			var predictor = new Predictor(new MockGame(), new List<Deck>());
+			predictor.OnGameStart();
 			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
 		}
 
 		[TestMethod]
 		public void OnGameStart_OneMetaDeckSameClass()
 		{
+			var game = new MockGame();
+			game.Opponent.Class = "Hunter";
 			var metaDecks = new List<Deck>();
 			metaDecks.Add(new Deck());
 			metaDecks[0].Class = "Hunter";
-			var predictor = new Predictor(metaDecks);
+			var predictor = new Predictor(game, metaDecks);
 
-			var game = new MockGame();
-			game.Opponent.Class = "Hunter";
-			predictor.OnGameStart(game);
-
+			predictor.OnGameStart();
 			Assert.IsTrue(metaDecks.SequenceEqual(predictor.GetPossibleDecks()));
 		}
 
 		[TestMethod]
 		public void OnGameStart_OneMetaDeckDifferentClass()
 		{
+			var game = new MockGame();
+			game.Opponent.Class = "Mage";
 			var metaDecks = new List<Deck>();
 			metaDecks.Add(new Deck());
 			metaDecks[0].Class = "Hunter";
-			var predictor = new Predictor(metaDecks);
+			var predictor = new Predictor(game, metaDecks);
 
-			var game = new MockGame();
-			game.Opponent.Class = "Mage";
-			predictor.OnGameStart(game);
-
+			predictor.OnGameStart();
 			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
 		}
 
 		[TestMethod]
 		public void OnOpponentPlay_MissingCardFiltersDeck()
 		{
+			var game = new MockGame();
+			game.Opponent.Class = "Hunter";
 			var metaDecks = new List<Deck>();
 			metaDecks.Add(new Deck());
 			metaDecks[0].Class = "Hunter";
-			var predictor = new Predictor(metaDecks);
+			var predictor = new Predictor(game, metaDecks);
 
-			var game = new MockGame();
-			game.Opponent.Class = "Hunter";
-			predictor.OnGameStart(game);
+			predictor.OnGameStart();
 			game.AddOpponentCard("EX1_617", CardType.SPELL);
 			predictor.OnOpponentPlay(null);
-
 			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
 		}
 
 		[TestMethod]
 		public void OnOpponentPlay_MatchingCardDoesNotFilter()
 		{
+			var game = new MockGame();
+			game.Opponent.Class = "Hunter";
 			var metaDecks = new List<Deck>();
 			metaDecks.Add(new Deck());
 			metaDecks[0].Class = "Hunter";
 			var hunterCard = new Card();
 			hunterCard.Id = "EX1_617";
 			metaDecks[0].Cards.Add(hunterCard);
-			var predictor = new Predictor(metaDecks);
+			var predictor = new Predictor(game, metaDecks);
 
-			var game = new MockGame();
-			game.Opponent.Class = "Hunter";
-			predictor.OnGameStart(game);
+			predictor.OnGameStart();
 			game.AddOpponentCard("EX1_617", CardType.SPELL);
 			predictor.OnOpponentPlay(null);
-
 			Assert.AreEqual(1, predictor.GetPossibleDecks().Count);
 		}
 

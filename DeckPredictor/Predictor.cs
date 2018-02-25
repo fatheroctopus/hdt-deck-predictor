@@ -17,18 +17,24 @@ namespace DeckPredictor
 		private List<Deck> _metaDecks;
 		private List<Deck> _possibleDecks;
 		private IGame _game;
+		private bool _classDetected;
 
-		public Predictor(List<Deck> metaDecks)
+		public Predictor(IGame game, List<Deck> metaDecks)
 		{
 			_metaDecks = metaDecks;
+			_game = game;
 		}
 
-		public void OnGameStart(IGame game)
+		public void OnGameStart()
 		{
-			_game = game;
-			// Only want decks for the opponent's class.
-			_possibleDecks = _metaDecks.Where(x => x.Class == _game.Opponent.Class).ToList();
-			Log.Info(_possibleDecks.Count + " possible decks for class " + _game.Opponent.Class);
+			Log.Debug("Copying possible decks from the current meta");
+			_possibleDecks = new List<Deck>(_metaDecks);
+			CheckOpponentClass();
+		}
+
+		public void OnOpponentDraw()
+		{
+			CheckOpponentClass();
 		}
 
 		public ReadOnlyCollection<Deck> GetPossibleDecks()
@@ -36,9 +42,13 @@ namespace DeckPredictor
 			return new ReadOnlyCollection<Deck>(_possibleDecks);
 		}
 
-		public void OnOpponentPlay(Card cardPlayed) {
+		public void OnOpponentPlay(Card cardPlayed)
+		{
 			Log.Debug("cardPlayed: " + cardPlayed);
-			Log.Debug("_game.Opponent.RevealedCards: " + _game.Opponent.RevealedCards);
+			foreach (Card card in _game.Opponent.RevealedCards)
+			{
+				Log.Debug("revealed card: " + card);
+			}
 			_possibleDecks = _possibleDecks
 				.Where(deck =>
 				{
@@ -52,7 +62,24 @@ namespace DeckPredictor
 					}
 					return true;
 				}).ToList();
-			Log.Info(_possibleDecks.Count + " possible decks");
+			Log.Debug(_possibleDecks.Count + " possible decks");
+		}
+
+		private void CheckOpponentClass()
+		{
+			if (_classDetected)
+			{
+				return;
+			}
+			if (string.IsNullOrEmpty(_game.Opponent.Class))
+			{
+				return;
+			}
+			// Only want decks for the opponent's class.
+			_possibleDecks = _possibleDecks.Where(x => x.Class == _game.Opponent.Class).ToList();
+			_classDetected = true;
+			Log.Info(_possibleDecks.Count + " possible decks for class " + _game.Opponent.Class);
 		}
 	}
+
 }
