@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Hearthstone_Deck_Tracker.API;
+using Hearthstone_Deck_Tracker.Hearthstone;
+using Hearthstone_Deck_Tracker.Plugins;
+using Hearthstone_Deck_Tracker;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Controls;
-using Hearthstone_Deck_Tracker;
-using Hearthstone_Deck_Tracker.API;
-using Hearthstone_Deck_Tracker.Hearthstone;
-using Hearthstone_Deck_Tracker.Plugins;
+using System;
 
 namespace DeckPredictor
 {
@@ -16,6 +17,7 @@ namespace DeckPredictor
 
 		private PluginConfig _config;
 		private Predictor _predictor;
+		private ReadOnlyCollection<Deck> _metaDecks;
 
 		public string Author
 		{
@@ -60,19 +62,23 @@ namespace DeckPredictor
 			// Synchronously retrieve our meta decks and keep them in memory.
 			var metaRetriever = new MetaRetriever();
 			var task = Task.Run<List<Deck>>(async () => await metaRetriever.RetrieveMetaDecks(_config));
-			List<Deck> metaDecks = task.Result;
+			_metaDecks = new ReadOnlyCollection<Deck>(task.Result);
 
-			_predictor = new Predictor(Hearthstone_Deck_Tracker.Core.Game, metaDecks);
-			GameEvents.OnGameStart.Add(_predictor.OnGameStart);
-			GameEvents.OnOpponentDraw.Add(_predictor.OnOpponentDraw);
+			GameEvents.OnGameStart.Add(() =>
+				{
+					Log.Debug("Creating a new Predictor");
+					_predictor = new Predictor(Hearthstone_Deck_Tracker.Core.Game, _metaDecks);
+					_predictor.OnGameStart();
+				});
+			GameEvents.OnOpponentDraw.Add(() => _predictor.OnOpponentDraw());
 
 			// Events that reveal cards
-			GameEvents.OnOpponentPlay.Add(_predictor.OnOpponentPlay);
-			GameEvents.OnOpponentHandDiscard.Add(_predictor.OnOpponentHandDiscard);
-			GameEvents.OnOpponentDeckDiscard.Add(_predictor.OnOpponentDeckDiscard);
-			GameEvents.OnOpponentSecretTriggered.Add(_predictor.OnOpponentSecretTriggered);
-			GameEvents.OnOpponentJoustReveal.Add(_predictor.OnOpponentJoustReveal);
-			GameEvents.OnOpponentDeckToPlay.Add(_predictor.OnOpponentDeckToPlay);
+			GameEvents.OnOpponentPlay.Add(card => _predictor.OnOpponentPlay(card));
+			GameEvents.OnOpponentHandDiscard.Add(card => _predictor.OnOpponentHandDiscard(card));
+			GameEvents.OnOpponentDeckDiscard.Add(card => _predictor.OnOpponentDeckDiscard(card));
+			GameEvents.OnOpponentSecretTriggered.Add(card => _predictor.OnOpponentSecretTriggered(card));
+			GameEvents.OnOpponentJoustReveal.Add(card => _predictor.OnOpponentJoustReveal(card));
+			GameEvents.OnOpponentDeckToPlay.Add(card => _predictor.OnOpponentDeckToPlay(card));
 		}
 
 		public void OnUnload()

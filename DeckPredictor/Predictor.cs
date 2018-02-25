@@ -14,21 +14,19 @@ namespace DeckPredictor
 {
 	public class Predictor
 	{
-		private List<Deck> _metaDecks;
 		private List<Deck> _possibleDecks;
 		private IGame _game;
 		private bool _classDetected;
 
-		public Predictor(IGame game, List<Deck> metaDecks)
+		public Predictor(IGame game, ReadOnlyCollection<Deck> metaDecks)
 		{
-			_metaDecks = metaDecks;
+			Log.Debug("Copying possible decks from the current meta");
+			_possibleDecks = new List<Deck>(metaDecks);
 			_game = game;
 		}
 
 		public void OnGameStart()
 		{
-			Log.Debug("Copying possible decks from the current meta");
-			_possibleDecks = new List<Deck>(_metaDecks);
 			CheckOpponentClass();
 		}
 
