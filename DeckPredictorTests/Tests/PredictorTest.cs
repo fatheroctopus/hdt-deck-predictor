@@ -15,7 +15,7 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void OnGameStart_EmptyMetaDecks()
 		{
-			var predictor = new Predictor(new MockGame(), new List<Deck>());
+			var predictor = new Predictor(new MockOpponent("Mage"), new List<Deck>().AsReadOnly());
 			predictor.OnGameStart();
 			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
 		}
@@ -23,12 +23,11 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void OnGameStart_OneMetaDeckSameClass()
 		{
-			var game = new MockGame();
-			game.Opponent.Class = "Hunter";
+			var opponent = new MockOpponent("Hunter");
 			var metaDecks = new List<Deck>();
 			metaDecks.Add(new Deck());
 			metaDecks[0].Class = "Hunter";
-			var predictor = new Predictor(game, metaDecks);
+			var predictor = new Predictor(opponent, metaDecks.AsReadOnly());
 
 			predictor.OnGameStart();
 			Assert.IsTrue(metaDecks.SequenceEqual(predictor.GetPossibleDecks()));
@@ -37,12 +36,11 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void OnGameStart_OneMetaDeckDifferentClass()
 		{
-			var game = new MockGame();
-			game.Opponent.Class = "Mage";
+			var opponent = new MockOpponent("Mage");
 			var metaDecks = new List<Deck>();
 			metaDecks.Add(new Deck());
 			metaDecks[0].Class = "Hunter";
-			var predictor = new Predictor(game, metaDecks);
+			var predictor = new Predictor(opponent, metaDecks.AsReadOnly());
 
 			predictor.OnGameStart();
 			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
@@ -51,16 +49,16 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void OnOpponentPlay_MissingCardFiltersDeck()
 		{
-			var game = new MockGame();
-			game.Opponent.Class = "Hunter";
+			var opponent = new MockOpponent("Hunter");
 			var metaDecks = new List<Deck>();
 			metaDecks.Add(new Deck());
 			metaDecks[0].Class = "Hunter";
-			var predictor = new Predictor(game, metaDecks);
+			var predictor = new Predictor(opponent, metaDecks.AsReadOnly());
 
 			predictor.OnGameStart();
 			var card = new Card();
-			card.Id = "EX1_617";
+			card.Id = "card_id1";
+			opponent.Cards.Add(card);
 			predictor.OnOpponentPlay(card);
 			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
 		}
@@ -68,17 +66,17 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void OnOpponentPlay_MatchingCardDoesNotFilter()
 		{
-			var game = new MockGame();
-			game.Opponent.Class = "Hunter";
+			var opponent = new MockOpponent("Hunter");
 			var metaDecks = new List<Deck>();
 			metaDecks.Add(new Deck());
 			metaDecks[0].Class = "Hunter";
 			var hunterCard = new Card();
-			hunterCard.Id = "EX1_617";
+			hunterCard.Id = "card_id1";
 			metaDecks[0].Cards.Add(hunterCard);
-			var predictor = new Predictor(game, metaDecks);
+			var predictor = new Predictor(opponent, metaDecks.AsReadOnly());
 
 			predictor.OnGameStart();
+			opponent.Cards.Add(hunterCard);
 			predictor.OnOpponentPlay(hunterCard);
 			Assert.AreEqual(1, predictor.GetPossibleDecks().Count);
 		}

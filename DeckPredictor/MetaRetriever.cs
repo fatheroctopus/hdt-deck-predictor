@@ -11,7 +11,7 @@ using Hearthstone_Deck_Tracker.Hearthstone;
 
 namespace DeckPredictor
 {
-	class MetaRetriever : IMetaRetriever
+	class MetaRetriever
 	{
 		// How many days we wait before updating the meta since the last download.
 		private const double RecentDownloadTimeoutDays = 1;

@@ -61,19 +61,25 @@ namespace DeckPredictor
 
 			// Synchronously retrieve our meta decks and keep them in memory.
 			var metaRetriever = new MetaRetriever();
-			var task = Task.Run<List<Deck>>(async () => await metaRetriever.RetrieveMetaDecks(_config));
-			_metaDecks = new ReadOnlyCollection<Deck>(task.Result);
+			var retrieveTask =
+				Task.Run<List<Deck>>(async () => await metaRetriever.RetrieveMetaDecks(_config));
+			_metaDecks = new ReadOnlyCollection<Deck>(retrieveTask.Result);
 
 			GameEvents.OnGameStart.Add(() =>
 				{
 					Log.Debug("Creating a new Predictor");
-					_predictor = new Predictor(Hearthstone_Deck_Tracker.Core.Game, _metaDecks);
+					var opponent = new Opponent(Hearthstone_Deck_Tracker.Core.Game.Opponent);
+					_predictor = new Predictor(opponent, _metaDecks);
 					_predictor.OnGameStart();
 				});
 			GameEvents.OnOpponentDraw.Add(() => _predictor.OnOpponentDraw());
 
 			// Events that reveal cards
-			GameEvents.OnOpponentPlay.Add(card => _predictor.OnOpponentPlay(card));
+			GameEvents.OnOpponentPlay.Add(card =>
+				{
+					Task.Delay(100).ContinueWith(_ => _predictor.OnOpponentPlay(card)) .Start();
+				});
+
 			GameEvents.OnOpponentHandDiscard.Add(card => _predictor.OnOpponentHandDiscard(card));
 			GameEvents.OnOpponentDeckDiscard.Add(card => _predictor.OnOpponentDeckDiscard(card));
 			GameEvents.OnOpponentSecretTriggered.Add(card => _predictor.OnOpponentSecretTriggered(card));
