@@ -65,13 +65,6 @@ namespace DeckPredictor
 					return;
 				}
 			}
-			try
-			{
-				Trace.Listeners.Add(new TextWriterTraceListener(new StreamWriter(LogFile, false)));
-			}
-			catch (Exception)
-			{
-			}
 			Initialized = true;
 		}
 
@@ -100,8 +93,14 @@ namespace DeckPredictor
 		private static void Write(string line)
 		{
 			line = $"{DateTime.Now.ToLongTimeString()}|{line}";
-			if (Initialized)
-				Trace.WriteLine(line);
+			if (!Initialized)
+			{
+				return;
+			}
+			using (StreamWriter sw = new StreamWriter(LogFile, true))
+			{
+				sw.WriteLine(line);
+			}
 		}
 
 		public static void Debug(string msg, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "")

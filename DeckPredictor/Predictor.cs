@@ -28,6 +28,7 @@ namespace DeckPredictor
 			_game = game;
 			// Only want decks for the opponent's class.
 			_possibleDecks = _metaDecks.Where(x => x.Class == _game.Opponent.Class).ToList();
+			Log.Info(_possibleDecks.Count + " possible decks for class " + _game.Opponent.Class);
 		}
 
 		public ReadOnlyCollection<Deck> GetPossibleDecks()
@@ -36,6 +37,8 @@ namespace DeckPredictor
 		}
 
 		public void OnOpponentPlay(Card cardPlayed) {
+			Log.Debug("cardPlayed: " + cardPlayed);
+			Log.Debug("_game.Opponent.RevealedCards: " + _game.Opponent.RevealedCards);
 			_possibleDecks = _possibleDecks
 				.Where(deck =>
 				{
@@ -43,11 +46,13 @@ namespace DeckPredictor
 					{
 						if (deck.Cards.FirstOrDefault(x => x.Id == card.Id) == null)
 						{
+							Log.Info("Filtering out a deck missing card: " + card);
 							return false;
 						}
 					}
 					return true;
 				}).ToList();
+			Log.Info(_possibleDecks.Count + " possible decks");
 		}
 	}
 }
