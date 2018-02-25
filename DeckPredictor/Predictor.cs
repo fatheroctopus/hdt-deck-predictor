@@ -48,6 +48,36 @@ namespace DeckPredictor
 			FilterFromRevealedCard(cardPlayed);
 		}
 
+		public void OnOpponentHandDiscard(Card cardDiscarded)
+		{
+			Log.Debug("cardDiscarded: " + cardDiscarded);
+			FilterFromRevealedCard(cardDiscarded);
+		}
+
+		public void OnOpponentDeckDiscard(Card cardDiscarded)
+		{
+			Log.Debug("cardDiscarded: " + cardDiscarded);
+			FilterFromRevealedCard(cardDiscarded);
+		}
+
+		public void OnOpponentSecretTriggered(Card secretTriggered)
+		{
+			Log.Debug("secretTriggered: " + secretTriggered);
+			FilterFromRevealedCard(secretTriggered);
+		}
+
+		public void OnOpponentJoustReveal(Card cardRevealed)
+		{
+			Log.Debug("cardRevealed: " + cardRevealed);
+			FilterFromRevealedCard(cardRevealed);
+		}
+
+		public void OnOpponentDeckToPlay(Card cardPlayed)
+		{
+			Log.Debug("cardPlayed: " + cardPlayed);
+			FilterFromRevealedCard(cardPlayed);
+		}
+
 		private void CheckOpponentClass()
 		{
 			if (_classDetected)

@@ -65,7 +65,14 @@ namespace DeckPredictor
 			_predictor = new Predictor(Hearthstone_Deck_Tracker.Core.Game, metaDecks);
 			GameEvents.OnGameStart.Add(_predictor.OnGameStart);
 			GameEvents.OnOpponentDraw.Add(_predictor.OnOpponentDraw);
+
+			// Events that reveal cards
 			GameEvents.OnOpponentPlay.Add(_predictor.OnOpponentPlay);
+			GameEvents.OnOpponentHandDiscard.Add(_predictor.OnOpponentHandDiscard);
+			GameEvents.OnOpponentDeckDiscard.Add(_predictor.OnOpponentDeckDiscard);
+			GameEvents.OnOpponentSecretTriggered.Add(_predictor.OnOpponentSecretTriggered);
+			GameEvents.OnOpponentJoustReveal.Add(_predictor.OnOpponentJoustReveal);
+			GameEvents.OnOpponentDeckToPlay.Add(_predictor.OnOpponentDeckToPlay);
 		}
 
 		public void OnUnload()
