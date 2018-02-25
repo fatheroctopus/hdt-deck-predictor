@@ -59,8 +59,9 @@ namespace DeckPredictorTests.Tests
 			var predictor = new Predictor(game, metaDecks);
 
 			predictor.OnGameStart();
-			game.AddOpponentCard("EX1_617", CardType.SPELL);
-			predictor.OnOpponentPlay(null);
+			var card = new Card();
+			card.Id = "EX1_617";
+			predictor.OnOpponentPlay(card);
 			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
 		}
 
@@ -78,8 +79,7 @@ namespace DeckPredictorTests.Tests
 			var predictor = new Predictor(game, metaDecks);
 
 			predictor.OnGameStart();
-			game.AddOpponentCard("EX1_617", CardType.SPELL);
-			predictor.OnOpponentPlay(null);
+			predictor.OnOpponentPlay(hunterCard);
 			Assert.AreEqual(1, predictor.GetPossibleDecks().Count);
 		}
 

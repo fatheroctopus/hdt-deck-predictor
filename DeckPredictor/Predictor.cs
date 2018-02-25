@@ -45,24 +45,7 @@ namespace DeckPredictor
 		public void OnOpponentPlay(Card cardPlayed)
 		{
 			Log.Debug("cardPlayed: " + cardPlayed);
-			foreach (Card card in _game.Opponent.RevealedCards)
-			{
-				Log.Debug("revealed card: " + card);
-			}
-			_possibleDecks = _possibleDecks
-				.Where(deck =>
-				{
-					foreach (Card card in _game.Opponent.RevealedCards)
-					{
-						if (deck.Cards.FirstOrDefault(x => x.Id == card.Id) == null)
-						{
-							Log.Info("Filtering out a deck missing card: " + card);
-							return false;
-						}
-					}
-					return true;
-				}).ToList();
-			Log.Debug(_possibleDecks.Count + " possible decks");
+			FilterFromRevealedCard(cardPlayed);
 		}
 
 		private void CheckOpponentClass()
@@ -79,6 +62,15 @@ namespace DeckPredictor
 			_possibleDecks = _possibleDecks.Where(x => x.Class == _game.Opponent.Class).ToList();
 			_classDetected = true;
 			Log.Info(_possibleDecks.Count + " possible decks for class " + _game.Opponent.Class);
+		}
+
+		private void FilterFromRevealedCard(Card revealedCard)
+		{
+			_possibleDecks = _possibleDecks
+				.Where(deck => deck.Cards.FirstOrDefault(card => card.Id == revealedCard.Id)
+					!= null)
+				.ToList();
+			Log.Debug(_possibleDecks.Count + " possible decks");
 		}
 	}
 
