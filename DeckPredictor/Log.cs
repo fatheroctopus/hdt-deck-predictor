@@ -18,7 +18,6 @@ namespace DeckPredictor
 
 		private const int MaxLogFileAge = 2;
 		private const int KeepOldLogs = 5;
-		private static int _duplicateCount;
 		public static string PrevLine { get; private set; }
 		public static bool Initialized { get; private set; }
 
@@ -78,16 +77,8 @@ namespace DeckPredictor
 			var file = sourceFilePath?.Split('/', '\\').LastOrDefault()?.Split('.').FirstOrDefault();
 			var line = $"{type}|{file}.{memberName} >> {msg}";
 
-			if (line == PrevLine)
-				_duplicateCount++;
-			else
-			{
-				if (_duplicateCount > 0)
-					Write($"... {_duplicateCount} duplicate messages");
-				PrevLine = line;
-				_duplicateCount = 0;
-				Write(line);
-			}
+			PrevLine = line;
+			Write(line);
 		}
 
 		private static void Write(string line)
