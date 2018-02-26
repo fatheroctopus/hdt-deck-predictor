@@ -96,14 +96,30 @@ namespace DeckPredictor
 		{
 			bool changed = false;
 			_possibleDecks = _possibleDecks
-				.Where(deck =>
+				.Where(possibleDeck =>
 				{
-					foreach (Card card in _opponent.KnownCards)
+					foreach (Card knownCard in _opponent.KnownCards)
 					{
-						if (!card.IsCreated && card.Collectible &&
-							deck.Cards.FirstOrDefault(x => x.Id == card.Id) == null)
+						if (knownCard.IsCreated)
 						{
-							Log.Debug("Filtering out a deck missing card: " + card);
+							continue;
+						}
+						if (!knownCard.Collectible)
+						{
+							continue;
+						}
+						var cardInPossibleDeck =
+							possibleDeck.Cards.FirstOrDefault(x => x.Id == knownCard.Id);
+						if (cardInPossibleDeck == null)
+						{
+							Log.Debug("Filtering out a deck missing card: " + knownCard);
+							changed = true;
+							return false;
+						}
+						if (knownCard.Count > cardInPossibleDeck.Count)
+						{
+							Log.Debug("Filtering out a deck that doesn't run enough copies of "
+								+ knownCard);
 							changed = true;
 							return false;
 						}

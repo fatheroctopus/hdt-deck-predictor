@@ -65,7 +65,36 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
-		public void OnOpponentPlay_MatchingCardDoesNotFilter()
+		public void OnOpponentHandDiscard_MissingCardFiltersDeck()
+		{
+			var opponent = new MockOpponent("Hunter");
+			AddMetaDeck("Hunter");
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+
+			predictor.OnGameStart();
+			opponent.Cards.Add(Database.GetCardFromName("Deadly Shot"));
+			predictor.OnOpponentHandDiscard(null);
+			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
+		}
+
+		[TestMethod]
+		public void MissingSecondCardFiltersDeck()
+		{
+			var opponent = new MockOpponent("Hunter");
+			var hunterCard = Database.GetCardFromName("Deadly Shot");
+			AddMetaDeck("Hunter");
+			_metaDecks[0].Cards.Add(hunterCard);
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+
+			predictor.OnGameStart();
+			opponent.Cards.Add(Database.GetCardFromName("Deadly Shot"));
+			opponent.Cards.Add(Database.GetCardFromName("Alleycat"));
+			predictor.OnOpponentPlay(null);
+			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
+		}
+
+		[TestMethod]
+		public void MatchingCardDoesNotFilter()
 		{
 			var opponent = new MockOpponent("Hunter");
 			var hunterCard = Database.GetCardFromName("Deadly Shot");
@@ -80,7 +109,7 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
-		public void OnOpponentPlay_MissingCreatedCardDoesNotFilter()
+		public void MissingCreatedCardDoesNotFilter()
 		{
 			var opponent = new MockOpponent("Hunter");
 			AddMetaDeck("Hunter");
@@ -95,7 +124,23 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
-		public void OnOpponentPlay_MissingNonCollectibleCardDoesNotFilter()
+		public void MissingSecondCardAfterCreatedCardFiltersDeck()
+		{
+			var opponent = new MockOpponent("Hunter");
+			AddMetaDeck("Hunter");
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+
+			predictor.OnGameStart();
+			var hunterCard = Database.GetCardFromName("Deadly Shot");
+			hunterCard.IsCreated = true;
+			opponent.Cards.Add(hunterCard);
+			opponent.Cards.Add(Database.GetCardFromName("Deadly Shot"));
+			predictor.OnOpponentPlay(null);
+			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
+		}
+
+		[TestMethod]
+		public void MissingNonCollectibleCardDoesNotFilter()
 		{
 			var opponent = new MockOpponent("Hunter");
 			AddMetaDeck("Hunter");
@@ -109,15 +154,18 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
-		public void OnOpponentHandDiscard_MissingCardFiltersDeck()
+		public void MissingSecondCopyFiltersDeck()
 		{
 			var opponent = new MockOpponent("Hunter");
 			AddMetaDeck("Hunter");
+			_metaDecks[0].Cards.Add(Database.GetCardFromName("Deadly Shot"));
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
 			predictor.OnGameStart();
-			opponent.Cards.Add(Database.GetCardFromName("Deadly Shot"));
-			predictor.OnOpponentHandDiscard(null);
+			var hunterCard2Copies = Database.GetCardFromName("Deadly Shot");
+			hunterCard2Copies.Count = 2;
+			opponent.Cards.Add(hunterCard2Copies);
+			predictor.OnOpponentPlay(null);
 			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
 		}
 	}
