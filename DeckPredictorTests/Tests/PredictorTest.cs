@@ -59,7 +59,7 @@ namespace DeckPredictorTests.Tests
 			var card = new Card();
 			card.Id = "card_id1";
 			opponent.Cards.Add(card);
-			predictor.OnOpponentPlay(card);
+			predictor.OnOpponentPlay(null);
 			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
 		}
 
@@ -77,9 +77,25 @@ namespace DeckPredictorTests.Tests
 
 			predictor.OnGameStart();
 			opponent.Cards.Add(hunterCard);
-			predictor.OnOpponentPlay(hunterCard);
+			predictor.OnOpponentPlay(null);
 			Assert.AreEqual(1, predictor.GetPossibleDecks().Count);
 		}
 
+		[TestMethod]
+		public void OnOpponentHandDiscard_MissingCardFiltersDeck()
+		{
+			var opponent = new MockOpponent("Hunter");
+			var metaDecks = new List<Deck>();
+			metaDecks.Add(new Deck());
+			metaDecks[0].Class = "Hunter";
+			var predictor = new Predictor(opponent, metaDecks.AsReadOnly());
+
+			predictor.OnGameStart();
+			var card = new Card();
+			card.Id = "card_id1";
+			opponent.Cards.Add(card);
+			predictor.OnOpponentHandDiscard(null);
+			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
+		}
 	}
 }

@@ -43,38 +43,37 @@ namespace DeckPredictor
 		public void OnOpponentPlay(Card cardPlayed)
 		{
 			Log.Debug("cardPlayed: " + cardPlayed);
-			FilterRevealedCard(cardPlayed);
 			FilterAllRevealedCards();
 		}
 
 		public void OnOpponentHandDiscard(Card cardDiscarded)
 		{
 			Log.Debug("cardDiscarded: " + cardDiscarded);
-			FilterRevealedCard(cardDiscarded);
+			FilterAllRevealedCards();
 		}
 
 		public void OnOpponentDeckDiscard(Card cardDiscarded)
 		{
 			Log.Debug("cardDiscarded: " + cardDiscarded);
-			FilterRevealedCard(cardDiscarded);
+			FilterAllRevealedCards();
 		}
 
 		public void OnOpponentSecretTriggered(Card secretTriggered)
 		{
 			Log.Debug("secretTriggered: " + secretTriggered);
-			FilterRevealedCard(secretTriggered);
+			FilterAllRevealedCards();
 		}
 
 		public void OnOpponentJoustReveal(Card cardRevealed)
 		{
 			Log.Debug("cardRevealed: " + cardRevealed);
-			FilterRevealedCard(cardRevealed);
+			FilterAllRevealedCards();
 		}
 
 		public void OnOpponentDeckToPlay(Card cardPlayed)
 		{
 			Log.Debug("cardPlayed: " + cardPlayed);
-			FilterRevealedCard(cardPlayed);
+			FilterAllRevealedCards();
 		}
 
 		private void CheckOpponentClass()
@@ -93,36 +92,27 @@ namespace DeckPredictor
 			Log.Info(_possibleDecks.Count + " possible decks for class " + _opponent.Class);
 		}
 
-		private void FilterRevealedCard(Card revealedCard)
-		{
-			_possibleDecks = _possibleDecks
-				.Where(deck => deck.Cards.FirstOrDefault(card => card.Id == revealedCard.Id)
-					!= null)
-				.ToList();
-			Log.Debug(_possibleDecks.Count + " possible decks");
-		}
-
 		private void FilterAllRevealedCards()
 		{
-			foreach (Card card in _opponent.KnownCards)
+			bool changed = false;
+			_possibleDecks = _possibleDecks
+				.Where(deck =>
+				{
+					foreach (Card card in _opponent.KnownCards)
+					{
+						if (deck.Cards.FirstOrDefault(x => x.Id == card.Id) == null)
+						{
+							Log.Debug("Filtering out a deck missing card: " + card);
+							changed = true;
+							return false;
+						}
+					}
+					return true;
+				}).ToList();
+			if (changed)
 			{
-				Log.Debug("opponent card: " + card);
-				Log.Debug("card.IsCreated: " + card.IsCreated);
+				Log.Info(_possibleDecks.Count + " possible decks");
 			}
-			// _possibleDecks = _possibleDecks
-			// 	.Where(deck =>
-			// 	{
-			// 		foreach (Card card in _game.Opponent.RevealedCards)
-			// 		{
-			// 			if (deck.Cards.FirstOrDefault(x => x.Id == card.Id) == null)
-			// 			{
-			// 				Log.Info("Filtering out a deck missing card: " + card);
-			// 				return false;
-			// 			}
-			// 		}
-			// 		return true;
-			// 	}).ToList();
-			// Log.Debug(_possibleDecks.Count + " possible decks");
 		}
 	}
 
