@@ -76,16 +76,32 @@ namespace DeckPredictor
 
 			// Events that reveal cards need a 100ms delay. This is because HDT takes some extra
 			// time to process all the tags we need, but it doesn't wait to send these callbacks.
-			GameEvents.OnOpponentPlay.Add(CallOnDelay(_predictor.OnOpponentPlay));
-			GameEvents.OnOpponentHandDiscard.Add(CallOnDelay(_predictor.OnOpponentHandDiscard));
-			GameEvents.OnOpponentDeckDiscard.Add(CallOnDelay(_predictor.OnOpponentDeckDiscard));
-			GameEvents.OnOpponentSecretTriggered.Add(CallOnDelay(_predictor.OnOpponentSecretTriggered));
-			GameEvents.OnOpponentJoustReveal.Add(CallOnDelay(_predictor.OnOpponentJoustReveal));
-			GameEvents.OnOpponentDeckToPlay.Add(CallOnDelay(_predictor.OnOpponentDeckToPlay));
+			int delayMs = 100;
+			GameEvents.OnOpponentPlay.Add(card =>
+				Task.Delay(delayMs)
+					.ContinueWith(_ => _predictor.OnOpponentPlay(card))
+					.Start());
+			GameEvents.OnOpponentHandDiscard.Add(card =>
+				Task.Delay(delayMs)
+					.ContinueWith(_ => _predictor.OnOpponentHandDiscard(card))
+					.Start());
+			GameEvents.OnOpponentDeckDiscard.Add(card =>
+				Task.Delay(delayMs)
+					.ContinueWith(_ => _predictor.OnOpponentDeckDiscard(card))
+					.Start());
+			GameEvents.OnOpponentSecretTriggered.Add(card =>
+				Task.Delay(delayMs)
+					.ContinueWith(_ => _predictor.OnOpponentSecretTriggered(card))
+					.Start());
+			GameEvents.OnOpponentJoustReveal.Add(card =>
+				Task.Delay(delayMs)
+					.ContinueWith(_ => _predictor.OnOpponentJoustReveal(card))
+					.Start());
+			GameEvents.OnOpponentDeckToPlay.Add(card =>
+				Task.Delay(delayMs)
+					.ContinueWith(_ => _predictor.OnOpponentDeckToPlay(card))
+					.Start());
 		}
-
-		private Action<Card> CallOnDelay(Action<Card> callback) =>
-			card => Task.Delay(100).ContinueWith(_ => callback(card)).Start();
 
 		public void OnUnload()
 		{
