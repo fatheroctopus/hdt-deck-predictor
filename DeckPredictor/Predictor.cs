@@ -100,7 +100,7 @@ namespace DeckPredictor
 				{
 					foreach (Card card in _opponent.KnownCards)
 					{
-						if (!card.IsCreated &&
+						if (!card.IsCreated && card.Collectible &&
 							deck.Cards.FirstOrDefault(x => x.Id == card.Id) == null)
 						{
 							Log.Debug("Filtering out a deck missing card: " + card);

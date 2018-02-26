@@ -22,6 +22,7 @@ namespace DeckPredictorTests.Mocks
 		public List<Card> Cards {get; set;}
 
 		public string Class { get; set; }
+
 		public ReadOnlyCollection<Card> KnownCards => Cards.AsReadOnly();
 	}
 }

@@ -59,9 +59,7 @@ namespace DeckPredictorTests.Tests
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
 			predictor.OnGameStart();
-			var card = new Card();
-			card.Id = "card_id1";
-			opponent.Cards.Add(card);
+			opponent.Cards.Add(Database.GetCardFromName("Deadly Shot"));
 			predictor.OnOpponentPlay(null);
 			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
 		}
@@ -70,9 +68,8 @@ namespace DeckPredictorTests.Tests
 		public void OnOpponentPlay_MatchingCardDoesNotFilter()
 		{
 			var opponent = new MockOpponent("Hunter");
+			var hunterCard = Database.GetCardFromName("Deadly Shot");
 			AddMetaDeck("Hunter");
-			var hunterCard = new Card();
-			hunterCard.Id = "card_id1";
 			_metaDecks[0].Cards.Add(hunterCard);
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
@@ -90,9 +87,22 @@ namespace DeckPredictorTests.Tests
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
 			predictor.OnGameStart();
-			var hunterCard = new Card();
-			hunterCard.Id = "card_id1";
+			var hunterCard = Database.GetCardFromName("Deadly Shot");
 			hunterCard.IsCreated = true;
+			opponent.Cards.Add(hunterCard);
+			predictor.OnOpponentPlay(null);
+			Assert.AreEqual(1, predictor.GetPossibleDecks().Count);
+		}
+
+		[TestMethod]
+		public void OnOpponentPlay_MissingNonCollectibleCardDoesNotFilter()
+		{
+			var opponent = new MockOpponent("Hunter");
+			AddMetaDeck("Hunter");
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+
+			predictor.OnGameStart();
+			var hunterCard = Database.GetCardFromName("Greater Emerald Spellstone");
 			opponent.Cards.Add(hunterCard);
 			predictor.OnOpponentPlay(null);
 			Assert.AreEqual(1, predictor.GetPossibleDecks().Count);
@@ -106,9 +116,7 @@ namespace DeckPredictorTests.Tests
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
 			predictor.OnGameStart();
-			var card = new Card();
-			card.Id = "card_id1";
-			opponent.Cards.Add(card);
+			opponent.Cards.Add(Database.GetCardFromName("Deadly Shot"));
 			predictor.OnOpponentHandDiscard(null);
 			Assert.AreEqual(0, predictor.GetPossibleDecks().Count);
 		}
