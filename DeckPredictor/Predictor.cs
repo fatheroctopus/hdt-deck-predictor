@@ -94,7 +94,8 @@ namespace DeckPredictor
 
 		private void FilterAllRevealedCards()
 		{
-			bool changed = false;
+			var missingCards = new HashSet<Card>();
+			var insufficientCards = new HashSet<Card>();
 			_possibleDecks = _possibleDecks
 				.Where(possibleDeck =>
 				{
@@ -112,22 +113,28 @@ namespace DeckPredictor
 							possibleDeck.Cards.FirstOrDefault(x => x.Id == knownCard.Id);
 						if (cardInPossibleDeck == null)
 						{
-							Log.Debug("Filtering out a deck missing card: " + knownCard);
-							changed = true;
+							missingCards.Add(knownCard);
 							return false;
 						}
 						if (knownCard.Count > cardInPossibleDeck.Count)
 						{
-							Log.Debug("Filtering out a deck that doesn't run enough copies of "
-								+ knownCard);
-							changed = true;
+							insufficientCards.Add(knownCard);
 							return false;
 						}
 					}
 					return true;
 				}).ToList();
-			if (changed)
+			// Logging
+			if (missingCards.Any() || insufficientCards.Any())
 			{
+				foreach (Card card in missingCards)
+				{
+					Log.Debug("Filtering out decks missing card: " + card);
+				}
+				foreach (Card card in insufficientCards)
+				{
+					Log.Debug("Filtering out decks that don't run enough copies of "+ card);
+				}
 				Log.Info(_possibleDecks.Count + " possible decks");
 			}
 		}
