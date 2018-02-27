@@ -38,9 +38,8 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void OnGameStart_OneMetaDeckSameClass()
 		{
-			var opponent = new MockOpponent("Hunter");
 			AddMetaDeck("Hunter");
-			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
 
 			predictor.OnGameStart();
 			Assert.IsTrue(_metaDecks.SequenceEqual(predictor.PossibleDecks));
@@ -49,9 +48,8 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void OnGameStart_OneMetaDeckDifferentClass()
 		{
-			var opponent = new MockOpponent("Mage");
 			AddMetaDeck("Hunter");
-			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+			var predictor = new Predictor(new MockOpponent("Mage"), _metaDecks.AsReadOnly());
 
 			predictor.OnGameStart();
 			Assert.AreEqual(0, predictor.PossibleDecks.Count);
@@ -166,8 +164,7 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void GetPossibleCards_EmptyByDefault()
 		{
-			var opponent = new MockOpponent("Hunter");
-			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
 			Assert.AreEqual(0, predictor.PossibleCards.Count);
 		}
 
@@ -176,8 +173,7 @@ namespace DeckPredictorTests.Tests
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 
-			var opponent = new MockOpponent("Hunter");
-			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
 			Assert.IsTrue(new HashSet<Card>(_metaDecks[0].Cards).SetEquals(predictor.PossibleCards));
 		}
 
@@ -186,8 +182,7 @@ namespace DeckPredictorTests.Tests
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 
-			var opponent = new MockOpponent("Mage");
-			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+			var predictor = new Predictor(new MockOpponent("Mage"), _metaDecks.AsReadOnly());
 			predictor.OnGameStart();
 			Assert.AreEqual(0, predictor.PossibleCards.Count);
 		}
@@ -210,8 +205,7 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Arcane Shot", "Bear Trap"});
 
-			var opponent = new MockOpponent("Hunter");
-			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
 			var combinedCards = new HashSet<Card> ();
 			combinedCards.UnionWith(_metaDecks[0].Cards);
 			combinedCards.UnionWith(_metaDecks[1].Cards);
@@ -224,8 +218,7 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
 
-			var opponent = new MockOpponent("Hunter");
-			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
 			var unionCards = new HashSet<Card> ();
 			unionCards.UnionWith(_metaDecks[0].Cards);
 			unionCards.UnionWith(_metaDecks[1].Cards);
@@ -243,6 +236,19 @@ namespace DeckPredictorTests.Tests
 			opponent.Cards.Add(Database.GetCardFromName("Deadly Shot"));
 			predictor.OnOpponentPlay(null);
 			Assert.IsTrue(new HashSet<Card>(_metaDecks[0].Cards).SetEquals(predictor.PossibleCards));
+		}
+
+		[TestMethod]
+		public void GetPossibleCards_UnionTakesHigherCardCount()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
+			_metaDecks[1].Cards[0].Count = 2;
+
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			var doubleCard =
+				predictor.PossibleCards.FirstOrDefault(card => card.Id == _metaDecks[1].Cards[0].Id);
+			Assert.AreEqual(2, doubleCard.Count);
 		}
 	}
 }

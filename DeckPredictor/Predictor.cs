@@ -24,7 +24,7 @@ namespace DeckPredictor
 			Log.Debug("Copying possible decks from the current meta");
 			_possibleDecks = new List<Deck>(metaDecks);
 			_opponent = opponent;
-			UpdatePossibleCards();
+			UpdatePossibleCards(false);
 		}
 
 		public void OnGameStart()
@@ -40,7 +40,7 @@ namespace DeckPredictor
 		public ReadOnlyCollection<Deck> PossibleDecks =>
 			new ReadOnlyCollection<Deck>(_possibleDecks);
 
-		public HashSet<Card> PossibleCards => new HashSet<Card>(_possibleCards);
+		public ISet<Card> PossibleCards => new HashSet<Card>(_possibleCards);
 
 		public void OnOpponentPlay(Card cardPlayed)
 		{
@@ -143,18 +143,28 @@ namespace DeckPredictor
 			}
 		}
 
-		public void UpdatePossibleCards()
+		public void UpdatePossibleCards(bool logEachCard = true)
 		{
 			_possibleCards.Clear();
-			Log.Debug("Possible cards in opponent's deck:");
 			foreach (Deck deck in _possibleDecks)
 			{
 				foreach (Card card in deck.Cards)
 				{
-					if (_possibleCards.Add(card))
+					// Remove an existing card with a lower card count than this one.
+					var alreadyExistingCard = _possibleCards.FirstOrDefault(x => x.Id == card.Id);
+					if (alreadyExistingCard != null && alreadyExistingCard.Count < card.Count)
 					{
-						Log.Debug(card.ToString());
+						_possibleCards.Remove(alreadyExistingCard);
 					}
+					_possibleCards.Add(card);
+				}
+			}
+			Log.Info(_possibleCards.Count + " possible different cards");
+			if (logEachCard)
+			{
+				foreach (Card possibleCard in _possibleCards)
+				{
+					Log.Debug(possibleCard.ToString());
 				}
 			}
 		}
