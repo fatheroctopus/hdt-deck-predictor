@@ -15,6 +15,7 @@ namespace DeckPredictor
 	public class Predictor
 	{
 		private List<Deck> _possibleDecks;
+		private HashSet<Card> _possibleCards = new HashSet<Card>();
 		private IOpponent _opponent;
 		private bool _classDetected;
 
@@ -23,6 +24,7 @@ namespace DeckPredictor
 			Log.Debug("Copying possible decks from the current meta");
 			_possibleDecks = new List<Deck>(metaDecks);
 			_opponent = opponent;
+			UpdatePossibleCards();
 		}
 
 		public void OnGameStart()
@@ -35,10 +37,10 @@ namespace DeckPredictor
 			CheckOpponentClass();
 		}
 
-		public ReadOnlyCollection<Deck> GetPossibleDecks()
-		{
-			return new ReadOnlyCollection<Deck>(_possibleDecks);
-		}
+		public ReadOnlyCollection<Deck> PossibleDecks =>
+			new ReadOnlyCollection<Deck>(_possibleDecks);
+
+		public HashSet<Card> PossibleCards => new HashSet<Card>(_possibleCards);
 
 		public void OnOpponentPlay(Card cardPlayed)
 		{
@@ -90,6 +92,7 @@ namespace DeckPredictor
 			_possibleDecks = _possibleDecks.Where(x => x.Class == _opponent.Class).ToList();
 			_classDetected = true;
 			Log.Info(_possibleDecks.Count + " possible decks for class " + _opponent.Class);
+			UpdatePossibleCards();
 		}
 
 		private void FilterAllRevealedCards()
@@ -124,7 +127,7 @@ namespace DeckPredictor
 					}
 					return true;
 				}).ToList();
-			// Logging
+			// If PossibleDecks have changed.
 			if (missingCards.Any() || insufficientCards.Any())
 			{
 				foreach (Card card in missingCards)
@@ -136,6 +139,23 @@ namespace DeckPredictor
 					Log.Debug("Filtering out decks that don't run enough copies of "+ card);
 				}
 				Log.Info(_possibleDecks.Count + " possible decks");
+				UpdatePossibleCards();
+			}
+		}
+
+		public void UpdatePossibleCards()
+		{
+			_possibleCards.Clear();
+			Log.Debug("Possible cards in opponent's deck:");
+			foreach (Deck deck in _possibleDecks)
+			{
+				foreach (Card card in deck.Cards)
+				{
+					if (_possibleCards.Add(card))
+					{
+						Log.Debug(card.ToString());
+					}
+				}
 			}
 		}
 	}
