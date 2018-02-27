@@ -39,6 +39,11 @@ namespace DeckPredictor
 		public PredictedCardInfo GetPredictedCard(Card card, int copyCount)
 		{
 			string key = PredictedCardInfo.Key(card, copyCount);
+			return GetPredictedCard(key);
+		}
+
+		public PredictedCardInfo GetPredictedCard(string key)
+		{
 			if (_predictedCards.ContainsKey(key))
 			{
 				return _predictedCards[key];
@@ -169,8 +174,10 @@ namespace DeckPredictor
 						var key = PredictedCardInfo.Key(card, copyCount);
 						if (!_predictedCards.ContainsKey(key))
 						{
-							_predictedCards[key] = new PredictedCardInfo(card, copyCount);
+							var predictedCard = new PredictedCardInfo(card, copyCount, _possibleDecks.Count);
+							_predictedCards[key] = predictedCard;
 						}
+						_predictedCards[key].IncrementNumOccurrences();
 					}
 				}
 			}

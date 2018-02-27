@@ -28,6 +28,12 @@ namespace DeckPredictorTests.Tests
 			_metaDecks.Add(deck);
 		}
 
+		private string Key(string cardName, int copyCount)
+		{
+			var card = Database.GetCardFromName(cardName);
+			return PredictedCardInfo.Key(card, copyCount);
+		}
+
 		[TestMethod]
 		public void PossibleDecks_EmptyByDefault()
 		{
@@ -231,9 +237,9 @@ namespace DeckPredictorTests.Tests
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
 			Assert.AreEqual(3, predictor.PredictedCards.Count);
 			// First copy of Alleycat.
-			Assert.IsNotNull(predictor.GetPredictedCard(_metaDecks[1].Cards[0], 1));
+			Assert.IsNotNull(predictor.GetPredictedCard(Key("Alleycat", 1)));
 			// No second copy of Alleycat.
-			Assert.IsNull(predictor.GetPredictedCard(_metaDecks[1].Cards[0], 2));
+			Assert.IsNull(predictor.GetPredictedCard(Key("Alleycat", 2)));
 		}
 
 		[TestMethod]
@@ -247,8 +253,8 @@ namespace DeckPredictorTests.Tests
 			opponent.Cards.Add(Database.GetCardFromName("Deadly Shot"));
 			predictor.OnOpponentPlay(null);
 			Assert.AreEqual(2, predictor.PredictedCards.Count);
-			Assert.IsNotNull(predictor.GetPredictedCard(_metaDecks[0].Cards[0], 1));
-			Assert.IsNotNull(predictor.GetPredictedCard(_metaDecks[0].Cards[1], 1));
+			Assert.IsNotNull(predictor.GetPredictedCard(Key("Alleycat", 1)));
+			Assert.IsNotNull(predictor.GetPredictedCard(Key("Deadly Shot", 1)));
 		}
 
 		[TestMethod]
@@ -260,7 +266,46 @@ namespace DeckPredictorTests.Tests
 
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
 			Assert.AreEqual(4, predictor.PredictedCards.Count);
-			Assert.IsNotNull(predictor.GetPredictedCard(_metaDecks[1].Cards[0], 2));
+			Assert.IsNotNull(predictor.GetPredictedCard(Key("Alleycat", 2)));
+		}
+
+		[TestMethod]
+		public void GetPredictedCard_ProbabilityIsOneForSinglePossibleDeck()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Deadly Shot", 1)).Probability, .01);
+		}
+
+		[TestMethod]
+		public void GetPredictedCard_ProbabilityIsHalfForOneOfTwoDecks()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			Assert.AreEqual(.5, predictor.GetPredictedCard(Key("Deadly Shot", 1)).Probability, .01);
+		}
+
+		[TestMethod]
+		public void GetPredictedCard_ProbabilityIsOneWhenInBothDecks()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Alleycat", 1)).Probability, .01);
+		}
+
+		[TestMethod]
+		public void GetPredictedCard_ProbabilityReturnsToOneAfterSecondDeckFiltered()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
+			var opponent = new MockOpponent("Hunter");
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+
+			opponent.Cards.Add(Database.GetCardFromName("Deadly Shot"));
+			predictor.OnOpponentPlay(null);
+			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Deadly Shot", 1)).Probability, .01);
 		}
 	}
 }
