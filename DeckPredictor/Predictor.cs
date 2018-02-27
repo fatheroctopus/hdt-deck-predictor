@@ -21,6 +21,7 @@ namespace DeckPredictor
 		private Dictionary<string, PredictedCardInfo> _possibleCards =
 			new Dictionary<string, PredictedCardInfo>();
 		private List<PredictedCardInfo> _predictedCards;
+		private List<PredictedCardInfo> _nextPredictedCards;
 		private IOpponent _opponent;
 		private bool _classDetected;
 
@@ -37,10 +38,16 @@ namespace DeckPredictor
 		public ReadOnlyCollection<Deck> PossibleDecks =>
 			new ReadOnlyCollection<Deck>(_possibleDecks);
 
+		// List of all possible cards that could be in the opponent's deck
 		public ICollection<PredictedCardInfo> PossibleCards => _possibleCards.Values;
 
+		// Sorted list of most likeley cards to be in opponent's deck, under the deck limit.
 		public ReadOnlyCollection<PredictedCardInfo> PredictedCards =>
 			new ReadOnlyCollection<PredictedCardInfo>(_predictedCards);
+
+		// Sorted list of the next most likely cards after the top 30 cutoff.
+		public ReadOnlyCollection<PredictedCardInfo> GetNextPredictedCards(int numCards) =>
+			new ReadOnlyCollection<PredictedCardInfo>(_nextPredictedCards.Take(numCards).ToList());
 
 		// Returns null if the given card and copyCount have no chance to be in the opponent's deck.
 		public PredictedCardInfo GetPredictedCard(Card card, int copyCount)
@@ -192,20 +199,23 @@ namespace DeckPredictor
 
 			// Prediction
 			// First sort possible cards by probability
-			_predictedCards = _possibleCards.Values
+			_nextPredictedCards = _possibleCards.Values
 				.OrderByDescending(predictedCard => predictedCard.Probability)
 				.ToList();
 			// If our list is greater than the Deck Size, take the probability of the first card that won't
 			// make the cut.  All other cards we predict have to be strictly greater than that probability.
 			// We do this so none of the top 30 are there for an arbitrary reason.
-			double cutOffProbability = _predictedCards.Count > DeckSize
-				? _predictedCards.ElementAt(DeckSize).Probability + Epsilon
+			double cutOffProbability = _nextPredictedCards.Count > DeckSize
+				? _nextPredictedCards.ElementAt(DeckSize).Probability + Epsilon
 				: 0;
-			_predictedCards = _predictedCards
+			_predictedCards = _nextPredictedCards
 				.Take(DeckSize)
 				.TakeWhile(predictedCard => predictedCard.Probability > cutOffProbability)
 				.OrderBy(predictedCard => predictedCard.Card.Cost)
 				.ToList();
+
+			// Shave off the cards we moved to _predictedCards from our _nextPredictedCards
+			_nextPredictedCards.RemoveRange(0, _predictedCards.Count);
 
 			Log.Info(_possibleCards.Count + " possible cards");
 			Log.Info(_predictedCards.Count + " predicted cards");

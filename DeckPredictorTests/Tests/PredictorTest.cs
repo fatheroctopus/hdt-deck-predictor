@@ -314,6 +314,52 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
+		public void GetNextPredictedCards_EmptyByDefault()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			Assert.AreEqual(0, predictor.GetNextPredictedCards(10).Count);
+		}
+
+		[TestMethod]
+		public void GetNextPredictedCards_ContainsLeftoverCards()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			_metaDecks[1].Cards[0].Count = 40;
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			// All 40 Deadly Shots
+			Assert.AreEqual(40, predictor.GetNextPredictedCards(40).Count);
+		}
+
+		[TestMethod]
+		public void GetNextPredictedCards_TruncatesLeftoverCards()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			_metaDecks[1].Cards[0].Count = 40;
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			Assert.AreEqual(10, predictor.GetNextPredictedCards(10).Count);
+		}
+
+		[TestMethod]
+		public void GetNextPredictedCards_SortedByProbability()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot",  "Bear Trap", "Alleycat"});
+			_metaDecks[1].Cards[0].Count = 40;
+			_metaDecks[1].Cards[1].Count = 40;
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat",});
+			_metaDecks[1].Cards[0].Count = 40;
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+
+			var nextPredictedCards = predictor.GetNextPredictedCards(50);
+			Assert.AreEqual("Deadly Shot", nextPredictedCards.ElementAt(0).Card.Name);
+			Assert.AreEqual("Deadly Shot", nextPredictedCards.ElementAt(1).Card.Name);
+			Assert.AreEqual("Bear Trap", nextPredictedCards.ElementAt(40).Card.Name);
+		}
+
+		[TestMethod]
 		public void GetPredictedCard_ProbabilityIsOneForSinglePossibleDeck()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
