@@ -15,8 +15,9 @@ namespace DeckPredictor
 	public class Predictor
 	{
 		private List<Deck> _possibleDecks;
-		private SortedDictionary<string, PredictedCardInfo> _predictedCards =
-			new SortedDictionary<string, PredictedCardInfo>();
+		private Dictionary<string, PredictedCardInfo> _predictedCards =
+			new Dictionary<string, PredictedCardInfo>();
+		private List<PredictedCardInfo> _predictedCardsByProbablity;
 		private IOpponent _opponent;
 		private bool _classDetected;
 
@@ -33,7 +34,8 @@ namespace DeckPredictor
 		public ReadOnlyCollection<Deck> PossibleDecks =>
 			new ReadOnlyCollection<Deck>(_possibleDecks);
 
-		public ICollection<PredictedCardInfo> PredictedCards => _predictedCards.Values;
+		public ReadOnlyCollection<PredictedCardInfo> PredictedCards =>
+			new ReadOnlyCollection<PredictedCardInfo>(_predictedCardsByProbablity);
 
 		// Returns null if the given card and copyCount are not predicted to be in the opponent's deck.
 		public PredictedCardInfo GetPredictedCard(Card card, int copyCount)
@@ -162,7 +164,7 @@ namespace DeckPredictor
 			}
 		}
 
-		public void UpdatePredictedCards()
+		private void UpdatePredictedCards()
 		{
 			_predictedCards.Clear();
 			foreach (Deck deck in _possibleDecks)
@@ -182,12 +184,18 @@ namespace DeckPredictor
 				}
 			}
 
+			_predictedCardsByProbablity = _predictedCards.Values
+				.OrderByDescending(predictedCard => predictedCard.Probability)
+				.ThenBy(predictedCard => predictedCard.Card.Cost)
+				.ToList();
+
 			Log.Info(_predictedCards.Count + " predicted cards");
 			foreach (Action<Predictor> callback in OnPredictionUpdate)
 			{
 				callback.Invoke(this);
 			}
 		}
+
 	}
 
 }

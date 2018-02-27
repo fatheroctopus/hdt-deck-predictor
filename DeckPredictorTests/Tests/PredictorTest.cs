@@ -270,6 +270,26 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
+		public void GetPredictedCard_SortedByDescendingProbability()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			PredictedCardInfo firstPredictedCard = predictor.PredictedCards.ElementAt(0);
+			Assert.AreEqual("Alleycat", firstPredictedCard.Card.Name);
+		}
+
+		[TestMethod]
+		public void GetPredictedCard_SortedSecondaryByLowerManaCost()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			PredictedCardInfo firstPredictedCard = predictor.PredictedCards.ElementAt(1);
+			Assert.AreEqual("Bear Trap", firstPredictedCard.Card.Name);
+		}
+
+		[TestMethod]
 		public void GetPredictedCard_ProbabilityIsOneForSinglePossibleDeck()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
