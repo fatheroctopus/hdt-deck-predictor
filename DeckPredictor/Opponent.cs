@@ -20,5 +20,15 @@ namespace DeckPredictor
 		public string Class => _opponent.Class;
 
 		public ReadOnlyCollection<Card> KnownCards => _opponent.OpponentCardList.AsReadOnly();
+
+		public void UpdatePredictedCards(List<Card> cards)
+		{
+			// Clear the current "Precitions" and add the new List.
+			_opponent.InDeckPrecitions.Clear();
+			foreach (Card card in cards)
+			{
+				_opponent.InDeckPrecitions.Add(new PredictedCard(card.Id, 0));
+			}
+		}
 	}
 }

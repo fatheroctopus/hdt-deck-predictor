@@ -15,5 +15,8 @@ namespace DeckPredictor
 
 		// List of all cards known to be in the opponent's deck.
 		ReadOnlyCollection<Card> KnownCards { get; }
+
+		// Updates the Opponent's cards that may be in their deck.
+		void UpdatePredictedCards(List<Card> cards);
 	}
 }
