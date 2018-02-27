@@ -15,7 +15,8 @@ namespace DeckPredictor
 	public class Predictor
 	{
 		private List<Deck> _possibleDecks;
-		private HashSet<Card> _possibleCards = new HashSet<Card>();
+		private SortedDictionary<string, PredictedCardInfo> _predictedCards =
+			new SortedDictionary<string, PredictedCardInfo>();
 		private IOpponent _opponent;
 		private bool _classDetected;
 
@@ -24,10 +25,26 @@ namespace DeckPredictor
 			Log.Debug("Copying possible decks from the current meta");
 			_possibleDecks = new List<Deck>(metaDecks);
 			_opponent = opponent;
-			UpdatePossibleCards();
+			UpdatePredictedCards();
 		}
 
 		public List<Action<Predictor>> OnPredictionUpdate = new List<Action<Predictor>>();
+
+		public ReadOnlyCollection<Deck> PossibleDecks =>
+			new ReadOnlyCollection<Deck>(_possibleDecks);
+
+		public ICollection<PredictedCardInfo> PredictedCards => _predictedCards.Values;
+
+		// Returns null if the given card and copyCount are not predicted to be in the opponent's deck.
+		public PredictedCardInfo GetPredictedCard(Card card, int copyCount)
+		{
+			string key = PredictedCardInfo.Key(card, copyCount);
+			if (_predictedCards.ContainsKey(key))
+			{
+				return _predictedCards[key];
+			}
+			return null;
+		}
 
 		public void OnGameStart()
 		{
@@ -38,11 +55,6 @@ namespace DeckPredictor
 		{
 			CheckOpponentClass();
 		}
-
-		public ReadOnlyCollection<Deck> PossibleDecks =>
-			new ReadOnlyCollection<Deck>(_possibleDecks);
-
-		public ISet<Card> PossibleCards => new HashSet<Card>(_possibleCards);
 
 		public void OnOpponentPlay(Card cardPlayed)
 		{
@@ -94,7 +106,7 @@ namespace DeckPredictor
 			_possibleDecks = _possibleDecks.Where(x => x.Class == _opponent.Class).ToList();
 			_classDetected = true;
 			Log.Info(_possibleDecks.Count + " possible decks for class " + _opponent.Class);
-			UpdatePossibleCards();
+			UpdatePredictedCards();
 		}
 
 		private void FilterAllRevealedCards()
@@ -141,28 +153,29 @@ namespace DeckPredictor
 					Log.Debug("Filtering out decks that don't run enough copies of "+ card);
 				}
 				Log.Info(_possibleDecks.Count + " possible decks");
-				UpdatePossibleCards();
+				UpdatePredictedCards();
 			}
 		}
 
-		public void UpdatePossibleCards()
+		public void UpdatePredictedCards()
 		{
-			_possibleCards.Clear();
+			_predictedCards.Clear();
 			foreach (Deck deck in _possibleDecks)
 			{
 				foreach (Card card in deck.Cards)
 				{
-					// Remove an existing card with a lower card count than this one.
-					var alreadyExistingCard = _possibleCards.FirstOrDefault(x => x.Id == card.Id);
-					if (alreadyExistingCard != null && alreadyExistingCard.Count < card.Count)
+					for (int copyCount = 1; copyCount <= card.Count; copyCount++)
 					{
-						_possibleCards.Remove(alreadyExistingCard);
+						var key = PredictedCardInfo.Key(card, copyCount);
+						if (!_predictedCards.ContainsKey(key))
+						{
+							_predictedCards[key] = new PredictedCardInfo(card, copyCount);
+						}
 					}
-					_possibleCards.Add(card);
 				}
 			}
 
-			Log.Info(_possibleCards.Count + " possible different cards");
+			Log.Info(_predictedCards.Count + " predicted cards");
 			foreach (Action<Predictor> callback in OnPredictionUpdate)
 			{
 				callback.Invoke(this);

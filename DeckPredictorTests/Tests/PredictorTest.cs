@@ -175,33 +175,33 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
-		public void GetPossibleCards_EmptyByDefault()
+		public void GetPredictedCards_EmptyByDefault()
 		{
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-			Assert.AreEqual(0, predictor.PossibleCards.Count);
+			Assert.AreEqual(0, predictor.PredictedCards.Count);
 		}
 
 		[TestMethod]
-		public void GetPossibleCards_SameAsSingleMetaDeck()
+		public void GetPredictedCards_SameAsSingleMetaDeck()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-			Assert.IsTrue(new HashSet<Card>(_metaDecks[0].Cards).SetEquals(predictor.PossibleCards));
+			Assert.AreEqual(2, predictor.PredictedCards.Count);
 		}
 
 		[TestMethod]
-		public void GetPossibleCards_EmptyAfterClassFiltered()
+		public void GetPredictedCards_EmptyAfterClassFiltered()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 
 			var predictor = new Predictor(new MockOpponent("Mage"), _metaDecks.AsReadOnly());
 			predictor.OnGameStart();
-			Assert.AreEqual(0, predictor.PossibleCards.Count);
+			Assert.AreEqual(0, predictor.PredictedCards.Count);
 		}
 
 		[TestMethod]
-		public void GetPossibleCards_EmptyAfterDeckFiltered()
+		public void GetPredictedCards_EmptyAfterDeckFiltered()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 
@@ -209,37 +209,35 @@ namespace DeckPredictorTests.Tests
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 			opponent.Cards.Add(Database.GetCardFromName("Savannah Highmane"));
 			predictor.OnOpponentPlay(null);
-			Assert.AreEqual(0, predictor.PossibleCards.Count);
+			Assert.AreEqual(0, predictor.PredictedCards.Count);
 		}
 
 		[TestMethod]
-		public void GetPossibleCards_CombinesContentsOfTwoDecks()
+		public void GetPredictedCards_CombinesContentsOfTwoDecks()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Arcane Shot", "Bear Trap"});
 
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-			var combinedCards = new HashSet<Card> ();
-			combinedCards.UnionWith(_metaDecks[0].Cards);
-			combinedCards.UnionWith(_metaDecks[1].Cards);
-			Assert.IsTrue(combinedCards.SetEquals(predictor.PossibleCards));
+			Assert.AreEqual(4, predictor.PredictedCards.Count);
 		}
 
 		[TestMethod]
-		public void GetPossibleCards_UnionOfTwoDecks()
+		public void GetPredictedCards_UnionOfTwoDecks()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
 
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-			var unionCards = new HashSet<Card> ();
-			unionCards.UnionWith(_metaDecks[0].Cards);
-			unionCards.UnionWith(_metaDecks[1].Cards);
-			Assert.IsTrue(unionCards.SetEquals(predictor.PossibleCards));
+			Assert.AreEqual(3, predictor.PredictedCards.Count);
+			// First copy of Alleycat.
+			Assert.IsNotNull(predictor.GetPredictedCard(_metaDecks[1].Cards[0], 1));
+			// No second copy of Alleycat.
+			Assert.IsNull(predictor.GetPredictedCard(_metaDecks[1].Cards[0], 2));
 		}
 
 		[TestMethod]
-		public void GetPossibleCards_SameAsFirstDeckAfterSecondFiltered()
+		public void GetPredictedCards_SameAsFirstDeckAfterSecondFiltered()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
@@ -248,20 +246,21 @@ namespace DeckPredictorTests.Tests
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 			opponent.Cards.Add(Database.GetCardFromName("Deadly Shot"));
 			predictor.OnOpponentPlay(null);
-			Assert.IsTrue(new HashSet<Card>(_metaDecks[0].Cards).SetEquals(predictor.PossibleCards));
+			Assert.AreEqual(2, predictor.PredictedCards.Count);
+			Assert.IsNotNull(predictor.GetPredictedCard(_metaDecks[0].Cards[0], 1));
+			Assert.IsNotNull(predictor.GetPredictedCard(_metaDecks[0].Cards[1], 1));
 		}
 
 		[TestMethod]
-		public void GetPossibleCards_UnionTakesHigherCardCount()
+		public void GetPredictedCards_UnionTakesHigherCardCount()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
 			_metaDecks[1].Cards[0].Count = 2;
 
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-			var doubleCard =
-				predictor.PossibleCards.FirstOrDefault(card => card.Id == _metaDecks[1].Cards[0].Id);
-			Assert.AreEqual(2, doubleCard.Count);
+			Assert.AreEqual(4, predictor.PredictedCards.Count);
+			Assert.IsNotNull(predictor.GetPredictedCard(_metaDecks[1].Cards[0], 2));
 		}
 	}
 }

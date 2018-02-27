@@ -36,10 +36,10 @@ namespace DeckPredictor
 			using (StreamWriter sw = new StreamWriter(LogFile, false))
 			{
 				sw.WriteLine(predictor.PossibleDecks.Count + " possible decks");
-				sw.WriteLine(predictor.PossibleCards.Count + " possible unique cards");
-				foreach (Card possibleCard in predictor.PossibleCards)
+				sw.WriteLine(predictor.PredictedCards + " predicted cards");
+				foreach (PredictedCardInfo predictedCard in predictor.PredictedCards)
 				{
-					sw.WriteLine(possibleCard.ToString());
+					sw.WriteLine(predictedCard.ToString());
 				}
 			}
 		}
