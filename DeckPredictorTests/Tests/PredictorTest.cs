@@ -56,6 +56,19 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
+		public void OnGameStart_CallsOnPredictionUpdate()
+		{
+			AddMetaDeck("Hunter");
+			var predictor = new Predictor(new MockOpponent("Mage"), _metaDecks.AsReadOnly());
+			bool called = false;
+			Action<Predictor> callback = x => { called = true; };
+			predictor.OnPredictionUpdate.Add(callback);
+
+			predictor.OnGameStart();
+			Assert.IsTrue(called);
+		}
+
+		[TestMethod]
 		public void OnOpponentPlay_MissingCardFiltersDeck()
 		{
 			var opponent = new MockOpponent("Hunter");

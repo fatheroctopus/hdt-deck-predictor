@@ -24,8 +24,10 @@ namespace DeckPredictor
 			Log.Debug("Copying possible decks from the current meta");
 			_possibleDecks = new List<Deck>(metaDecks);
 			_opponent = opponent;
-			UpdatePossibleCards(false);
+			UpdatePossibleCards();
 		}
+
+		public List<Action<Predictor>> OnPredictionUpdate = new List<Action<Predictor>>();
 
 		public void OnGameStart()
 		{
@@ -143,7 +145,7 @@ namespace DeckPredictor
 			}
 		}
 
-		public void UpdatePossibleCards(bool logEachCard = true)
+		public void UpdatePossibleCards()
 		{
 			_possibleCards.Clear();
 			foreach (Deck deck in _possibleDecks)
@@ -159,13 +161,11 @@ namespace DeckPredictor
 					_possibleCards.Add(card);
 				}
 			}
+
 			Log.Info(_possibleCards.Count + " possible different cards");
-			if (logEachCard)
+			foreach (Action<Predictor> callback in OnPredictionUpdate)
 			{
-				foreach (Card possibleCard in _possibleCards)
-				{
-					Log.Debug(possibleCard.ToString());
-				}
+				callback.Invoke(this);
 			}
 		}
 	}
