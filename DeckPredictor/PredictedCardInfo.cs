@@ -40,7 +40,9 @@ namespace DeckPredictor
 
 		public override string ToString()
 		{
-			return Card.Name + "(" + CopyCount + ")" + " - " + (Probability * 100) + "%";
+			return "[" + Card.Cost + "] " +
+				Card.Name + "(" + CopyCount + ")" +
+				" - " + Math.Truncate(Probability * 100) + "%";
 		}
 	}
 }

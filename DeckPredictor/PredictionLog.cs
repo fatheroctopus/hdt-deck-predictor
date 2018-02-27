@@ -36,7 +36,8 @@ namespace DeckPredictor
 			using (StreamWriter sw = new StreamWriter(LogFile, false))
 			{
 				sw.WriteLine(predictor.PossibleDecks.Count + " possible decks");
-				sw.WriteLine(predictor.PredictedCards + " predicted cards");
+				sw.WriteLine(predictor.PossibleCards.Count + " possible cards");
+				sw.WriteLine(predictor.PredictedCards.Count + " predicted cards:");
 				foreach (PredictedCardInfo predictedCard in predictor.PredictedCards)
 				{
 					sw.WriteLine(predictedCard.ToString());

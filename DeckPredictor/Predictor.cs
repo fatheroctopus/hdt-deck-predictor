@@ -14,10 +14,13 @@ namespace DeckPredictor
 {
 	public class Predictor
 	{
+		public static readonly int DeckSize = 30;
+		private static readonly double Epsilon = .00001;
+
 		private List<Deck> _possibleDecks;
-		private Dictionary<string, PredictedCardInfo> _predictedCards =
+		private Dictionary<string, PredictedCardInfo> _possibleCards =
 			new Dictionary<string, PredictedCardInfo>();
-		private List<PredictedCardInfo> _predictedCardsByProbablity;
+		private List<PredictedCardInfo> _predictedCards;
 		private IOpponent _opponent;
 		private bool _classDetected;
 
@@ -34,10 +37,12 @@ namespace DeckPredictor
 		public ReadOnlyCollection<Deck> PossibleDecks =>
 			new ReadOnlyCollection<Deck>(_possibleDecks);
 
-		public ReadOnlyCollection<PredictedCardInfo> PredictedCards =>
-			new ReadOnlyCollection<PredictedCardInfo>(_predictedCardsByProbablity);
+		public ICollection<PredictedCardInfo> PossibleCards => _possibleCards.Values;
 
-		// Returns null if the given card and copyCount are not predicted to be in the opponent's deck.
+		public ReadOnlyCollection<PredictedCardInfo> PredictedCards =>
+			new ReadOnlyCollection<PredictedCardInfo>(_predictedCards);
+
+		// Returns null if the given card and copyCount have no chance to be in the opponent's deck.
 		public PredictedCardInfo GetPredictedCard(Card card, int copyCount)
 		{
 			string key = PredictedCardInfo.Key(card, copyCount);
@@ -46,9 +51,9 @@ namespace DeckPredictor
 
 		public PredictedCardInfo GetPredictedCard(string key)
 		{
-			if (_predictedCards.ContainsKey(key))
+			if (_possibleCards.ContainsKey(key))
 			{
-				return _predictedCards[key];
+				return _possibleCards[key];
 			}
 			return null;
 		}
@@ -166,7 +171,8 @@ namespace DeckPredictor
 
 		private void UpdatePredictedCards()
 		{
-			_predictedCards.Clear();
+			// Determine which cards are possible.
+			_possibleCards.Clear();
 			foreach (Deck deck in _possibleDecks)
 			{
 				foreach (Card card in deck.Cards)
@@ -174,21 +180,34 @@ namespace DeckPredictor
 					for (int copyCount = 1; copyCount <= card.Count; copyCount++)
 					{
 						var key = PredictedCardInfo.Key(card, copyCount);
-						if (!_predictedCards.ContainsKey(key))
+						if (!_possibleCards.ContainsKey(key))
 						{
 							var predictedCard = new PredictedCardInfo(card, copyCount, _possibleDecks.Count);
-							_predictedCards[key] = predictedCard;
+							_possibleCards[key] = predictedCard;
 						}
-						_predictedCards[key].IncrementNumOccurrences();
+						_possibleCards[key].IncrementNumOccurrences();
 					}
 				}
 			}
 
-			_predictedCardsByProbablity = _predictedCards.Values
+			// Prediction
+			// First sort possible cards by probability
+			_predictedCards = _possibleCards.Values
 				.OrderByDescending(predictedCard => predictedCard.Probability)
-				.ThenBy(predictedCard => predictedCard.Card.Cost)
+				.ToList();
+			// If our list is greater than the Deck Size, take the probability of the first card that won't
+			// make the cut.  All other cards we predict have to be strictly greater than that probability.
+			// We do this so none of the top 30 are there for an arbitrary reason.
+			double cutOffProbability = _predictedCards.Count > DeckSize
+				? _predictedCards.ElementAt(DeckSize).Probability + Epsilon
+				: 0;
+			_predictedCards = _predictedCards
+				.Take(DeckSize)
+				.TakeWhile(predictedCard => predictedCard.Probability > cutOffProbability)
+				.OrderBy(predictedCard => predictedCard.Card.Cost)
 				.ToList();
 
+			Log.Info(_possibleCards.Count + " possible cards");
 			Log.Info(_predictedCards.Count + " predicted cards");
 			foreach (Action<Predictor> callback in OnPredictionUpdate)
 			{

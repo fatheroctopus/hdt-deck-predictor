@@ -270,7 +270,7 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
-		public void GetPredictedCard_SortedByDescendingProbability()
+		public void GetPredictedCards_SortedByDescendingProbability()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
@@ -280,13 +280,37 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
-		public void GetPredictedCard_SortedSecondaryByLowerManaCost()
+		public void GetPredictedCards_SortedSecondaryByLowerManaCost()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
 			PredictedCardInfo firstPredictedCard = predictor.PredictedCards.ElementAt(1);
 			Assert.AreEqual("Bear Trap", firstPredictedCard.Card.Name);
+		}
+
+		[TestMethod]
+		public void GetPredictedCards_ReturnsNoMoreThanDeckSize()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			_metaDecks[0].Cards[0].Count = 30;
+			_metaDecks[1].Cards[0].Count = 30;
+
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			Assert.AreEqual(30, predictor.PredictedCards.Count);
+		}
+
+		[TestMethod]
+		public void GetPredictedCards_LessThanDeckSizeIfAtSameProbability()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			_metaDecks[1].Cards[0].Count = 40;
+
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			// All the Deadly Shots are at the same probability, so don't include any of them.
+			Assert.AreEqual(1, predictor.PredictedCards.Count);
 		}
 
 		[TestMethod]
