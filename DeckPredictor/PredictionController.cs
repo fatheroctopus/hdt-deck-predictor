@@ -11,11 +11,11 @@ using System;
 
 namespace DeckPredictor
 {
-	public class PredictionView
+	public class PredictionController
 	{
 		private IOpponent _opponent;
 
-		public PredictionView(IOpponent opponent)
+		public PredictionController(IOpponent opponent)
 		{
 			_opponent = opponent;
 		}

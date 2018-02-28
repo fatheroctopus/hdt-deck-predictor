@@ -19,7 +19,7 @@ namespace DeckPredictor
 
 		public string Class => _opponent.Class;
 
-		public ReadOnlyCollection<Card> KnownCards => _opponent.OpponentCardList.AsReadOnly();
+		public List<Card> KnownCards => _opponent.OpponentCardList;
 
 		public void UpdatePredictedCards(List<Card> cards)
 		{

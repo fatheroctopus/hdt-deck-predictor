@@ -64,7 +64,7 @@
     <Compile Include="Tests\LogTest.cs" />
     <Compile Include="Tests\PluginConfigTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tests\PredictionViewTest.cs" />
+    <Compile Include="Tests\PredictionControllerTest.cs" />
     <Compile Include="Tests\PredictorTest.cs" />
   </ItemGroup>
   <ItemGroup>

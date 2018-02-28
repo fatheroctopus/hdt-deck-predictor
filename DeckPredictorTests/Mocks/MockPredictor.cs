@@ -13,12 +13,9 @@ namespace DeckPredictorTests.Mocks
 	public class MockPredictor : IPredictor
 	{
 		public MockPredictor() {
-			Cards = new List<PredictedCardInfo>();
+			PredictedCards = new List<PredictedCardInfo>();
 		}
 
-		// Manipulate this in tests to affect PredictedCards.
-		public List<PredictedCardInfo> Cards { get; set; }
-
-		public ReadOnlyCollection<PredictedCardInfo> PredictedCards => Cards.AsReadOnly();
+		public List<PredictedCardInfo> PredictedCards { get; set; }
 	}
 }

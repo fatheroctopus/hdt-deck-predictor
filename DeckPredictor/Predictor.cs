@@ -42,8 +42,7 @@ namespace DeckPredictor
 		public ICollection<PredictedCardInfo> PossibleCards => _possibleCards.Values;
 
 		// Sorted list of most likeley cards to be in opponent's deck, under the deck limit.
-		public ReadOnlyCollection<PredictedCardInfo> PredictedCards =>
-			new ReadOnlyCollection<PredictedCardInfo>(_predictedCards);
+		public List<PredictedCardInfo> PredictedCards => new List<PredictedCardInfo>(_predictedCards);
 
 		// Sorted list of the next most likely cards after the top 30 cutoff.
 		public ReadOnlyCollection<PredictedCardInfo> GetNextPredictedCards(int numCards) =>

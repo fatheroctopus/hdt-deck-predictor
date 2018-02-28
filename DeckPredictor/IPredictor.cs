@@ -10,6 +10,6 @@ namespace DeckPredictor
 {
 	public interface IPredictor
 	{
-		ReadOnlyCollection<PredictedCardInfo> PredictedCards { get; }
+		List<PredictedCardInfo> PredictedCards { get; }
 	}
 }

@@ -15,15 +15,12 @@ namespace DeckPredictorTests.Mocks
 		public MockOpponent(string className)
 		{
 			Class = className;
-			Cards = new List<Card>();
+			KnownCards = new List<Card>();
 		}
-
-		// Manipulate this in tests to affect KnownCards.
-		public List<Card> Cards { get; set; }
 
 		public string Class { get; set; }
 
-		public ReadOnlyCollection<Card> KnownCards => Cards.AsReadOnly();
+		public List<Card> KnownCards { get; set; }
 
 		public List<Card> PredictedCards { get; private set; }
 
