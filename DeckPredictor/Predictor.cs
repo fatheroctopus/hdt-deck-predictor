@@ -212,6 +212,7 @@ namespace DeckPredictor
 				.Take(DeckSize)
 				.TakeWhile(predictedCard => predictedCard.Probability > cutOffProbability)
 				.OrderBy(predictedCard => predictedCard.Card.Cost)
+				.ThenBy(predictedCard => predictedCard.Card.Name)
 				.ToList();
 
 			// Shave off the cards we moved to _predictedCards from our _nextPredictedCards
