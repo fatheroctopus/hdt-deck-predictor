@@ -22,7 +22,10 @@ namespace DeckPredictor
 
 		public void OnPredictionUpdate(IPredictor predictor)
 		{
-			_opponent.UpdatePredictedCards(new List<Card>());
+			List<Card> cardList = predictor.PredictedCards
+				.Select(predictedCard => predictedCard.Card)
+				.ToList();
+			_opponent.UpdatePredictedCards(cardList);
 		}
 	}
 }

@@ -12,7 +12,7 @@ using System;
 
 namespace DeckPredictor
 {
-	public class Predictor
+	public class Predictor : IPredictor
 	{
 		public static readonly int DeckSize = 30;
 		private static readonly double Epsilon = .00001;

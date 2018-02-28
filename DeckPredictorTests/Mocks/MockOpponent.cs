@@ -16,21 +16,22 @@ namespace DeckPredictorTests.Mocks
 		{
 			Class = className;
 			Cards = new List<Card>();
-			UpdatePredictedCardsCalled = false;
 		}
 
 		// Manipulate this in tests to affect KnownCards.
 		public List<Card> Cards { get; set; }
 
-		public bool UpdatePredictedCardsCalled { get; private set; }
-
 		public string Class { get; set; }
 
 		public ReadOnlyCollection<Card> KnownCards => Cards.AsReadOnly();
 
+		public List<Card> PredictedCards { get; private set; }
+
+		public bool UpdatePredictedCardsCalled => PredictedCards != null;
+
 		public void UpdatePredictedCards(List<Card> cards)
 		{
-			UpdatePredictedCardsCalled = true;
+			PredictedCards = cards;
 		}
 	}
 }
