@@ -12,11 +12,29 @@ namespace DeckPredictorTests.Tests
 	[TestClass]
 	public class PredictionControllerTest
 	{
-		private List<PredictedCardInfo> PredictedCardList(List<string> cardNames) =>
-			CardList(cardNames).Select(card => new PredictedCardInfo(card, 1, 1)).ToList();
+		private List<PredictedCardInfo> PredictedCardList(List<string> cardNames, List<int> copyCounts = null)
+		{
+			if (copyCounts == null)
+			{
+				copyCounts = Enumerable.Repeat(1, cardNames.Count).ToList();
+			}
+			return cardNames.Zip(copyCounts, (cardName, copyCount) =>
+				new PredictedCardInfo(Database.GetCardFromName(cardName), copyCount, 1)).ToList();
+		}
 
-		private List<Card> CardList(List<string> cardNames) =>
-			cardNames.Select(cardName => Database.GetCardFromName(cardName)).ToList();
+		private List<Card> CardList(List<string> cardNames, List<int> counts = null)
+		{
+			if (counts == null)
+			{
+				counts = Enumerable.Repeat(1, cardNames.Count).ToList();
+			}
+			return cardNames.Zip(counts, (cardName, count) =>
+				{
+					var card = Database.GetCardFromName(cardName);
+					card.Count = count;
+					return card;
+				}).ToList();
+		}
 
 		[TestMethod]
 		public void OnPredictionUpdate_CallsUpdateCards()
@@ -43,6 +61,24 @@ namespace DeckPredictorTests.Tests
 			controller.OnPredictionUpdate(predictor);
 			CollectionAssert.AreEqual(CardList(new List<string> {"Deadly Shot", "Alleycat", "Bear Trap"}),
 				view.Cards);
+		}
+
+		[TestMethod]
+		public void OnPredictionUpdate_CollapsesMultipleCopiesInPredictedCards()
+		{
+			var opponent = new MockOpponent("Hunter");
+			var view = new MockPredictionView();
+			var controller = new PredictionController(opponent, view);
+
+			var predictor = new MockPredictor();
+			predictor.PredictedCards = PredictedCardList(
+				new List<string> {"Deadly Shot", "Deadly Shot", "Bear Trap"},
+				new List<int> {1, 2, 1});
+			controller.OnPredictionUpdate(predictor);
+			var expectedCardList = CardList(
+				new List<string> {"Deadly Shot", "Bear Trap"},
+				new List<int> {2, 1});
+			CollectionAssert.AreEqual(expectedCardList, view.Cards);
 		}
 
 		// [TestMethod]

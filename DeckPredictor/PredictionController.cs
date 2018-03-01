@@ -25,7 +25,13 @@ namespace DeckPredictor
 		public void OnPredictionUpdate(IPredictor predictor)
 		{
 			List<Card> cardList = predictor.PredictedCards
-				.Select(predictedCard => predictedCard.Card)
+				.GroupBy(predictedCard => predictedCard.Card.Id, predictedCard => predictedCard.Card)
+				.Select(group =>
+				{
+					var card = Database.GetCardFromId(group.Key);
+					card.Count = group.Count();
+					return card;
+				})
 				.ToList();
 			_view.UpdateCards(cardList);
 		}
