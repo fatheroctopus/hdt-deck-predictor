@@ -71,9 +71,11 @@ namespace DeckPredictor
 			GameEvents.OnGameStart.Add(() =>
 				{
 					var format = Hearthstone_Deck_Tracker.Core.Game.CurrentFormat;
-					if (format == Format.Standard)
+					var mode = Hearthstone_Deck_Tracker.Core.Game.CurrentGameMode;
+					if (format == Format.Standard &&
+						(mode == GameMode.Ranked || mode == GameMode.Casual || mode == GameMode.Friendly))
 					{
-						Log.Debug("Enabling DeckPredictor for Standard game");
+						Log.Info("Enabling DeckPredictor for " + format + " " + mode + " game");
 						var opponent = new Opponent(Hearthstone_Deck_Tracker.Core.Game.Opponent);
 						_predictor = new Predictor(opponent, _metaDecks);
 						_predictor.OnPredictionUpdate.Add(_predictionLog.OnPredictionUpdate);
@@ -81,7 +83,7 @@ namespace DeckPredictor
 					}
 					else
 					{
-						Log.Info("Disabling DeckPredictor for " + format + " game");
+						Log.Info("Disabling DeckPredictor for " + format + " " + mode + " game");
 					}
 				});
 			GameEvents.OnGameEnd.Add(() =>

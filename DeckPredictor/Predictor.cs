@@ -217,8 +217,8 @@ namespace DeckPredictor
 			// Shave off the cards we moved to _predictedCards from our _nextPredictedCards
 			_nextPredictedCards.RemoveRange(0, _predictedCards.Count);
 
-			Log.Info(_possibleCards.Count + " possible cards");
-			Log.Info(_predictedCards.Count + " predicted cards");
+			Log.Debug(_possibleCards.Count + " possible cards");
+			Log.Debug(_predictedCards.Count + " predicted cards");
 			foreach (Action<Predictor> callback in OnPredictionUpdate)
 			{
 				callback.Invoke(this);
