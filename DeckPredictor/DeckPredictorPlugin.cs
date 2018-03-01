@@ -1,4 +1,5 @@
 ﻿using Hearthstone_Deck_Tracker.API;
+using Hearthstone_Deck_Tracker.Enums;
 using Hearthstone_Deck_Tracker.Hearthstone;
 using Hearthstone_Deck_Tracker.Plugins;
 using Hearthstone_Deck_Tracker;
@@ -69,40 +70,56 @@ namespace DeckPredictor
 
 			GameEvents.OnGameStart.Add(() =>
 				{
-					Log.Debug("Creating a new Predictor");
-					var opponent = new Opponent(Hearthstone_Deck_Tracker.Core.Game.Opponent);
-					_predictor = new Predictor(opponent, _metaDecks);
-					_predictor.OnPredictionUpdate.Add(_predictionLog.OnPredictionUpdate);
-					_predictor.OnGameStart();
+					var format = Hearthstone_Deck_Tracker.Core.Game.CurrentFormat;
+					if (format == Format.Standard)
+					{
+						Log.Debug("Enabling DeckPredictor for Standard game");
+						var opponent = new Opponent(Hearthstone_Deck_Tracker.Core.Game.Opponent);
+						_predictor = new Predictor(opponent, _metaDecks);
+						_predictor.OnPredictionUpdate.Add(_predictionLog.OnPredictionUpdate);
+						_predictor.OnGameStart();
+					}
+					else
+					{
+						Log.Info("Disabling DeckPredictor for " + format + " game");
+					}
 				});
-			GameEvents.OnOpponentDraw.Add(() => _predictor.OnOpponentDraw());
+			GameEvents.OnGameEnd.Add(() =>
+				{
+					if (_predictor != null)
+					{
+						Log.Debug("Disabling DeckPredictor for end of game");
+					}
+					_predictor = null;
+				});
+			GameEvents.OnOpponentDraw.Add(() => _predictor?.OnOpponentDraw());
 
 			// Events that reveal cards need a 100ms delay. This is because HDT takes some extra
 			// time to process all the tags we need, but it doesn't wait to send these callbacks.
 			int delayMs = 100;
 			GameEvents.OnOpponentPlay.Add(card =>
 				Task.Delay(delayMs)
-					.ContinueWith(_ => _predictor.OnOpponentPlay(card))
+					.ContinueWith(_ => _predictor?.OnOpponentPlay(card))
 					.Start());
 			GameEvents.OnOpponentHandDiscard.Add(card =>
 				Task.Delay(delayMs)
-					.ContinueWith(_ => _predictor.OnOpponentHandDiscard(card))
+					.ContinueWith(_ => _predictor?.OnOpponentHandDiscard(card))
 					.Start());
 			GameEvents.OnOpponentDeckDiscard.Add(card =>
 				Task.Delay(delayMs)
-					.ContinueWith(_ => _predictor.OnOpponentDeckDiscard(card))
+					.ContinueWith(_ => _predictor?.OnOpponentDeckDiscard(card))
 					.Start());
 			GameEvents.OnOpponentSecretTriggered.Add(card =>
 				Task.Delay(delayMs)
-					.ContinueWith(_ => _predictor.OnOpponentSecretTriggered(card))
+					.ContinueWith(_ => _predictor?.OnOpponentSecretTriggered(card))
 					.Start());
 			GameEvents.OnOpponentJoustReveal.Add(card =>
 				Task.Delay(delayMs)
-					.ContinueWith(_ => _predictor.OnOpponentJoustReveal(card))
+					.ContinueWith(_ => _predictor?.OnOpponentJoustReveal(card))
 					.Start());
 			GameEvents.OnOpponentDeckToPlay.Add(card =>
 				Task.Delay(delayMs)
-					.ContinueWith(_ => _predictor.OnOpponentDeckToPlay(card))
+					.ContinueWith(_ => _predictor?.OnOpponentDeckToPlay(card))
 					.Start());
 		}
 
