@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Mocks\MockOpponent.cs" />
+    <Compile Include="Mocks\MockPredictionView.cs" />
     <Compile Include="Mocks\MockPredictor.cs" />
     <Compile Include="Tests\LogTest.cs" />
     <Compile Include="Tests\PluginConfigTest.cs" />

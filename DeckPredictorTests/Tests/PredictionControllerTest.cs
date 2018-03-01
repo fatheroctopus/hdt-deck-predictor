@@ -19,28 +19,30 @@ namespace DeckPredictorTests.Tests
 			cardNames.Select(cardName => Database.GetCardFromName(cardName)).ToList();
 
 		[TestMethod]
-		public void OnPredictionUpdate_CallsUpdatePredictedCards()
+		public void OnPredictionUpdate_CallsUpdateCards()
 		{
 			var opponent = new MockOpponent("Hunter");
-			var controller = new PredictionController(opponent);
-
 			var predictor = new MockPredictor();
+			var view = new MockPredictionView();
+
+			var controller = new PredictionController(opponent, view);
 			controller.OnPredictionUpdate(predictor);
-			Assert.IsTrue(opponent.UpdatePredictedCardsCalled);
+			Assert.IsTrue(view.UpdateCardsCalled);
 		}
 
 		[TestMethod]
-		public void OnPredictionUpdate_CallsPredictedCardList()
+		public void OnPredictionUpdate_UsesPredictedCardList()
 		{
 			var opponent = new MockOpponent("Hunter");
-			var controller = new PredictionController(opponent);
+			var view = new MockPredictionView();
+			var controller = new PredictionController(opponent, view);
 
 			var predictor = new MockPredictor();
 			predictor.PredictedCards =
 				PredictedCardList(new List<string> {"Deadly Shot", "Alleycat", "Bear Trap"});
 			controller.OnPredictionUpdate(predictor);
 			CollectionAssert.AreEqual(CardList(new List<string> {"Deadly Shot", "Alleycat", "Bear Trap"}),
-				opponent.PredictedCards);
+				view.Cards);
 		}
 
 		// [TestMethod]

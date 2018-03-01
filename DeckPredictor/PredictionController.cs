@@ -14,10 +14,12 @@ namespace DeckPredictor
 	public class PredictionController
 	{
 		private IOpponent _opponent;
+		private IPredictionView _view;
 
-		public PredictionController(IOpponent opponent)
+		public PredictionController(IOpponent opponent, IPredictionView view)
 		{
 			_opponent = opponent;
+			_view = view;
 		}
 
 		public void OnPredictionUpdate(IPredictor predictor)
@@ -25,7 +27,7 @@ namespace DeckPredictor
 			List<Card> cardList = predictor.PredictedCards
 				.Select(predictedCard => predictedCard.Card)
 				.ToList();
-			_opponent.UpdatePredictedCards(cardList);
+			_view.UpdateCards(cardList);
 		}
 	}
 }

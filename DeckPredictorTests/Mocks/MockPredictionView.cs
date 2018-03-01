@@ -10,16 +10,15 @@ using Hearthstone_Deck_Tracker.Hearthstone.Entities;
 
 namespace DeckPredictorTests.Mocks
 {
-	public class MockOpponent : IOpponent
+	public class MockPredictionView : IPredictionView
 	{
-		public MockOpponent(string className)
+		public List<Card> Cards { get; set; }
+
+		public bool UpdateCardsCalled => Cards != null;
+
+		public void UpdateCards(List<Card> cards)
 		{
-			Class = className;
-			KnownCards = new List<Card>();
+			Cards = cards;
 		}
-
-		public string Class { get; set; }
-
-		public List<Card> KnownCards { get; set; }
 	}
 }

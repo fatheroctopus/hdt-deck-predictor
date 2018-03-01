@@ -8,12 +8,9 @@ using System;
 
 namespace DeckPredictor
 {
-	public interface IOpponent
+	public interface IPredictionView
 	{
-		// May be empty or null if API has not yet detected the opponent class.
-		string Class { get; }
-
-		// List of all cards known to be in the opponent's deck.
-		List<Card> KnownCards { get; }
+		// Updates the card list that reflects the current deck prediction.
+		void UpdateCards(List<Card> cards);
 	}
 }
