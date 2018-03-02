@@ -18,6 +18,7 @@ namespace DeckPredictor
 
 		private PluginConfig _config;
 		private Predictor _predictor;
+		private PredictionView _view;
 		private ReadOnlyCollection<Deck> _metaDecks;
 		private PredictionLog _predictionLog;
 
@@ -67,6 +68,7 @@ namespace DeckPredictor
 			var retrieveTask =
 				Task.Run<List<Deck>>(async () => await metaRetriever.RetrieveMetaDecks(_config));
 			_metaDecks = new ReadOnlyCollection<Deck>(retrieveTask.Result);
+			_view = new PredictionView();
 
 			GameEvents.OnGameStart.Add(() =>
 				{
@@ -77,8 +79,8 @@ namespace DeckPredictor
 					{
 						Log.Info("Enabling DeckPredictor for " + format + " " + mode + " game");
 						var opponent = new Opponent(Hearthstone_Deck_Tracker.Core.Game.Opponent);
-						var view = new PredictionView();
-						var controller = new PredictionController(opponent, view);
+						_view.SetEnabled(true);
+						var controller = new PredictionController(opponent, _view);
 						_predictor = new Predictor(opponent, _metaDecks);
 						_predictor.OnPredictionUpdate.Add(_predictionLog.OnPredictionUpdate);
 						_predictor.OnPredictionUpdate.Add(controller.OnPredictionUpdate);
@@ -86,13 +88,14 @@ namespace DeckPredictor
 					}
 					else
 					{
-						Log.Info("Disabling DeckPredictor for " + format + " " + mode + " game");
+						Log.Info("No deck predictions for " + format + " " + mode + " game");
 					}
 				});
 			GameEvents.OnGameEnd.Add(() =>
 				{
 					if (_predictor != null)
 					{
+						_view.SetEnabled(false);
 						Log.Debug("Disabling DeckPredictor for end of game");
 					}
 					_predictor = null;
