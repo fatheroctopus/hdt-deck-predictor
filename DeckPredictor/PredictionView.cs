@@ -27,7 +27,7 @@ namespace DeckPredictor
 				Core.OverlayCanvas.Children.Add(_cardList);
 				Canvas.SetTop(_cardList, Core.OverlayWindow.Height * 5 / 100);
 				Canvas.SetLeft(_cardList, Core.OverlayWindow.Width * 80 / 100);
-				_cardList.Dispatcher.Invoke(() =>  _cardList.Visibility = Visibility.Hidden);
+				_cardList.Dispatcher.Invoke(() => _cardList.Visibility = Visibility.Hidden);
 			}
 			else
 			{

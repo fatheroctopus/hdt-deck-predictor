@@ -20,15 +20,5 @@ namespace DeckPredictor
 		public string Class => _opponent.Class;
 
 		public List<Card> KnownCards => _opponent.OpponentCardList;
-
-		public void UpdatePredictedCards(List<Card> cards)
-		{
-			// Clear the current "Precitions" and add the new List.
-			_opponent.InDeckPrecitions.Clear();
-			foreach (Card card in cards)
-			{
-				_opponent.InDeckPrecitions.Add(new PredictedCard(card.Id, 0));
-			}
-		}
 	}
 }

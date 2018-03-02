@@ -81,19 +81,54 @@ namespace DeckPredictorTests.Tests
 			CollectionAssert.AreEqual(expectedCardList, view.Cards);
 		}
 
-		// [TestMethod]
-		// public void OnPredictionUpdate_RemovesCardsAlreadyPlayed()
-		// {
-		// 	var opponent = new MockOpponent("Hunter");
-		// 	var controller = new PredictionController(opponent);
+		[TestMethod]
+		public void OnPredictionUpdate_RemovesCardsAlreadyPlayed()
+		{
+			var opponent = new MockOpponent("Hunter");
+			var view = new MockPredictionView();
+			var controller = new PredictionController(opponent, view);
 
-		// 	var predictor = new MockPredictor();
-		// 	predictor.PredictedCards =
-		// 		PredictedCardList(new List<string> {"Deadly Shot", "Alleycat", "Bear Trap"});
-		// 	opponent.KnownCards = CardList(new List<string> {"Alleycat"});
-		// 	controller.OnPredictionUpdate(predictor);
-		// 	CollectionAssert.AreEqual(CardList(new List<string> {"Deadly Shot", "Bear Trap"}),
-		// 		opponent.PredictedCards);
-		// }
+			var predictor = new MockPredictor();
+			predictor.PredictedCards =
+				PredictedCardList(new List<string> {"Deadly Shot", "Alleycat", "Bear Trap"});
+			opponent.KnownCards = CardList(new List<string> {"Alleycat"});
+			controller.OnPredictionUpdate(predictor);
+			CollectionAssert.AreEqual(CardList(new List<string> {"Deadly Shot", "Bear Trap"}),
+				view.Cards);
+		}
+
+		[TestMethod]
+		public void OnPredictionUpdate_DoesNotRemoveCreatedCards()
+		{
+			var opponent = new MockOpponent("Hunter");
+			var view = new MockPredictionView();
+			var controller = new PredictionController(opponent, view);
+
+			var predictor = new MockPredictor();
+			predictor.PredictedCards =
+				PredictedCardList(new List<string> {"Deadly Shot", "Alleycat", "Bear Trap"});
+			opponent.KnownCards = CardList(new List<string> {"Alleycat"});
+			opponent.KnownCards[0].IsCreated = true;
+			controller.OnPredictionUpdate(predictor);
+			CollectionAssert.AreEqual(CardList(new List<string> {"Deadly Shot", "Alleycat", "Bear Trap"}),
+				view.Cards);
+		}
+
+		[TestMethod]
+		public void OnPredictionUpdate_DoesNotRemoveJoustedCards()
+		{
+			var opponent = new MockOpponent("Hunter");
+			var view = new MockPredictionView();
+			var controller = new PredictionController(opponent, view);
+
+			var predictor = new MockPredictor();
+			predictor.PredictedCards =
+				PredictedCardList(new List<string> {"Deadly Shot", "Alleycat", "Bear Trap"});
+			opponent.KnownCards = CardList(new List<string> {"Alleycat"});
+			opponent.KnownCards[0].Jousted = true;
+			controller.OnPredictionUpdate(predictor);
+			CollectionAssert.AreEqual(CardList(new List<string> {"Deadly Shot", "Alleycat", "Bear Trap"}),
+				view.Cards);
+		}
 	}
 }

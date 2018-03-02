@@ -25,14 +25,23 @@ namespace DeckPredictor
 		public void OnPredictionUpdate(IPredictor predictor)
 		{
 			Log.Debug("Collapsing duplicates from prediction.");
+			var playedCards = _opponent.KnownCards
+				.Where(card => !card.IsCreated && card.Collectible && !card.Jousted);
 			List<Card> cardList = predictor.PredictedCards
 				.GroupBy(predictedCard => predictedCard.Card.Id, predictedCard => predictedCard.Card)
 				.Select(group =>
 				{
 					var card = Database.GetCardFromId(group.Key);
 					card.Count = group.Count();
+					var playedCard = playedCards.FirstOrDefault(c => c.Id == card.Id);
+					if (playedCard != null)
+					{
+						Log.Debug("Removing played card: " + playedCard);
+						card.Count -= playedCard.Count;
+					}
 					return card;
 				})
+				.Where(card => card.Count > 0)
 				.ToList();
 			_view.UpdateCards(cardList);
 		}
