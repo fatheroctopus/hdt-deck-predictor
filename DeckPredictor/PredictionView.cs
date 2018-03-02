@@ -42,7 +42,7 @@ namespace DeckPredictor
 			_cardList.Dispatcher.Invoke(() =>
 				{
 					_cardList.Visibility = cards.Count <= 0 ? Visibility.Hidden : Visibility.Visible;
-					_cardList.Update(cards, false);
+					_cardList.Update(cards, true);
 				});
 		}
 	}
