@@ -77,8 +77,11 @@ namespace DeckPredictor
 					{
 						Log.Info("Enabling DeckPredictor for " + format + " " + mode + " game");
 						var opponent = new Opponent(Hearthstone_Deck_Tracker.Core.Game.Opponent);
+						var view = new PredictionView();
+						var controller = new PredictionController(opponent, view);
 						_predictor = new Predictor(opponent, _metaDecks);
 						_predictor.OnPredictionUpdate.Add(_predictionLog.OnPredictionUpdate);
+						_predictor.OnPredictionUpdate.Add(controller.OnPredictionUpdate);
 						_predictor.OnGameStart();
 					}
 					else

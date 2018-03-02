@@ -24,6 +24,7 @@ namespace DeckPredictor
 
 		public void OnPredictionUpdate(IPredictor predictor)
 		{
+			Log.Debug("Collapsing duplicates from prediction.");
 			List<Card> cardList = predictor.PredictedCards
 				.GroupBy(predictedCard => predictedCard.Card.Id, predictedCard => predictedCard.Card)
 				.Select(group =>
