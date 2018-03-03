@@ -31,27 +31,11 @@ namespace DeckPredictor
 			}
 		}
 
-		public void OnPredictionUpdate(Predictor predictor)
+		public void OnPredictionUpdate(PredictionInfo prediction)
 		{
 			using (StreamWriter sw = new StreamWriter(LogFile, false))
 			{
-				sw.WriteLine(predictor.PossibleDecks.Count + " possible decks");
-				sw.WriteLine(predictor.PossibleCards.Count + " possible cards");
-				sw.WriteLine("");
-
-				sw.WriteLine(predictor.PredictedCards.Count + " predicted cards:");
-				foreach (PredictedCardInfo predictedCard in predictor.PredictedCards)
-				{
-					sw.WriteLine(predictedCard.ToString());
-				}
-				sw.WriteLine("");
-
-				var nextPredictedCards = predictor.GetNextPredictedCards(3);
-				sw.WriteLine("Next " + nextPredictedCards.Count + " most likely cards:");
-				foreach (PredictedCardInfo predictedCard in nextPredictedCards)
-				{
-					sw.WriteLine(predictedCard.ToString());
-				}
+				prediction.WritePrediction(sw);
 			}
 		}
 	}

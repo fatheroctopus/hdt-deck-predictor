@@ -12,7 +12,7 @@ using System;
 
 namespace DeckPredictor
 {
-	public class Predictor : IPredictor
+	public class Predictor
 	{
 		public static readonly int DeckSize = 30;
 		private static readonly double Epsilon = .00001;
@@ -30,10 +30,8 @@ namespace DeckPredictor
 			Log.Debug("Copying possible decks from the current meta");
 			_possibleDecks = new List<Deck>(metaDecks);
 			_opponent = opponent;
-			UpdatePredictedCards();
+			CheckOpponentClass();
 		}
-
-		public List<Action<Predictor>> OnPredictionUpdate = new List<Action<Predictor>>();
 
 		public ReadOnlyCollection<Deck> PossibleDecks =>
 			new ReadOnlyCollection<Deck>(_possibleDecks);
@@ -64,53 +62,7 @@ namespace DeckPredictor
 			return null;
 		}
 
-		public void OnGameStart()
-		{
-			CheckOpponentClass();
-		}
-
-		public void OnOpponentDraw()
-		{
-			CheckOpponentClass();
-		}
-
-		public void OnOpponentPlay(Card cardPlayed)
-		{
-			Log.Debug("cardPlayed: " + cardPlayed);
-			FilterAllRevealedCards();
-		}
-
-		public void OnOpponentHandDiscard(Card cardDiscarded)
-		{
-			Log.Debug("cardDiscarded: " + cardDiscarded);
-			FilterAllRevealedCards();
-		}
-
-		public void OnOpponentDeckDiscard(Card cardDiscarded)
-		{
-			Log.Debug("cardDiscarded: " + cardDiscarded);
-			FilterAllRevealedCards();
-		}
-
-		public void OnOpponentSecretTriggered(Card secretTriggered)
-		{
-			Log.Debug("secretTriggered: " + secretTriggered);
-			FilterAllRevealedCards();
-		}
-
-		public void OnOpponentJoustReveal(Card cardRevealed)
-		{
-			Log.Debug("cardRevealed: " + cardRevealed);
-			FilterAllRevealedCards();
-		}
-
-		public void OnOpponentDeckToPlay(Card cardPlayed)
-		{
-			Log.Debug("cardPlayed: " + cardPlayed);
-			FilterAllRevealedCards();
-		}
-
-		private void CheckOpponentClass()
+		public void CheckOpponentClass()
 		{
 			if (_classDetected)
 			{
@@ -127,7 +79,7 @@ namespace DeckPredictor
 			UpdatePredictedCards();
 		}
 
-		private void FilterAllRevealedCards()
+		public void CheckOpponentCards()
 		{
 			var missingCards = new HashSet<Card>();
 			var insufficientCards = new HashSet<Card>();
@@ -219,10 +171,6 @@ namespace DeckPredictor
 
 			Log.Debug(_possibleCards.Count + " possible cards");
 			Log.Debug(_predictedCards.Count + " predicted cards");
-			foreach (Action<Predictor> callback in OnPredictionUpdate)
-			{
-				callback.Invoke(this);
-			}
 		}
 
 	}

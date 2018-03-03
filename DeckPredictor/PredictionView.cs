@@ -38,7 +38,15 @@ namespace DeckPredictor
 
 		public void UpdateCards(List<Hearthstone_Deck_Tracker.Hearthstone.Card> cards)
 		{
-			Log.Debug("Updating view list with " + cards.Count + " cards");
+			_cardList.Dispatcher.Invoke(() =>
+				{
+					_cardList.Visibility = cards.Count <= 0 ? Visibility.Hidden : Visibility.Visible;
+					_cardList.Update(cards, true);
+				});
+		}
+		public void OnPredictionUpdate(PredictionInfo prediction)
+		{
+			var cards = prediction.UnplayedCards;
 			_cardList.Dispatcher.Invoke(() =>
 				{
 					_cardList.Visibility = cards.Count <= 0 ? Visibility.Hidden : Visibility.Visible;

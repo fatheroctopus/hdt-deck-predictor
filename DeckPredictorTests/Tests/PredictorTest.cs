@@ -18,13 +18,7 @@ namespace DeckPredictorTests.Tests
 		{
 			var deck = new Deck();
 			deck.Class = className;
-			if (cardNames != null)
-			{
-				foreach (string cardName in cardNames)
-				{
-					deck.Cards.Add(Database.GetCardFromName(cardName));
-				}
-			}
+			cardNames?.ForEach(cardName => deck.Cards.Add(Database.GetCardFromName(cardName)));
 			_metaDecks.Add(deck);
 		}
 
@@ -42,59 +36,30 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
-		public void OnGameStart_OneMetaDeckSameClass()
+		public void PossibleDecks_OneMetaDeckSameClass()
 		{
 			AddMetaDeck("Hunter");
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-
-			predictor.OnGameStart();
 			Assert.IsTrue(_metaDecks.SequenceEqual(predictor.PossibleDecks));
 		}
 
 		[TestMethod]
-		public void OnGameStart_OneMetaDeckDifferentClass()
+		public void PossibleDecks_OneMetaDeckDifferentClass()
 		{
 			AddMetaDeck("Hunter");
 			var predictor = new Predictor(new MockOpponent("Mage"), _metaDecks.AsReadOnly());
-
-			predictor.OnGameStart();
 			Assert.AreEqual(0, predictor.PossibleDecks.Count);
 		}
 
 		[TestMethod]
-		public void OnGameStart_CallsOnPredictionUpdate()
-		{
-			AddMetaDeck("Hunter");
-			var predictor = new Predictor(new MockOpponent("Mage"), _metaDecks.AsReadOnly());
-			bool called = false;
-			Action<Predictor> callback = x => { called = true; };
-			predictor.OnPredictionUpdate.Add(callback);
-
-			predictor.OnGameStart();
-			Assert.IsTrue(called);
-		}
-
-		[TestMethod]
-		public void OnOpponentPlay_MissingCardFiltersDeck()
+		public void CheckOpponentCards_MissingCardFiltersDeck()
 		{
 			var opponent = new MockOpponent("Hunter");
 			AddMetaDeck("Hunter");
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
 			opponent.KnownCards.Add(Database.GetCardFromName("Deadly Shot"));
-			predictor.OnOpponentPlay(null);
-			Assert.AreEqual(0, predictor.PossibleDecks.Count);
-		}
-
-		[TestMethod]
-		public void OnOpponentHandDiscard_MissingCardFiltersDeck()
-		{
-			var opponent = new MockOpponent("Hunter");
-			AddMetaDeck("Hunter");
-			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
-
-			opponent.KnownCards.Add(Database.GetCardFromName("Deadly Shot"));
-			predictor.OnOpponentHandDiscard(null);
+			predictor.CheckOpponentCards();
 			Assert.AreEqual(0, predictor.PossibleDecks.Count);
 		}
 
@@ -107,7 +72,7 @@ namespace DeckPredictorTests.Tests
 
 			opponent.KnownCards.Add(Database.GetCardFromName("Deadly Shot"));
 			opponent.KnownCards.Add(Database.GetCardFromName("Alleycat"));
-			predictor.OnOpponentPlay(null);
+			predictor.CheckOpponentCards();
 			Assert.AreEqual(0, predictor.PossibleDecks.Count);
 		}
 
@@ -120,7 +85,7 @@ namespace DeckPredictorTests.Tests
 
 			var hunterCard = Database.GetCardFromName("Deadly Shot");
 			opponent.KnownCards.Add(hunterCard);
-			predictor.OnOpponentPlay(null);
+			predictor.CheckOpponentCards();
 			Assert.AreEqual(1, predictor.PossibleDecks.Count);
 		}
 
@@ -134,7 +99,7 @@ namespace DeckPredictorTests.Tests
 			var hunterCard = Database.GetCardFromName("Deadly Shot");
 			hunterCard.IsCreated = true;
 			opponent.KnownCards.Add(hunterCard);
-			predictor.OnOpponentPlay(null);
+			predictor.CheckOpponentCards();
 			Assert.AreEqual(1, predictor.PossibleDecks.Count);
 		}
 
@@ -149,7 +114,7 @@ namespace DeckPredictorTests.Tests
 			hunterCard.IsCreated = true;
 			opponent.KnownCards.Add(hunterCard);
 			opponent.KnownCards.Add(Database.GetCardFromName("Deadly Shot"));
-			predictor.OnOpponentPlay(null);
+			predictor.CheckOpponentCards();
 			Assert.AreEqual(0, predictor.PossibleDecks.Count);
 		}
 
@@ -162,7 +127,7 @@ namespace DeckPredictorTests.Tests
 
 			var hunterCard = Database.GetCardFromName("Greater Emerald Spellstone");
 			opponent.KnownCards.Add(hunterCard);
-			predictor.OnOpponentPlay(null);
+			predictor.CheckOpponentCards();
 			Assert.AreEqual(1, predictor.PossibleDecks.Count);
 		}
 
@@ -176,7 +141,7 @@ namespace DeckPredictorTests.Tests
 			var hunterCard2Copies = Database.GetCardFromName("Deadly Shot");
 			hunterCard2Copies.Count = 2;
 			opponent.KnownCards.Add(hunterCard2Copies);
-			predictor.OnOpponentPlay(null);
+			predictor.CheckOpponentCards();
 			Assert.AreEqual(0, predictor.PossibleDecks.Count);
 		}
 
@@ -202,7 +167,6 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 
 			var predictor = new Predictor(new MockOpponent("Mage"), _metaDecks.AsReadOnly());
-			predictor.OnGameStart();
 			Assert.AreEqual(0, predictor.PredictedCards.Count);
 		}
 
@@ -214,7 +178,7 @@ namespace DeckPredictorTests.Tests
 			var opponent = new MockOpponent("Hunter");
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 			opponent.KnownCards.Add(Database.GetCardFromName("Savannah Highmane"));
-			predictor.OnOpponentPlay(null);
+			predictor.CheckOpponentCards();
 			Assert.AreEqual(0, predictor.PredictedCards.Count);
 		}
 
@@ -251,7 +215,7 @@ namespace DeckPredictorTests.Tests
 			var opponent = new MockOpponent("Hunter");
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 			opponent.KnownCards.Add(Database.GetCardFromName("Deadly Shot"));
-			predictor.OnOpponentPlay(null);
+			predictor.CheckOpponentCards();
 			Assert.AreEqual(2, predictor.PredictedCards.Count);
 			Assert.IsNotNull(predictor.GetPredictedCard(Key("Alleycat", 1)));
 			Assert.IsNotNull(predictor.GetPredictedCard(Key("Deadly Shot", 1)));
@@ -394,7 +358,7 @@ namespace DeckPredictorTests.Tests
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
 			opponent.KnownCards.Add(Database.GetCardFromName("Deadly Shot"));
-			predictor.OnOpponentPlay(null);
+			predictor.CheckOpponentCards();
 			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Deadly Shot", 1)).Probability, .01);
 		}
 	}

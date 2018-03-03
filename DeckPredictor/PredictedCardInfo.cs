@@ -37,12 +37,5 @@ namespace DeckPredictor
 		public string Key() => Key(Card, CopyCount);
 
 		public static string Key(Card card, int copyCount) => card.Id + copyCount;
-
-		public override string ToString()
-		{
-			return "[" + Card.Cost + "] " +
-				Card.Name + "(" + CopyCount + ")" +
-				" - " + Math.Truncate(Probability * 100) + "%";
-		}
 	}
 }

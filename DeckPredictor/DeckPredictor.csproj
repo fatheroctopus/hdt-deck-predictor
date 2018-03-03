@@ -59,9 +59,9 @@
   <ItemGroup>
     <Compile Include="IOpponent.cs" />
     <Compile Include="IPredictionView.cs" />
-    <Compile Include="IPredictor.cs" />
     <Compile Include="Opponent.cs" />
     <Compile Include="PredictedCardInfo.cs" />
+    <Compile Include="PredictionInfo.cs" />
     <Compile Include="PredictionLog.cs" />
     <Compile Include="PredictionController.cs" />
     <Compile Include="PredictionView.cs" />

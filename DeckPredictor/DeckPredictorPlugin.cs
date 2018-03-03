@@ -17,9 +17,9 @@ namespace DeckPredictor
 		public static readonly string DataDirectory = Path.Combine(Config.AppDataPath, "DeckPredictor");
 
 		private PluginConfig _config;
-		private Predictor _predictor;
-		private PredictionView _view;
 		private ReadOnlyCollection<Deck> _metaDecks;
+		private PredictionController _controller;
+		private PredictionView _view;
 		private PredictionLog _predictionLog;
 
 		public string Author
@@ -79,12 +79,10 @@ namespace DeckPredictor
 					{
 						Log.Info("Enabling DeckPredictor for " + format + " " + mode + " game");
 						var opponent = new Opponent(Hearthstone_Deck_Tracker.Core.Game.Opponent);
+						_controller = new PredictionController(opponent, _metaDecks);
 						_view.SetEnabled(true);
-						var controller = new PredictionController(opponent, _view);
-						_predictor = new Predictor(opponent, _metaDecks);
-						_predictor.OnPredictionUpdate.Add(_predictionLog.OnPredictionUpdate);
-						_predictor.OnPredictionUpdate.Add(controller.OnPredictionUpdate);
-						_predictor.OnGameStart();
+						_controller.OnPredictionUpdate.Add(_predictionLog.OnPredictionUpdate);
+						_controller.OnPredictionUpdate.Add(_view.OnPredictionUpdate);
 					}
 					else
 					{
@@ -93,41 +91,41 @@ namespace DeckPredictor
 				});
 			GameEvents.OnGameEnd.Add(() =>
 				{
-					if (_predictor != null)
+					if (_controller != null)
 					{
 						_view.SetEnabled(false);
 						Log.Debug("Disabling DeckPredictor for end of game");
 					}
-					_predictor = null;
+					_controller = null;
 				});
-			GameEvents.OnOpponentDraw.Add(() => _predictor?.OnOpponentDraw());
+			GameEvents.OnOpponentDraw.Add(() => _controller?.OnOpponentDraw());
 
 			// Events that reveal cards need a 100ms delay. This is because HDT takes some extra
 			// time to process all the tags we need, but it doesn't wait to send these callbacks.
 			int delayMs = 100;
 			GameEvents.OnOpponentPlay.Add(card =>
 				Task.Delay(delayMs)
-					.ContinueWith(_ => _predictor?.OnOpponentPlay(card))
+					.ContinueWith(_ => _controller?.OnOpponentPlay(card))
 					.Start());
 			GameEvents.OnOpponentHandDiscard.Add(card =>
 				Task.Delay(delayMs)
-					.ContinueWith(_ => _predictor?.OnOpponentHandDiscard(card))
+					.ContinueWith(_ => _controller?.OnOpponentHandDiscard(card))
 					.Start());
 			GameEvents.OnOpponentDeckDiscard.Add(card =>
 				Task.Delay(delayMs)
-					.ContinueWith(_ => _predictor?.OnOpponentDeckDiscard(card))
+					.ContinueWith(_ => _controller?.OnOpponentDeckDiscard(card))
 					.Start());
 			GameEvents.OnOpponentSecretTriggered.Add(card =>
 				Task.Delay(delayMs)
-					.ContinueWith(_ => _predictor?.OnOpponentSecretTriggered(card))
+					.ContinueWith(_ => _controller?.OnOpponentSecretTriggered(card))
 					.Start());
 			GameEvents.OnOpponentJoustReveal.Add(card =>
 				Task.Delay(delayMs)
-					.ContinueWith(_ => _predictor?.OnOpponentJoustReveal(card))
+					.ContinueWith(_ => _controller?.OnOpponentJoustReveal(card))
 					.Start());
 			GameEvents.OnOpponentDeckToPlay.Add(card =>
 				Task.Delay(delayMs)
-					.ContinueWith(_ => _predictor?.OnOpponentDeckToPlay(card))
+					.ContinueWith(_ => _controller?.OnOpponentDeckToPlay(card))
 					.Start());
 		}
 
