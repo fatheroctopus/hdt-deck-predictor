@@ -44,6 +44,9 @@
       <HintPath>..\..\Hearthstone-Deck-Tracker\Hearthstone Deck Tracker\bin\x86\Debug\HearthstoneDeckTracker.exe</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="MahApps.Metro">
+      <HintPath>..\..\Hearthstone-Deck-Tracker\Hearthstone Deck Tracker\bin\x86\Debug\MahApps.Metro.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -58,7 +61,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IOpponent.cs" />
-    <Compile Include="IPredictionView.cs" />
     <Compile Include="Opponent.cs" />
     <Compile Include="PredictedCardInfo.cs" />
     <Compile Include="PredictionInfo.cs" />
@@ -74,7 +76,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetDir)$(TargetName).dll" "C:\Users\Geoff\AppData\Roaming\HearthstoneDeckTracker\Plugins\DeckPredictor\$(TargetName).dll"</PostBuildEvent>
+    <PostBuildEvent>copy /Y "$(TargetDir)$(TargetName).dll" "C:\Users\Geoff\AppData\Roaming\HearthstoneDeckTracker\Plugins\DeckPredictor\$(TargetName).dll"
+copy /Y "$(TargetDir)$(TargetName).pdb" "C:\Users\Geoff\AppData\Roaming\HearthstoneDeckTracker\Plugins\DeckPredictor\$(TargetName).pdb"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

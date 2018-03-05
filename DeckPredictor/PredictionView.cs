@@ -12,7 +12,7 @@ using Hearthstone_Deck_Tracker.Controls;
 
 namespace DeckPredictor
 {
-	public class PredictionView : IPredictionView
+	public class PredictionView
 	{
 		private AnimatedCardList _cardList = new AnimatedCardList();
 
