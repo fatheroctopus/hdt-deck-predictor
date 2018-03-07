@@ -28,15 +28,11 @@ namespace DeckPredictor
 		public void AddCardInfo(Card card, List<double> probabilities, int numPlayed) =>
 			_cardInfos.Add(new CardInfo(card, probabilities, numPlayed));
 
+		public List<CardInfo> PredictedCards => _cardInfos;
+
 		public List<Card> UnplayedCards =>
-			_cardInfos.Select(cardInfo =>
-				{
-					var card = Database.GetCardFromId(cardInfo.Card.Id);
-					card.Count = cardInfo.Probabilities.Count - cardInfo.NumPlayed;
-					return card;
-				})
-				.Where(card => card.Count > 0)
-				.ToList();
+			_cardInfos.Select(cardInfo => cardInfo.GetCardWithUnplayedCount())
+				.Where(card => card.Count > 0).ToList();
 
 		public void WritePrediction(TextWriter writer)
 		{
@@ -56,7 +52,7 @@ namespace DeckPredictor
 			// }
 		}
 
-		private class CardInfo
+		public class CardInfo
 		{
 			public Card Card { get; }
 			public List<double> Probabilities { get; }
@@ -69,7 +65,21 @@ namespace DeckPredictor
 				NumPlayed = numPlayed;
 			}
 
+			public Card GetCardWithUnplayedCount()
+			{
+				var card = Database.GetCardFromId(Card.Id);
+				card.Count = Probabilities.Count - NumPlayed;
+				return card;
+			}
+
 			public override string ToString()
+			{
+				return "[" + Card.Cost + "] " +
+					Card.Name + "(" + Probabilities.Count + ")" +
+					" - " + GetPercentageString();
+			}
+
+			public string GetPercentageString()
 			{
 				List<string> probStrings = new List<string>();
 				for (int n = 0; n < Probabilities.Count; n++)
@@ -77,10 +87,7 @@ namespace DeckPredictor
 					probStrings.Add(n + 1 <= NumPlayed ? "XX"
 						: Math.Truncate(Probabilities[n] * 100) + "%");
 				}
-
-				return "[" + Card.Cost + "] " +
-					Card.Name + "(" + Probabilities.Count + ")" +
-					" - " + String.Join(" / ", probStrings);
+				return String.Join(" / ", probStrings);
 			}
 		}
 	}

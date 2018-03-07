@@ -37,11 +37,9 @@ namespace DeckPredictor
 
 		public void OnPredictionUpdate(PredictionInfo prediction)
 		{
-			var cards = prediction.UnplayedCards;
 			_layout.Dispatcher.Invoke(() =>
 				{
-					_layout.Visibility = cards.Count <= 0 ? Visibility.Hidden : Visibility.Visible;
-					_layout.Update(cards);
+					_layout.Update(prediction);
 				});
 		}
 	}
