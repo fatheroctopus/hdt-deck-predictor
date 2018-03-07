@@ -1,0 +1,14 @@
+<UserControl x:Class="DeckPredictor.PredictionLayout"
+						 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+						 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+						 xmlns:controls="clr-namespace:Hearthstone_Deck_Tracker.Controls;assembly=HearthstoneDeckTracker"
+						 Height="Auto" Width="Auto"
+						 Background="Transparent">
+		<StackPanel Name="StackPanelMain" Orientation="Horizontal" Margin="0,1,0,0">
+				<controls:AnimatedCardList x:Name="CardList" Background="Transparent" BorderThickness="0"
+										ScrollViewer.HorizontalScrollBarVisibility="Disabled" Width="221"
+										ScrollViewer.VerticalScrollBarVisibility="Disabled" IsEnabled="False"
+										ScrollViewer.CanContentScroll="False">
+				</controls:AnimatedCardList>
+		</StackPanel>
+</UserControl>

@@ -67,12 +67,19 @@
     <Compile Include="PredictionLog.cs" />
     <Compile Include="PredictionController.cs" />
     <Compile Include="PredictionView.cs" />
+    <Compile Include="PredictionLayout.xaml.cs" />
     <Compile Include="Predictor.cs" />
     <Compile Include="MetaRetriever.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="PluginConfig.cs" />
     <Compile Include="DeckPredictorPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="PredictionLayout.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
