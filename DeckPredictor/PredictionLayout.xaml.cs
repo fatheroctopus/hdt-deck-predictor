@@ -23,7 +23,7 @@ namespace DeckPredictor
 
 		public void Update(PredictionInfo prediction)
 		{
-			var cardInfos = prediction.PredictedCards;
+			var cardInfos = prediction.CardInfos;
 			List<Card> cards = cardInfos.Select(cardInfo => cardInfo.GetCardWithUnplayedCount()).ToList();
 			Visibility = cards.Count <= 0 ? Visibility.Hidden : Visibility.Visible;
 			CardList.Update(cards, true);

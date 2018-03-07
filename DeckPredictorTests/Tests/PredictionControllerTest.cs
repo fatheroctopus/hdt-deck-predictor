@@ -43,6 +43,11 @@ namespace DeckPredictorTests.Tests
 				.ToList();
 		}
 
+		private List<Card> CardsFromInfo(PredictionInfo info)
+		{
+			return info.CardInfos.Select(i => i.Card).ToList();
+		}
+
 		private PredictionInfo GetPredictionInfo(PredictionController controller)
 		{
 			PredictionInfo info = null;
@@ -110,7 +115,7 @@ namespace DeckPredictorTests.Tests
 
 			var info = GetPredictionInfo(controller);
 			CollectionAssert.AreEqual(CardList(new List<string> {"Deadly Shot", "Alleycat", "Bear Trap"}),
-				info.UnplayedCards);
+				CardsFromInfo(info));
 		}
 
 		[TestMethod]
@@ -137,45 +142,74 @@ namespace DeckPredictorTests.Tests
 			var expectedCardList = CardList(
 				new List<string> {"Alleycat", "Deadly Shot", "Bear Trap"},
 				new List<int> {1, 2, 1});
-			CollectionAssert.AreEqual(expectedCardList, info.UnplayedCards);
+			CollectionAssert.AreEqual(expectedCardList, CardsFromInfo(info));
 		}
 
 		[TestMethod]
-		public void RemovesCardsAlreadyPlayed()
+		public void MarksCardsAlreadyPlayed()
 		{
 			var opponent = new MockOpponent("Hunter");
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat", "Bear Trap"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
 			opponent.KnownCards = CardList(new List<string> {"Alleycat"});
 			var info = GetPredictionInfo(controller);
-			CollectionAssert.AreEqual(CardList(new List<string> {"Deadly Shot", "Bear Trap"}),
-				info.UnplayedCards);
+			Assert.AreEqual(1, info.CardInfos[0].NumPlayed);
 		}
 
 		[TestMethod]
-		public void OnPredictionUpdate_DoesNotRemoveCreatedCards()
+		public void AddsInCardsNotInMetaDecks()
 		{
 			var opponent = new MockOpponent("Hunter");
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat", "Bear Trap"});
+			AddMetaDeck("Hunter", new List<string> {});
+			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
+			opponent.KnownCards = CardList(new List<string> {"Alleycat"});
+			var info = GetPredictionInfo(controller);
+			CollectionAssert.AreEqual(CardList(new List<string> {"Alleycat"}), CardsFromInfo(info));
+			Assert.AreEqual(1, info.CardInfos[0].NumPlayed);
+		}
+
+		[TestMethod]
+		public void SeparateEntriesForCreatedCards()
+		{
+			var opponent = new MockOpponent("Hunter");
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
 			opponent.KnownCards = CardList(new List<string> {"Alleycat"});
 			opponent.KnownCards[0].IsCreated = true;
 			var info = GetPredictionInfo(controller);
-			CollectionAssert.AreEqual(CardList(new List<string> {"Alleycat", "Deadly Shot", "Bear Trap"}),
-				info.UnplayedCards);
+			Assert.AreEqual(2, info.CardInfos.Count);
+			var createdCardInfo = info.CardInfos[0];
+			Assert.AreEqual(1, createdCardInfo.NumPlayed);
+			Assert.AreEqual(1, createdCardInfo.Card.Count);
+			Assert.IsTrue(createdCardInfo.Card.IsCreated);
+			var originalCardInfo = info.CardInfos[1];
+			Assert.AreEqual(0, originalCardInfo.NumPlayed);
+			Assert.AreEqual(1, originalCardInfo.Card.Count);
+			Assert.IsFalse(originalCardInfo.Card.IsCreated);
 		}
 
 		[TestMethod]
-		public void OnPredictionUpdate_DoesNotRemoveJoustedCards()
+		public void SortEntriesByManaCost()
 		{
 			var opponent = new MockOpponent("Hunter");
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat", "Bear Trap"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
+			opponent.KnownCards = CardList(new List<string> {"Bear Trap"});
+			opponent.KnownCards[0].IsCreated = true;
+			var info = GetPredictionInfo(controller);
+			Assert.AreEqual("Alleycat", info.CardInfos[0].Card.Name);
+		}
+
+		[TestMethod]
+		public void DoesNotAddJoustedCards()
+		{
+			var opponent = new MockOpponent("Hunter");
+			AddMetaDeck("Hunter", new List<string> {});
 			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
 			opponent.KnownCards = CardList(new List<string> {"Alleycat"});
 			opponent.KnownCards[0].Jousted = true;
 			var info = GetPredictionInfo(controller);
-			CollectionAssert.AreEqual(CardList(new List<string> {"Alleycat", "Deadly Shot", "Bear Trap"}),
-				info.UnplayedCards);
+			Assert.AreEqual(0, info.CardInfos.Count);
 		}
 	}
 }

@@ -11,28 +11,20 @@ namespace DeckPredictor
 {
 	public class PredictionInfo
 	{
-		private List<CardInfo> _cardInfos { get; } = new List<CardInfo>();
-
-		public PredictionInfo(int numPossibleDecks, int numPossibleCards)
+		public PredictionInfo(int numPossibleDecks, int numPossibleCards, List<CardInfo> cardInfos)
 		{
 			NumPossibleDecks = numPossibleDecks;
 			NumPossibleCards = numPossibleCards;
+			CardInfos = cardInfos;
 		}
 
 		public int NumPossibleDecks { get; }
 
 		public int NumPossibleCards { get; }
 
-		public int NumPredictedCards => _cardInfos.Sum(cardInfo => cardInfo.Probabilities.Count);
+		public List<CardInfo> CardInfos { get; }
 
-		public void AddCardInfo(Card card, List<double> probabilities, int numPlayed) =>
-			_cardInfos.Add(new CardInfo(card, probabilities, numPlayed));
-
-		public List<CardInfo> PredictedCards => _cardInfos;
-
-		public List<Card> UnplayedCards =>
-			_cardInfos.Select(cardInfo => cardInfo.GetCardWithUnplayedCount())
-				.Where(card => card.Count > 0).ToList();
+		public int NumPredictedCards => CardInfos.Sum(cardInfo => cardInfo.Probabilities.Count);
 
 		public void WritePrediction(TextWriter writer)
 		{
@@ -41,7 +33,7 @@ namespace DeckPredictor
 			writer.WriteLine("");
 
 			writer.WriteLine(NumPredictedCards + " predicted cards:");
-			_cardInfos.ForEach(cardInfo => writer.WriteLine(cardInfo.ToString()));
+			CardInfos.ForEach(cardInfo => writer.WriteLine(cardInfo.ToString()));
 			// writer.WriteLine("");
 
 			// var nextPredictedCards = predictor.GetNextPredictedCards(3);
@@ -64,6 +56,8 @@ namespace DeckPredictor
 				Probabilities = probabilities;
 				NumPlayed = numPlayed;
 			}
+
+			public CardInfo(Card card, int numPlayed) : this(card, new List<double>(), numPlayed) {}
 
 			public Card GetCardWithUnplayedCount()
 			{
