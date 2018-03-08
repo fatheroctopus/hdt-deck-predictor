@@ -30,7 +30,10 @@ namespace DeckPredictor
 			var items = cardInfos.Select(cardInfo =>
 				{
 					var item = new PercentageItem();
-					item.Percentage = cardInfo.GetPercentageString();
+					string percentageString = cardInfo.NumPlayed < cardInfo.Probabilities.Count
+						? Math.Truncate(cardInfo.Probabilities[cardInfo.NumPlayed] * 100) + "%"
+						: "";
+					item.Percentage = percentageString;
 					return item;
 				}).ToList();
 			PercentageList.ItemsSource = items;

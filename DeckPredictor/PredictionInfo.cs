@@ -73,7 +73,7 @@ namespace DeckPredictor
 					" - " + GetPercentageString();
 			}
 
-			public string GetPercentageString()
+			private string GetPercentageString()
 			{
 				List<string> probStrings = new List<string>();
 				for (int n = 0; n < Probabilities.Count; n++)
