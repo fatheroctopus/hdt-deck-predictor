@@ -25,7 +25,7 @@ namespace DeckPredictorTests.Tests
 		private string Key(string cardName, int copyCount)
 		{
 			var card = Database.GetCardFromName(cardName);
-			return PredictedCardInfo.Key(card, copyCount);
+			return Predictor.CardInfo.Key(card, copyCount);
 		}
 
 		[TestMethod]
@@ -239,7 +239,7 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-			PredictedCardInfo firstPredictedCard = predictor.PredictedCards.ElementAt(0);
+			var firstPredictedCard = predictor.PredictedCards.ElementAt(0);
 			Assert.AreEqual("Alleycat", firstPredictedCard.Card.Name);
 		}
 
@@ -249,7 +249,7 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-			PredictedCardInfo firstPredictedCard = predictor.PredictedCards.ElementAt(1);
+			var firstPredictedCard = predictor.PredictedCards.ElementAt(1);
 			Assert.AreEqual("Bear Trap", firstPredictedCard.Card.Name);
 		}
 
@@ -275,6 +275,19 @@ namespace DeckPredictorTests.Tests
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
 			// All the Deadly Shots are at the same probability, so don't include any of them.
 			Assert.AreEqual(1, predictor.PredictedCards.Count);
+		}
+
+		[TestMethod]
+		public void GetPredictedCards_DoesNotIncludeCardsBelowThreshold()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			// Deadly Shot only has 33% chance, not included.
+			Assert.AreEqual(1, predictor.PredictedCards.Count);
+			Assert.AreEqual("Alleycat", predictor.PredictedCards[0].Card.Name);
 		}
 
 		[TestMethod]
@@ -328,7 +341,7 @@ namespace DeckPredictorTests.Tests
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Deadly Shot", 1)).Probability, .01);
+			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Deadly Shot", 1)).Probability);
 		}
 
 		[TestMethod]
@@ -337,7 +350,7 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-			Assert.AreEqual(.5, predictor.GetPredictedCard(Key("Deadly Shot", 1)).Probability, .01);
+			Assert.AreEqual(.5m, predictor.GetPredictedCard(Key("Deadly Shot", 1)).Probability);
 		}
 
 		[TestMethod]
@@ -346,7 +359,7 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Alleycat", 1)).Probability, .01);
+			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Alleycat", 1)).Probability);
 		}
 
 		[TestMethod]
@@ -359,7 +372,7 @@ namespace DeckPredictorTests.Tests
 
 			opponent.KnownCards.Add(Database.GetCardFromName("Deadly Shot"));
 			predictor.CheckOpponentCards();
-			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Deadly Shot", 1)).Probability, .01);
+			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Deadly Shot", 1)).Probability);
 		}
 	}
 }

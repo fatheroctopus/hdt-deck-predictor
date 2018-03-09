@@ -47,17 +47,17 @@ namespace DeckPredictor
 		public class CardInfo
 		{
 			public Card Card { get; }
-			public List<double> Probabilities { get; }
+			public List<decimal> Probabilities { get; }
 			public int NumPlayed { get; }
 
-			public CardInfo(Card card, List<double> probabilities, int numPlayed)
+			public CardInfo(Card card, List<decimal> probabilities, int numPlayed)
 			{
 				Card = card;
 				Probabilities = probabilities;
 				NumPlayed = numPlayed;
 			}
 
-			public CardInfo(Card card, int numPlayed) : this(card, new List<double>(), numPlayed) {}
+			public CardInfo(Card card, int numPlayed) : this(card, new List<decimal>(), numPlayed) {}
 
 			public Card GetCardWithUnplayedCount()
 			{

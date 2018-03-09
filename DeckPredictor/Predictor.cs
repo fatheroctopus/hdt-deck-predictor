@@ -14,14 +14,15 @@ namespace DeckPredictor
 {
 	public class Predictor
 	{
-		public static readonly int DeckSize = 30;
-		private static readonly double Epsilon = .00001;
+		private const int DeckSize = 30;
+		// We never show cards below this probability.
+		private const decimal ProbabilityHardCutoff = .4m;
 
 		private List<Deck> _possibleDecks;
-		private Dictionary<string, PredictedCardInfo> _possibleCards =
-			new Dictionary<string, PredictedCardInfo>();
-		private List<PredictedCardInfo> _predictedCards;
-		private List<PredictedCardInfo> _nextPredictedCards;
+		private Dictionary<string, CardInfo> _possibleCards =
+			new Dictionary<string, CardInfo>();
+		private List<CardInfo> _predictedCards;
+		private List<CardInfo> _nextPredictedCards;
 		private IOpponent _opponent;
 		private bool _classDetected;
 
@@ -37,23 +38,23 @@ namespace DeckPredictor
 			new ReadOnlyCollection<Deck>(_possibleDecks);
 
 		// List of all possible cards that could be in the opponent's deck
-		public ICollection<PredictedCardInfo> PossibleCards => _possibleCards.Values;
+		public ICollection<CardInfo> PossibleCards => _possibleCards.Values;
 
 		// Sorted list of most likeley cards to be in opponent's deck, under the deck limit.
-		public List<PredictedCardInfo> PredictedCards => new List<PredictedCardInfo>(_predictedCards);
+		public List<CardInfo> PredictedCards => new List<CardInfo>(_predictedCards);
 
 		// Sorted list of the next most likely cards after the top 30 cutoff.
-		public ReadOnlyCollection<PredictedCardInfo> GetNextPredictedCards(int numCards) =>
-			new ReadOnlyCollection<PredictedCardInfo>(_nextPredictedCards.Take(numCards).ToList());
+		public ReadOnlyCollection<CardInfo> GetNextPredictedCards(int numCards) =>
+			new ReadOnlyCollection<CardInfo>(_nextPredictedCards.Take(numCards).ToList());
 
 		// Returns null if the given card and copyCount have no chance to be in the opponent's deck.
-		public PredictedCardInfo GetPredictedCard(Card card, int copyCount)
+		public CardInfo GetPredictedCard(Card card, int copyCount)
 		{
-			string key = PredictedCardInfo.Key(card, copyCount);
+			string key = CardInfo.Key(card, copyCount);
 			return GetPredictedCard(key);
 		}
 
-		public PredictedCardInfo GetPredictedCard(string key)
+		public CardInfo GetPredictedCard(string key)
 		{
 			if (_possibleCards.ContainsKey(key))
 			{
@@ -137,10 +138,10 @@ namespace DeckPredictor
 				{
 					for (int copyCount = 1; copyCount <= card.Count; copyCount++)
 					{
-						var key = PredictedCardInfo.Key(card, copyCount);
+						var key = CardInfo.Key(card, copyCount);
 						if (!_possibleCards.ContainsKey(key))
 						{
-							var predictedCard = new PredictedCardInfo(card, copyCount, _possibleDecks.Count);
+							var predictedCard = new CardInfo(card, copyCount, _possibleDecks.Count);
 							_possibleCards[key] = predictedCard;
 						}
 						_possibleCards[key].IncrementNumOccurrences();
@@ -156,12 +157,13 @@ namespace DeckPredictor
 			// If our list is greater than the Deck Size, take the probability of the first card that won't
 			// make the cut.  All other cards we predict have to be strictly greater than that probability.
 			// We do this so none of the top 30 are there for an arbitrary reason.
-			double cutOffProbability = _nextPredictedCards.Count > DeckSize
-				? _nextPredictedCards.ElementAt(DeckSize).Probability + Epsilon
+			decimal insufficientProbability = _nextPredictedCards.Count > DeckSize
+				? _nextPredictedCards.ElementAt(DeckSize).Probability
 				: 0;
 			_predictedCards = _nextPredictedCards
 				.Take(DeckSize)
-				.TakeWhile(predictedCard => predictedCard.Probability > cutOffProbability)
+				.TakeWhile(predictedCard => predictedCard.Probability > insufficientProbability &&
+					predictedCard.Probability >= ProbabilityHardCutoff)
 				.OrderBy(predictedCard => predictedCard.Card.Cost)
 				.ThenBy(predictedCard => predictedCard.Card.Name)
 				.ToList();
@@ -173,6 +175,36 @@ namespace DeckPredictor
 			Log.Debug(_predictedCards.Count + " predicted cards");
 		}
 
+		public class CardInfo
+		{
+			private int _numOccurrences;
+			private int _numPossibleDecks;
+
+			public CardInfo(Card card, int copyCount, int numPossibleDecks)
+			{
+				Card = card;
+				CopyCount = copyCount;
+				_numOccurrences = 0;
+				_numPossibleDecks = numPossibleDecks;
+			}
+
+			public Card Card { get; }
+
+			// Track each copy of a card separately in the deck.
+			// This is 1-indexed to mirror Card.Count
+			public int CopyCount { get; }
+
+			public void IncrementNumOccurrences()
+			{
+				_numOccurrences++;
+			}
+
+			public decimal Probability => (decimal)_numOccurrences / _numPossibleDecks;
+
+			public string Key() => Key(Card, CopyCount);
+
+			public static string Key(Card card, int copyCount) => card.Id + copyCount;
+		}
 	}
 
 }
