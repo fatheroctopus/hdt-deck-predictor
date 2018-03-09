@@ -185,9 +185,8 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void GetPredictedCards_CombinesContentsOfTwoDecks()
 		{
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
-			AddMetaDeck("Hunter", new List<string> {"Arcane Shot", "Bear Trap"});
-
+			AddMetaDeck("Hunter", new List<string> {"Hunter's Mark", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Arcane Shot", "Tracking"});
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
 			Assert.AreEqual(4, predictor.PredictedCards.Count);
 		}
@@ -195,9 +194,8 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void GetPredictedCards_UnionOfTwoDecks()
 		{
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
-			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
-
+			AddMetaDeck("Hunter", new List<string> {"Hunter's Mark", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Tracking"});
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
 			Assert.AreEqual(3, predictor.PredictedCards.Count);
 			// First copy of Alleycat.
@@ -209,23 +207,23 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void GetPredictedCards_SameAsFirstDeckAfterSecondFiltered()
 		{
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
-			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
+			AddMetaDeck("Hunter", new List<string> {"Hunter's Mark", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Tracking"});
 
 			var opponent = new MockOpponent("Hunter");
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
-			opponent.KnownCards.Add(Database.GetCardFromName("Deadly Shot"));
+			opponent.KnownCards.Add(Database.GetCardFromName("Tracking"));
 			predictor.CheckOpponentCards();
 			Assert.AreEqual(2, predictor.PredictedCards.Count);
 			Assert.IsNotNull(predictor.GetPredictedCard(Key("Alleycat", 1)));
-			Assert.IsNotNull(predictor.GetPredictedCard(Key("Deadly Shot", 1)));
+			Assert.IsNotNull(predictor.GetPredictedCard(Key("Tracking", 1)));
 		}
 
 		[TestMethod]
 		public void GetPredictedCards_UnionTakesHigherCardCount()
 		{
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
-			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
+			AddMetaDeck("Hunter", new List<string> {"Hunter's Mark", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Tracking"});
 			_metaDecks[1].Cards[0].Count = 2;
 
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
@@ -236,8 +234,8 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void GetPredictedCards_SortedByDescendingProbability()
 		{
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
-			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
+			AddMetaDeck("Hunter", new List<string> {"Hunter's Mark", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Tracking"});
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
 			var firstPredictedCard = predictor.PredictedCards.ElementAt(0);
 			Assert.AreEqual("Alleycat", firstPredictedCard.Card.Name);
@@ -246,18 +244,20 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void GetPredictedCards_SortedSecondaryByLowerManaCost()
 		{
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
-			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
-			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			AddMetaDeck("Hunter", new List<string> {"Bear Trap", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Tracking"});
+			var opponent = new MockOpponent("Hunter");
+			opponent.AvailableManaNextTurn = 2;
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 			var firstPredictedCard = predictor.PredictedCards.ElementAt(1);
-			Assert.AreEqual("Bear Trap", firstPredictedCard.Card.Name);
+			Assert.AreEqual("Tracking", firstPredictedCard.Card.Name);
 		}
 
 		[TestMethod]
 		public void GetPredictedCards_ReturnsNoMoreThanDeckSize()
 		{
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			AddMetaDeck("Hunter", new List<string> {"Tracking", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Tracking"});
 			_metaDecks[0].Cards[0].Count = 30;
 			_metaDecks[1].Cards[0].Count = 30;
 
@@ -268,7 +268,7 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void GetPredictedCards_GreaterThanDeckSizeIfAtSameProbability()
 		{
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			AddMetaDeck("Hunter", new List<string> {"Tracking"});
 			_metaDecks[0].Cards[0].Count = 40;
 
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
@@ -310,7 +310,7 @@ namespace DeckPredictorTests.Tests
 			{
 				AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			}
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Tracking", "Alleycat"});
 			var opponent = new MockOpponent("Hunter");
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 			// Deadly Shot only has a 10% chance and won't be included.
@@ -373,25 +373,25 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void GetPredictedCard_ProbabilityIsOneForSinglePossibleDeck()
 		{
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Tracking", "Alleycat"});
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Deadly Shot", 1)).Probability);
+			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Tracking", 1)).Probability);
 		}
 
 		[TestMethod]
 		public void GetPredictedCard_ProbabilityIsHalfForOneOfTwoDecks()
 		{
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
-			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
+			AddMetaDeck("Hunter", new List<string> {"Hunter's Mark", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Tracking"});
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-			Assert.AreEqual(.5m, predictor.GetPredictedCard(Key("Deadly Shot", 1)).Probability);
+			Assert.AreEqual(.5m, predictor.GetPredictedCard(Key("Tracking", 1)).Probability);
 		}
 
 		[TestMethod]
 		public void GetPredictedCard_ProbabilityIsOneWhenInBothDecks()
 		{
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
-			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
+			AddMetaDeck("Hunter", new List<string> {"Hunter's Mark", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Tracking"});
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
 			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Alleycat", 1)).Probability);
 		}
@@ -399,14 +399,14 @@ namespace DeckPredictorTests.Tests
 		[TestMethod]
 		public void GetPredictedCard_ProbabilityReturnsToOneAfterSecondDeckFiltered()
 		{
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
-			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
+			AddMetaDeck("Hunter", new List<string> {"Hunter's Mark", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Tracking"});
 			var opponent = new MockOpponent("Hunter");
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
-			opponent.KnownCards.Add(Database.GetCardFromName("Deadly Shot"));
+			opponent.KnownCards.Add(Database.GetCardFromName("Tracking"));
 			predictor.CheckOpponentCards();
-			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Deadly Shot", 1)).Probability);
+			Assert.AreEqual(1, predictor.GetPredictedCard(Key("Tracking", 1)).Probability);
 		}
 	}
 }

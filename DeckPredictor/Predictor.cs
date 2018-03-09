@@ -15,10 +15,11 @@ namespace DeckPredictor
 	public class Predictor
 	{
 		private const int DeckSize = 30;
-		// We only show cards below this probability if they are playable next turn by the opponent.
-		private const decimal ProbabilitySoftCutoff = .7m;
+		// We only show cards below this probability if their cost is close to the opponent's available mana
+		// next turn.
+		private const decimal ProbabilitySoftCutoff = .65m;
 		// We never show cards below this probability.
-		private const decimal ProbabilityHardCutoff = .2m;
+		private const decimal ProbabilityHardCutoff = .30m;
 
 		private List<Deck> _possibleDecks;
 		private Dictionary<string, CardInfo> _possibleCards =
@@ -190,9 +191,11 @@ namespace DeckPredictor
 			_nextPredictedCards = new List<CardInfo>();
 			sortedPossibleCards.Skip(_predictedCards.Count).ToList().ForEach(possibleCard =>
 				{
-					// Cards are only added if the opponent can play it on their next turn.
+					// A speculative card is only added if the opponent can play it on their next turn,
+					// spending all their mana or with one left over.
 					// Go until the deck is filled, but include all cards at the same probability.
 					if (possibleCard.Card.Cost <= _availableMana &&
+						possibleCard.Card.Cost >= _availableMana - 1 &&
 						possibleCard.Probability >= ProbabilityHardCutoff &&
 						(_predictedCards.Count < DeckSize || possibleCard.Probability >= lastPickProbability))
 					{

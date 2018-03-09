@@ -16,9 +16,7 @@ namespace DeckPredictorTests.Mocks
 		{
 			Class = className;
 			KnownCards = new List<Card>();
-
-			// Default to all cards being playable.
-			AvailableManaNextTurn = 10;
+			AvailableManaNextTurn = 1;
 		}
 
 		public string Class { get; set; }
