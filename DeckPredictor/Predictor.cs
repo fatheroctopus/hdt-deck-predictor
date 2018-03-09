@@ -15,8 +15,10 @@ namespace DeckPredictor
 	public class Predictor
 	{
 		private const int DeckSize = 30;
+		// We only show cards below this probability if they are playable next turn by the opponent.
+		private const decimal ProbabilitySoftCutoff = .7m;
 		// We never show cards below this probability.
-		private const decimal ProbabilityHardCutoff = .4m;
+		private const decimal ProbabilityHardCutoff = .2m;
 
 		private List<Deck> _possibleDecks;
 		private Dictionary<string, CardInfo> _possibleCards =
@@ -43,7 +45,7 @@ namespace DeckPredictor
 		// Sorted list of most likeley cards to be in opponent's deck, under the deck limit.
 		public List<CardInfo> PredictedCards => new List<CardInfo>(_predictedCards);
 
-		// Sorted list of the next most likely cards after the top 30 cutoff.
+		// Sorted list of the next most likely cards not in the current prediction.
 		public ReadOnlyCollection<CardInfo> GetNextPredictedCards(int numCards) =>
 			new ReadOnlyCollection<CardInfo>(_nextPredictedCards.Take(numCards).ToList());
 
@@ -151,25 +153,50 @@ namespace DeckPredictor
 
 			// Prediction
 			// First sort possible cards by probability
-			_nextPredictedCards = _possibleCards.Values
+			var sortedPossibleCards = _possibleCards.Values
 				.OrderByDescending(predictedCard => predictedCard.Probability)
-				.ToList();
-			// If our list is greater than the Deck Size, take the probability of the first card that won't
-			// make the cut.  All other cards we predict have to be strictly greater than that probability.
-			// We do this so none of the top 30 are there for an arbitrary reason.
-			decimal insufficientProbability = _nextPredictedCards.Count > DeckSize
-				? _nextPredictedCards.ElementAt(DeckSize).Probability
-				: 0;
-			_predictedCards = _nextPredictedCards
-				.Take(DeckSize)
-				.TakeWhile(predictedCard => predictedCard.Probability > insufficientProbability &&
-					predictedCard.Probability >= ProbabilityHardCutoff)
-				.OrderBy(predictedCard => predictedCard.Card.Cost)
+				.ThenBy(predictedCard => predictedCard.Card.Cost)
 				.ThenBy(predictedCard => predictedCard.Card.Name)
 				.ToList();
 
-			// Shave off the cards we moved to _predictedCards from our _nextPredictedCards
-			_nextPredictedCards.RemoveRange(0, _predictedCards.Count);
+			// If our list is greater than the Deck Size, find the probability of the first card that won't
+			// make the cut.  All other cards we predict have to be strictly greater than that probability.
+			// We do this so none of the top 30 are there for an arbitrary reason.
+			// Additionally, each card must make the soft cutoff to get an automatic include.
+			decimal insufficientProbability = sortedPossibleCards.Count > DeckSize
+				? sortedPossibleCards.ElementAt(DeckSize).Probability
+				: 0;
+			_predictedCards = sortedPossibleCards
+				.TakeWhile(predictedCard => predictedCard.Probability > insufficientProbability &&
+					predictedCard.Probability >= ProbabilitySoftCutoff &&
+					predictedCard.Probability >= ProbabilityHardCutoff)
+				.ToList();
+
+			// Now go through the remaining possible cards to fill out the deck with picks.
+			decimal lastPickProbability = 1;
+			_nextPredictedCards = new List<CardInfo>();
+			int manaNextTurn = _opponent.AvailableManaNextTurn;
+			Log.Debug("manaNextTurn: " + manaNextTurn);
+			sortedPossibleCards.Skip(_predictedCards.Count).ToList().ForEach(possibleCard =>
+				{
+					// Cards are only added if the opponent can play it on their next turn.
+					// Go until the deck is filled, but include all cards at the same probability.
+					if (possibleCard.Card.Cost <= manaNextTurn &&
+						possibleCard.Probability >= ProbabilityHardCutoff &&
+						(_predictedCards.Count < DeckSize || possibleCard.Probability >= lastPickProbability))
+					{
+						_predictedCards.Add(possibleCard);
+						lastPickProbability = possibleCard.Probability;
+					}
+					else
+					{
+						_nextPredictedCards.Add(possibleCard);
+					}
+				});
+			_predictedCards = _predictedCards
+				.OrderBy(predictedCard => predictedCard.Card.Cost)
+				.ThenBy(predictedCard => predictedCard.Card.Name)
+				.ToList();
 
 			Log.Debug(_possibleCards.Count + " possible cards");
 			Log.Debug(_predictedCards.Count + " predicted cards");

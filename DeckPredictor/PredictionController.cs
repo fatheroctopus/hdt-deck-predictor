@@ -1,4 +1,5 @@
-﻿using Hearthstone_Deck_Tracker.Hearthstone;
+﻿using Hearthstone_Deck_Tracker.Enums;
+using Hearthstone_Deck_Tracker.Hearthstone;
 using Hearthstone_Deck_Tracker.Utility.Extensions;
 using Hearthstone_Deck_Tracker.Utility.Logging;
 using Hearthstone_Deck_Tracker;
@@ -28,6 +29,13 @@ namespace DeckPredictor
 		public void OnOpponentDraw()
 		{
 			_predictor.CheckOpponentClass();
+			UpdatePrediction();
+		}
+
+		public void OnTurnStart(ActivePlayer player)
+		{
+			Log.Debug("OnTurnStart: " + player);
+			_predictor.CheckOpponentCards();
 			UpdatePrediction();
 		}
 

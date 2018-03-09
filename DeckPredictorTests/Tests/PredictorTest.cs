@@ -266,26 +266,39 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
-		public void GetPredictedCards_LessThanDeckSizeIfAtSameProbability()
+		public void GetPredictedCards_GreaterThanDeckSizeIfAtSameProbability()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			_metaDecks[0].Cards[0].Count = 40;
+
+			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			// All the Deadly Shots are at the same probability, so include them all.
+			Assert.AreEqual(40, predictor.PredictedCards.Count);
+		}
+
+		[TestMethod]
+		public void GetPredictedCards_LessThanDeckSizeIfAtSameProbabilityAndTooExpensive()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			_metaDecks[1].Cards[0].Count = 40;
-
-			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-			// All the Deadly Shots are at the same probability, so don't include any of them.
+			var opponent = new MockOpponent("Hunter");
+			opponent.AvailableManaNextTurn = 1;
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+			// All the Deadly Shots are at the same probability and can't yet be played,
+			// so don't include any of them.
 			Assert.AreEqual(1, predictor.PredictedCards.Count);
 		}
 
 		[TestMethod]
-		public void GetPredictedCards_DoesNotIncludeCardsBelowThreshold()
+		public void GetPredictedCards_DoesNotIncludeCardsBelowThresholdIfNotPlayableYet()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
-			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
-
-			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
-			// Deadly Shot only has 33% chance, not included.
+			var opponent = new MockOpponent("Hunter");
+			opponent.AvailableManaNextTurn = 1;
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+			// Deadly Shot only has a 50% chance and can't be played next turn.
 			Assert.AreEqual(1, predictor.PredictedCards.Count);
 			Assert.AreEqual("Alleycat", predictor.PredictedCards[0].Card.Name);
 		}
@@ -304,7 +317,9 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			_metaDecks[1].Cards[0].Count = 40;
-			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			var opponent = new MockOpponent("Hunter");
+			opponent.AvailableManaNextTurn = 1;
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 			// All 40 Deadly Shots
 			Assert.AreEqual(40, predictor.GetNextPredictedCards(40).Count);
 		}
@@ -315,7 +330,9 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			_metaDecks[1].Cards[0].Count = 40;
-			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			var opponent = new MockOpponent("Hunter");
+			opponent.AvailableManaNextTurn = 1;
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 			Assert.AreEqual(10, predictor.GetNextPredictedCards(10).Count);
 		}
 
@@ -323,12 +340,14 @@ namespace DeckPredictorTests.Tests
 		public void GetNextPredictedCards_SortedByProbability()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
-			AddMetaDeck("Hunter", new List<string> {"Deadly Shot",  "Bear Trap", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Bear Trap", "Alleycat"});
 			_metaDecks[1].Cards[0].Count = 40;
 			_metaDecks[1].Cards[1].Count = 40;
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat",});
-			_metaDecks[1].Cards[0].Count = 40;
-			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());
+			_metaDecks[2].Cards[0].Count = 40;
+			var opponent = new MockOpponent("Hunter");
+			opponent.AvailableManaNextTurn = 1;
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
 			var nextPredictedCards = predictor.GetNextPredictedCards(50);
 			Assert.AreEqual("Deadly Shot", nextPredictedCards.ElementAt(0).Card.Name);

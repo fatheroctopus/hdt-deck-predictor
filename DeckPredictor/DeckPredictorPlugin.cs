@@ -78,7 +78,7 @@ namespace DeckPredictor
 						(mode == GameMode.Ranked || mode == GameMode.Casual || mode == GameMode.Friendly))
 					{
 						Log.Info("Enabling DeckPredictor for " + format + " " + mode + " game");
-						var opponent = new Opponent(Hearthstone_Deck_Tracker.Core.Game.Opponent);
+						var opponent = new Opponent(Hearthstone_Deck_Tracker.Core.Game);
 						_controller = new PredictionController(opponent, _metaDecks);
 						_view.SetEnabled(true);
 						_controller.OnPredictionUpdate.Add(_predictionLog.OnPredictionUpdate);
@@ -99,6 +99,7 @@ namespace DeckPredictor
 					_controller = null;
 				});
 			GameEvents.OnOpponentDraw.Add(() => _controller?.OnOpponentDraw());
+			GameEvents.OnTurnStart.Add(activePlayer => _controller?.OnTurnStart(activePlayer));
 
 			// Events that reveal cards need a 100ms delay. This is because HDT takes some extra
 			// time to process all the tags we need, but it doesn't wait to send these callbacks.
