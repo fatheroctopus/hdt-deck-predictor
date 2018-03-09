@@ -30,12 +30,26 @@ namespace DeckPredictor
 					// Card with unplayed count on the card list.
 					cards.Add(cardInfo.GetCardWithUnplayedCount());
 
-					// Percentage on the percentage list.
-					var item = new PercentageItem();
-					string percentageString = cardInfo.NumPlayed < cardInfo.Probabilities.Count
-						? Math.Truncate(cardInfo.Probabilities[cardInfo.NumPlayed] * 100) + "%"
-						: "";
-					item.Percentage = percentageString;
+					// Percentages on the percentage list.
+					var nextProbabilities = cardInfo.Probabilities.Skip(cardInfo.NumPlayed).ToList();
+					string percentageString;
+					if (nextProbabilities.Count == 0)
+					{
+						// All cards have been played already.
+						percentageString = "";
+					}
+					else
+					{
+						if (nextProbabilities.All(prob => prob == nextProbabilities[0]))
+						{
+							// All instances are at the same probability, just show one number.
+							nextProbabilities = new List<decimal> { nextProbabilities[0] };
+						}
+						percentageString = String.Join(" / ",
+							nextProbabilities.Select(prob => Math.Truncate(prob * 100).ToString() + "%"));
+					}
+
+					var item = new PercentageItem(percentageString);
 					percentages.Add(item);
 				});
 			Visibility = cards.Count <= 0 ? Visibility.Hidden : Visibility.Visible;
@@ -50,7 +64,12 @@ namespace DeckPredictor
 
 		public class PercentageItem
 		{
-			public string Percentage { get; set; }
+			public PercentageItem(string percentage)
+			{
+				Percentage = percentage;
+			}
+
+			public string Percentage { get; private set; }
 		}
 	}
 }
