@@ -23,20 +23,24 @@ namespace DeckPredictor
 
 		public void Update(PredictionInfo prediction)
 		{
-			var cardInfos = prediction.PredictedCards;
-			List<Card> cards = cardInfos.Select(cardInfo => cardInfo.GetCardWithUnplayedCount()).ToList();
-			Visibility = cards.Count <= 0 ? Visibility.Hidden : Visibility.Visible;
-			CardList.Update(cards, true);
-			var items = cardInfos.Select(cardInfo =>
+			var cards = new List<Card>();
+			var percentages = new List<PercentageItem>();
+			prediction.PredictedCards.ForEach(cardInfo =>
 				{
+					// Card with unplayed count on the card list.
+					cards.Add(cardInfo.GetCardWithUnplayedCount());
+
+					// Percentage on the percentage list.
 					var item = new PercentageItem();
 					string percentageString = cardInfo.NumPlayed < cardInfo.Probabilities.Count
 						? Math.Truncate(cardInfo.Probabilities[cardInfo.NumPlayed] * 100) + "%"
 						: "";
 					item.Percentage = percentageString;
-					return item;
-				}).ToList();
-			PercentageList.ItemsSource = items;
+					percentages.Add(item);
+				});
+			Visibility = cards.Count <= 0 ? Visibility.Hidden : Visibility.Visible;
+			CardList.Update(cards, true);
+			PercentageList.ItemsSource = percentages;
 
 			// Additional stats
 			PossibleCards.Text = "Showing " +
