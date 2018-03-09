@@ -304,6 +304,21 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
+		public void GetPredictedCards_DoesNotIncludeCardWithLowProbability()
+		{
+			for (int n = 0; n < 9; n++)
+			{
+				AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			}
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			var opponent = new MockOpponent("Hunter");
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+			// Deadly Shot only has a 10% chance and won't be included.
+			Assert.AreEqual(1, predictor.PredictedCards.Count);
+			Assert.AreEqual("Alleycat", predictor.PredictedCards[0].Card.Name);
+		}
+
+		[TestMethod]
 		public void GetNextPredictedCards_EmptyByDefault()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
