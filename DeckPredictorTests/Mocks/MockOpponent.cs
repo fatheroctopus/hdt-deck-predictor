@@ -26,5 +26,6 @@ namespace DeckPredictorTests.Mocks
 		public List<Card> KnownCards { get; set; }
 
 		public int AvailableManaNextTurn { get; set; }
+
 	}
 }

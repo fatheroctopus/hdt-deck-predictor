@@ -27,13 +27,15 @@ namespace DeckPredictor
 		private List<CardInfo> _nextPredictedCards;
 		private IOpponent _opponent;
 		private bool _classDetected;
+		private int _availableMana = 0;
 
 		public Predictor(IOpponent opponent, ReadOnlyCollection<Deck> metaDecks)
 		{
-			Log.Debug("Copying possible decks from the current meta");
+			Log.Debug("Copying possible decks from the meta");
 			_possibleDecks = new List<Deck>(metaDecks);
 			_opponent = opponent;
 			CheckOpponentClass();
+			CheckOpponentMana();
 		}
 
 		public ReadOnlyCollection<Deck> PossibleDecks =>
@@ -130,6 +132,17 @@ namespace DeckPredictor
 			}
 		}
 
+		public void CheckOpponentMana()
+		{
+			var availableMana = _opponent.AvailableManaNextTurn;
+			if (availableMana > _availableMana)
+			{
+				Log.Info("Updating Opponent's available mana to " + availableMana);
+				_availableMana = availableMana;
+				UpdatePredictedCards();
+			}
+		}
+
 		private void UpdatePredictedCards()
 		{
 			// Determine which cards are possible.
@@ -175,13 +188,11 @@ namespace DeckPredictor
 			// Now go through the remaining possible cards to fill out the deck with picks.
 			decimal lastPickProbability = 1;
 			_nextPredictedCards = new List<CardInfo>();
-			int manaNextTurn = _opponent.AvailableManaNextTurn;
-			Log.Debug("manaNextTurn: " + manaNextTurn);
 			sortedPossibleCards.Skip(_predictedCards.Count).ToList().ForEach(possibleCard =>
 				{
 					// Cards are only added if the opponent can play it on their next turn.
 					// Go until the deck is filled, but include all cards at the same probability.
-					if (possibleCard.Card.Cost <= manaNextTurn &&
+					if (possibleCard.Card.Cost <= _availableMana &&
 						possibleCard.Probability >= ProbabilityHardCutoff &&
 						(_predictedCards.Count < DeckSize || possibleCard.Probability >= lastPickProbability))
 					{

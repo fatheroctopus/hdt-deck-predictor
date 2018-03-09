@@ -18,7 +18,8 @@ namespace DeckPredictor
 
 		// Return how much mana the opponent will have on the next turn.
 		// Takes overload into account, and whether the opponent still has the coin.
-		// Value will always be in [0, 10]
+		// Returns -1 if API has not yet initialized the opponent state.
+		// Valid values will always be in [0, 10]
 		int AvailableManaNextTurn { get; }
 	}
 }

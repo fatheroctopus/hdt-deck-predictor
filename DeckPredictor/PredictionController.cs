@@ -17,6 +17,7 @@ namespace DeckPredictor
 	{
 		private IOpponent _opponent;
 		private Predictor _predictor;
+		private bool _firstOpponentDraw = true;
 
 		public PredictionController(IOpponent opponent, ReadOnlyCollection<Deck> metaDecks)
 		{
@@ -28,15 +29,26 @@ namespace DeckPredictor
 
 		public void OnOpponentDraw()
 		{
-			_predictor.CheckOpponentClass();
-			UpdatePrediction();
+			if (_firstOpponentDraw)
+			{
+				// This draw is mulligan, so check the values that weren't initialized at Game Start.
+				// (i.e. - hero class, mana crystals)
+				_predictor.CheckOpponentClass();
+				_predictor.CheckOpponentMana();
+				UpdatePrediction();
+				_firstOpponentDraw = false;
+			}
 		}
 
 		public void OnTurnStart(ActivePlayer player)
 		{
 			Log.Debug("OnTurnStart: " + player);
-			_predictor.CheckOpponentCards();
-			UpdatePrediction();
+			// At the beginning of the player turn, update the opponent's available mana for the next turn.
+			if (player == ActivePlayer.Player)
+			{
+				_predictor.CheckOpponentMana();
+				UpdatePrediction();
+			}
 		}
 
 		public void OnOpponentPlay(Card cardPlayed)
@@ -81,7 +93,7 @@ namespace DeckPredictor
 			UpdatePrediction();
 		}
 
-		private void UpdatePrediction()
+		public void UpdatePrediction()
 		{
 			// Make CardInfos for all cards that have already been played
 			var cardInfos = _opponent.KnownCards

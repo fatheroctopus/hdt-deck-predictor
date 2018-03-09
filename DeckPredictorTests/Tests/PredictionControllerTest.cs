@@ -1,6 +1,7 @@
 ﻿using DeckPredictor;
 using DeckPredictorTests.Mocks;
 using HearthDb.Enums;
+using Hearthstone_Deck_Tracker.Enums;
 using Hearthstone_Deck_Tracker.Hearthstone;
 using Hearthstone_Deck_Tracker;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -52,7 +53,7 @@ namespace DeckPredictorTests.Tests
 		{
 			PredictionInfo info = null;
 			controller.OnPredictionUpdate.Add(p => info = p);
-			controller.OnOpponentDraw();
+			controller.UpdatePrediction();
 			return info;
 		}
 
@@ -67,6 +68,20 @@ namespace DeckPredictorTests.Tests
 			controller.OnOpponentDraw();
 
 			Assert.IsTrue(called);
+		}
+
+		[TestMethod]
+		public void OnOpponentDraw_SecondTimeDoesNotCallOnPredictionUpdate()
+		{
+			var opponent = new MockOpponent("Hunter");
+			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
+			controller.OnOpponentDraw();
+
+			bool called = false;
+			controller.OnPredictionUpdate.Add(prediction => called = true);
+			controller.OnOpponentDraw();
+
+			Assert.IsFalse(called);
 		}
 
 		[TestMethod]
@@ -210,6 +225,36 @@ namespace DeckPredictorTests.Tests
 			opponent.KnownCards[0].Jousted = true;
 			var info = GetPredictionInfo(controller);
 			Assert.AreEqual(0, info.PredictedCards.Count);
+		}
+
+		[TestMethod]
+		public void OnTurnStart_UpdatesAvailableManaOnPlayerTurn()
+		{
+			var opponent = new MockOpponent("Hunter");
+			opponent.AvailableManaNextTurn = 1;
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
+			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
+			opponent.AvailableManaNextTurn = 2;
+			controller.OnTurnStart(ActivePlayer.Player);
+
+			var info = GetPredictionInfo(controller);
+			Assert.AreEqual(2, info.PredictedCards.Count);
+		}
+
+		[TestMethod]
+		public void OnTurnStart_DoesNotUpdateAvailableManaOnOpponentTurn()
+		{
+			var opponent = new MockOpponent("Hunter");
+			opponent.AvailableManaNextTurn = 1;
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
+			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
+			opponent.AvailableManaNextTurn = 2;
+			controller.OnTurnStart(ActivePlayer.Opponent);
+
+			var info = GetPredictionInfo(controller);
+			Assert.AreEqual(1, info.PredictedCards.Count);
 		}
 	}
 }
