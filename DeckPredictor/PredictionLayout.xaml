@@ -4,33 +4,53 @@
 		xmlns:controls="clr-namespace:Hearthstone_Deck_Tracker.Controls;assembly=HearthstoneDeckTracker"
 		Height="Auto" Width="Auto"
 		Background="Transparent">
-	<StackPanel Name="StackPanelMain" Orientation="Horizontal">
-		<!-- Card List -->
-		<controls:AnimatedCardList x:Name="CardList" Background="Transparent" BorderThickness="0"
-				ScrollViewer.HorizontalScrollBarVisibility="Disabled" Width="221"
-				ScrollViewer.VerticalScrollBarVisibility="Disabled" IsEnabled="False"
-				ScrollViewer.CanContentScroll="False">
-		</controls:AnimatedCardList>
-		<!-- Percentages List -->
-		<ItemsControl Name="PercentageList" Grid.IsSharedSizeScope="True">
-			<ItemsControl.ItemTemplate>
-				<DataTemplate>
-					<Border BorderBrush="Black" BorderThickness="1">
-						<Grid Height="32" Background="Gray">
-							<Grid.ColumnDefinitions>
-								<ColumnDefinition SharedSizeGroup="GroupName"/>
-							</Grid.ColumnDefinitions>
-							<TextBlock
-									Text="{Binding Percentage}"
-									FontFamily="/HearthstoneDeckTracker;component/Resources/#Chunkfive"
-									VerticalAlignment="Center"
-									FontSize="17"
-									Padding="5,0,5,0"
-									Foreground="AntiqueWhite"/>
-						</Grid>
-					</Border>
-				</DataTemplate>
-			</ItemsControl.ItemTemplate>
-		</ItemsControl>
+	<StackPanel Orientation="Vertical">
+		<!-- Individual Cards -->
+		<StackPanel Orientation="Horizontal">
+			<!-- Card List -->
+			<controls:AnimatedCardList x:Name="CardList" Background="Transparent" BorderThickness="0"
+					ScrollViewer.HorizontalScrollBarVisibility="Disabled" Width="221"
+					ScrollViewer.VerticalScrollBarVisibility="Disabled" IsEnabled="False"
+					ScrollViewer.CanContentScroll="False">
+			</controls:AnimatedCardList>
+			<!-- Percentages List -->
+			<ItemsControl Name="PercentageList" Grid.IsSharedSizeScope="True">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Border BorderBrush="Black" BorderThickness="1">
+							<Grid Height="32" Background="Gray">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition SharedSizeGroup="GroupName"/>
+								</Grid.ColumnDefinitions>
+								<TextBlock
+										Text="{Binding Percentage}"
+										FontFamily="/HearthstoneDeckTracker;component/Resources/#Chunkfive"
+										VerticalAlignment="Center"
+										FontSize="17"
+										Padding="5,0,5,0"
+										Foreground="AntiqueWhite"/>
+							</Grid>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</StackPanel>
+		<!-- Additional Stats -->
+		<TextBlock
+				Name="PossibleCards"
+				FontFamily="/HearthstoneDeckTracker;component/Resources/#Chunkfive"
+				TextAlignment="Center"
+				Background="Gray"
+				FontSize="16"
+				Margin="0,2"
+				Foreground="AntiqueWhite"/>
+		<TextBlock
+				Name="PossibleDecks"
+				FontFamily="/HearthstoneDeckTracker;component/Resources/#Chunkfive"
+				TextAlignment="Center"
+				Background="Gray"
+				FontSize="16"
+				Margin="0,2"
+				Foreground="AntiqueWhite"/>
 	</StackPanel>
 </UserControl>

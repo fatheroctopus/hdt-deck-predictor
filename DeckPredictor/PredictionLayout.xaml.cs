@@ -37,6 +37,11 @@ namespace DeckPredictor
 					return item;
 				}).ToList();
 			PercentageList.ItemsSource = items;
+
+			// Additional stats
+			PossibleCards.Text = "Showing " +
+				prediction.NumPredictedCards + " / " + prediction.NumPossibleCards + " Possible Cards";
+			PossibleDecks.Text = prediction.NumPossibleDecks.ToString() + " Matching Decks";
 		}
 
 		public class PercentageItem
