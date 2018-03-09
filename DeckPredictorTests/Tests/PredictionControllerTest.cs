@@ -45,7 +45,7 @@ namespace DeckPredictorTests.Tests
 
 		private List<Card> CardsFromInfo(PredictionInfo info)
 		{
-			return info.CardInfos.Select(i => i.Card).ToList();
+			return info.PredictedCards.Select(i => i.Card).ToList();
 		}
 
 		private PredictionInfo GetPredictionInfo(PredictionController controller)
@@ -153,7 +153,7 @@ namespace DeckPredictorTests.Tests
 			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
 			opponent.KnownCards = CardList(new List<string> {"Alleycat"});
 			var info = GetPredictionInfo(controller);
-			Assert.AreEqual(1, info.CardInfos[0].NumPlayed);
+			Assert.AreEqual(1, info.PredictedCards[0].NumPlayed);
 		}
 
 		[TestMethod]
@@ -165,7 +165,7 @@ namespace DeckPredictorTests.Tests
 			opponent.KnownCards = CardList(new List<string> {"Alleycat"});
 			var info = GetPredictionInfo(controller);
 			CollectionAssert.AreEqual(CardList(new List<string> {"Alleycat"}), CardsFromInfo(info));
-			Assert.AreEqual(1, info.CardInfos[0].NumPlayed);
+			Assert.AreEqual(1, info.PredictedCards[0].NumPlayed);
 		}
 
 		[TestMethod]
@@ -177,12 +177,12 @@ namespace DeckPredictorTests.Tests
 			opponent.KnownCards = CardList(new List<string> {"Alleycat"});
 			opponent.KnownCards[0].IsCreated = true;
 			var info = GetPredictionInfo(controller);
-			Assert.AreEqual(2, info.CardInfos.Count);
-			var createdCardInfo = info.CardInfos[0];
+			Assert.AreEqual(2, info.PredictedCards.Count);
+			var createdCardInfo = info.PredictedCards[0];
 			Assert.AreEqual(1, createdCardInfo.NumPlayed);
 			Assert.AreEqual(1, createdCardInfo.Card.Count);
 			Assert.IsTrue(createdCardInfo.Card.IsCreated);
-			var originalCardInfo = info.CardInfos[1];
+			var originalCardInfo = info.PredictedCards[1];
 			Assert.AreEqual(0, originalCardInfo.NumPlayed);
 			Assert.AreEqual(1, originalCardInfo.Card.Count);
 			Assert.IsFalse(originalCardInfo.Card.IsCreated);
@@ -197,7 +197,7 @@ namespace DeckPredictorTests.Tests
 			opponent.KnownCards = CardList(new List<string> {"Bear Trap"});
 			opponent.KnownCards[0].IsCreated = true;
 			var info = GetPredictionInfo(controller);
-			Assert.AreEqual("Alleycat", info.CardInfos[0].Card.Name);
+			Assert.AreEqual("Alleycat", info.PredictedCards[0].Card.Name);
 		}
 
 		[TestMethod]
@@ -209,7 +209,7 @@ namespace DeckPredictorTests.Tests
 			opponent.KnownCards = CardList(new List<string> {"Alleycat"});
 			opponent.KnownCards[0].Jousted = true;
 			var info = GetPredictionInfo(controller);
-			Assert.AreEqual(0, info.CardInfos.Count);
+			Assert.AreEqual(0, info.PredictedCards.Count);
 		}
 	}
 }

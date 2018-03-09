@@ -11,20 +11,24 @@ namespace DeckPredictor
 {
 	public class PredictionInfo
 	{
-		public PredictionInfo(int numPossibleDecks, int numPossibleCards, List<CardInfo> cardInfos)
+		public PredictionInfo(int numPossibleDecks, int numPossibleCards,
+			List<CardInfo> predictedCards, List<CardInfo> runnerUpCards)
 		{
 			NumPossibleDecks = numPossibleDecks;
 			NumPossibleCards = numPossibleCards;
-			CardInfos = cardInfos;
+			PredictedCards = predictedCards;
+			RunnerUpCards = runnerUpCards;
 		}
 
 		public int NumPossibleDecks { get; }
 
 		public int NumPossibleCards { get; }
 
-		public List<CardInfo> CardInfos { get; }
+		public List<CardInfo> PredictedCards { get; }
 
-		public int NumPredictedCards => CardInfos.Sum(cardInfo => cardInfo.Probabilities.Count);
+		public List<CardInfo> RunnerUpCards { get; }
+
+		public int NumPredictedCards => PredictedCards.Sum(cardInfo => cardInfo.Probabilities.Count);
 
 		public void WritePrediction(TextWriter writer)
 		{
@@ -33,15 +37,11 @@ namespace DeckPredictor
 			writer.WriteLine("");
 
 			writer.WriteLine(NumPredictedCards + " predicted cards:");
-			CardInfos.ForEach(cardInfo => writer.WriteLine(cardInfo.ToString()));
-			// writer.WriteLine("");
+			PredictedCards.ForEach(cardInfo => writer.WriteLine(cardInfo.ToString()));
+			writer.WriteLine("");
 
-			// var nextPredictedCards = predictor.GetNextPredictedCards(3);
-			// writer.WriteLine("Next " + nextPredictedCards.Count + " most likely cards:");
-			// foreach (PredictedCardInfo predictedCard in nextPredictedCards)
-			// {
-			// 	writer.WriteLine(predictedCard.ToString());
-			// }
+			writer.WriteLine("Next " + RunnerUpCards.Count + " most likely cards:");
+			RunnerUpCards.ForEach(cardInfo => writer.WriteLine(cardInfo.ToString()));
 		}
 
 		public class CardInfo

@@ -86,7 +86,7 @@ namespace DeckPredictor
 					return new PredictionInfo.CardInfo(playedCard, playedCard.Count);
 				}).ToList();
 
-			// Get the top predicted cards from the original deck list and group them together by id.
+			// Get the predicted cards from the original deck list and group them together by id.
 			// Then find the ones that have already been played and update their probabilities.
 			// Otherwise, make a new CardInfo with the predicted cards.
 			_predictor.PredictedCards
@@ -112,11 +112,20 @@ namespace DeckPredictor
 					}
 				});
 
-			var predictionInfo =
-				new PredictionInfo(_predictor.PossibleDecks.Count, _predictor.PossibleCards.Count, cardInfos
+			var predictedCards = cardInfos
 					.OrderBy(cardInfo => cardInfo.Card.Cost)
 					.ThenBy(cardInfo => cardInfo.Card.Name)
-					.ToList());
+					.ToList();
+			var runnerUps = _predictor.GetNextPredictedCards(30).Select(cardInfo =>
+				{
+					// Don't group runnerUps, they all should have a count of 1 and are unplayed.
+					var card = Database.GetCardFromId(cardInfo.Card.Id);
+					var probabilities = new List<decimal> {cardInfo.Probability};
+					return new PredictionInfo.CardInfo(card, probabilities, 0);
+				}).ToList();
+
+			var predictionInfo = new PredictionInfo(
+				_predictor.PossibleDecks.Count, _predictor.PossibleCards.Count, predictedCards, runnerUps);
 			OnPredictionUpdate.ForEach(callback => callback.Invoke(predictionInfo));
 		}
 
