@@ -62,15 +62,17 @@ namespace DeckPredictor
 			public Card GetCardWithUnplayedCount()
 			{
 				var card = Database.GetCardFromId(Card.Id);
-				card.Count = Probabilities.Count - NumPlayed;
+				card.Count = Card.Count - NumPlayed;
+				card.IsCreated = Card.IsCreated;
 				return card;
 			}
 
 			public override string ToString()
 			{
+				var createdString = Card.IsCreated ? "[C]" : "";
 				return "[" + Card.Cost + "] " +
-					Card.Name + "(" + Probabilities.Count + ")" +
-					" - " + GetPercentageString();
+					Card.Name + "(" + Card.Count + ")" +
+					createdString + " - " + GetPercentageString();
 			}
 
 			private string GetPercentageString()
