@@ -256,5 +256,25 @@ namespace DeckPredictorTests.Tests
 			var info = GetPredictionInfo(controller);
 			Assert.AreEqual(1, info.PredictedCards.Count);
 		}
+
+		[TestMethod]
+		public void CardIsPlayableIfAtAvailableManaForNextTurn()
+		{
+			var opponent = new MockOpponent("Hunter");
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
+			var info = GetPredictionInfo(controller);
+			Assert.IsTrue(info.PredictedCards[0].IsPlayable);
+		}
+
+		[TestMethod]
+		public void CardIsNotPlayableIfAboveAvailableManaForNextTurn()
+		{
+			var opponent = new MockOpponent("Hunter");
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
+			var info = GetPredictionInfo(controller);
+			Assert.IsFalse(info.PredictedCards[0].IsPlayable);
+		}
 	}
 }

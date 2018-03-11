@@ -18,7 +18,7 @@
 				<ItemsControl.ItemTemplate>
 					<DataTemplate>
 						<Border BorderBrush="Black" BorderThickness="1">
-							<Grid Height="32" Background="Gray">
+							<Grid Height="32" Background="Gray" Opacity="{Binding Opacity}">
 								<Grid.ColumnDefinitions>
 									<ColumnDefinition SharedSizeGroup="GroupName"/>
 								</Grid.ColumnDefinitions>

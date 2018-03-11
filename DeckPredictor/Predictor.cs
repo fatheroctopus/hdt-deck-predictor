@@ -28,7 +28,6 @@ namespace DeckPredictor
 		private List<CardInfo> _nextPredictedCards;
 		private IOpponent _opponent;
 		private bool _classDetected;
-		private int _availableMana = 0;
 
 		public Predictor(IOpponent opponent, ReadOnlyCollection<Deck> metaDecks)
 		{
@@ -38,6 +37,8 @@ namespace DeckPredictor
 			CheckOpponentClass();
 			CheckOpponentMana();
 		}
+
+		public int AvailableMana { get; private set; } = 0;
 
 		public ReadOnlyCollection<Deck> PossibleDecks =>
 			new ReadOnlyCollection<Deck>(_possibleDecks);
@@ -136,10 +137,10 @@ namespace DeckPredictor
 		public void CheckOpponentMana()
 		{
 			var availableMana = _opponent.AvailableManaNextTurn;
-			if (availableMana > _availableMana)
+			if (availableMana > AvailableMana)
 			{
 				Log.Info("Updating Opponent's available mana to " + availableMana);
-				_availableMana = availableMana;
+				AvailableMana = availableMana;
 				UpdatePredictedCards();
 			}
 		}
@@ -194,8 +195,8 @@ namespace DeckPredictor
 					// A speculative card is only added if the opponent can play it on their next turn,
 					// spending all their mana or with one left over.
 					// Go until the deck is filled, but include all cards at the same probability.
-					if (possibleCard.Card.Cost <= _availableMana &&
-						possibleCard.Card.Cost >= _availableMana - 1 &&
+					if (possibleCard.Card.Cost <= AvailableMana &&
+						possibleCard.Card.Cost >= AvailableMana - 1 &&
 						possibleCard.Probability >= ProbabilityHardCutoff &&
 						(_predictedCards.Count < DeckSize || possibleCard.Probability >= lastPickProbability))
 					{

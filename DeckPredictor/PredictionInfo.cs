@@ -11,13 +11,18 @@ namespace DeckPredictor
 {
 	public class PredictionInfo
 	{
-		public PredictionInfo(int numPossibleDecks, int numPossibleCards,
+		public PredictionInfo(int numPossibleDecks, int numPossibleCards, int availableMana,
 			List<CardInfo> predictedCards, List<CardInfo> runnerUpCards)
 		{
 			NumPossibleDecks = numPossibleDecks;
 			NumPossibleCards = numPossibleCards;
 			PredictedCards = predictedCards;
 			RunnerUpCards = runnerUpCards;
+			// Set all the cards' IsPlayable values based on availableMana.
+			PredictedCards.Concat(RunnerUpCards).ToList().ForEach(cardInfo =>
+				{
+					cardInfo.IsPlayable = cardInfo.Card.Cost <= availableMana;
+				});
 		}
 
 		public int NumPossibleDecks { get; }
@@ -49,6 +54,7 @@ namespace DeckPredictor
 			public Card Card { get; }
 			public List<decimal> Probabilities { get; }
 			public int NumPlayed { get; }
+			public bool IsPlayable { get; set; }
 
 			public CardInfo(Card card, List<decimal> probabilities, int numPlayed)
 			{
@@ -69,9 +75,9 @@ namespace DeckPredictor
 
 			public override string ToString()
 			{
+				var costString = "[" + Card.Cost + (IsPlayable ? "" : "X") + "] ";
 				var createdString = Card.IsCreated ? "[C]" : "";
-				return "[" + Card.Cost + "] " +
-					Card.Name + "(" + Card.Count + ")" +
+				return costString + Card.Name + "(" + Card.Count + ")" +
 					createdString + " - " + GetPercentageString();
 			}
 

@@ -17,7 +17,10 @@ namespace DeckPredictor
 		private PredictionLayout _layout = new PredictionLayout();
 		private bool _lastHideOpponentCards;
 
-		public PredictionView() {}
+		public PredictionView()
+		{
+			// TestView();
+		}
 
 		public void SetEnabled(bool enabled)
 		{
@@ -66,7 +69,7 @@ namespace DeckPredictor
 				.ThenBy(cardInfo => cardInfo.Card.Name)
 				.ThenByDescending(cardInfo => cardInfo.Card.IsCreated)
 				.ToList();
-			var prediction = new PredictionInfo(1, 2, cardList, new List<PredictionInfo.CardInfo> {});
+			var prediction = new PredictionInfo(1, 2, 10, cardList, new List<PredictionInfo.CardInfo> {});
 			SetEnabled(true);
 			OnPredictionUpdate(prediction);
 		}

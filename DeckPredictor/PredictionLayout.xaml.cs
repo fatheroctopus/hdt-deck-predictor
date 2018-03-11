@@ -23,38 +23,21 @@ namespace DeckPredictor
 
 		public void Update(PredictionInfo prediction)
 		{
-			var cards = new List<Card>();
-			var percentages = new List<PercentageItem>();
-			prediction.PredictedCards.ForEach(cardInfo =>
-				{
-					// Card with unplayed count on the card list.
-					cards.Add(cardInfo.GetCardWithUnplayedCount());
-
-					// Percentages on the percentage list.
-					var nextProbabilities = cardInfo.Probabilities.Skip(cardInfo.NumPlayed).ToList();
-					string percentageString;
-					if (nextProbabilities.Count == 0)
-					{
-						// All cards have been played already.
-						percentageString = "";
-					}
-					else
-					{
-						if (nextProbabilities.All(prob => prob == nextProbabilities[0]))
-						{
-							// All instances are at the same probability, just show one number.
-							nextProbabilities = new List<decimal> { nextProbabilities[0] };
-						}
-						percentageString = String.Join(" / ",
-							nextProbabilities.Select(prob => Math.Truncate(prob * 100).ToString() + "%"));
-					}
-
-					var item = new PercentageItem(percentageString);
-					percentages.Add(item);
-				});
+			// Show each card at its unplayed count.
+			var cards =
+				prediction.PredictedCards.Select(cardInfo => cardInfo.GetCardWithUnplayedCount()).ToList();
 			Visibility = cards.Count <= 0 ? Visibility.Hidden : Visibility.Visible;
 			CardList.Update(cards, true);
-			PercentageList.ItemsSource = percentages;
+
+			PercentageList.ItemsSource = prediction.PredictedCards.Select(cardInfo =>
+				{
+					// Lookup probabilities for any cards not already played.
+					var nextProbabilities = cardInfo.Probabilities.Skip(cardInfo.NumPlayed).ToList();
+					// Hide cards that no longer can be played, dim ones that aren't playable yet.
+					var opacity = cardInfo.Card.Count - cardInfo.NumPlayed <= 0 ? 0 :
+						(cardInfo.IsPlayable ? 1 : .5);
+					return new PercentageItem(nextProbabilities, opacity);
+				}).ToList();
 
 			// Additional stats
 			PossibleCards.Text = "Showing " +
@@ -64,12 +47,31 @@ namespace DeckPredictor
 
 		public class PercentageItem
 		{
-			public PercentageItem(string percentage)
+			public PercentageItem(List<decimal> probabilities, double opacity)
 			{
-				Percentage = percentage;
+				if (probabilities.Count == 0)
+				{
+					Percentage = "";
+				}
+				else if (probabilities.All(prob => prob == probabilities[0]))
+				{
+					// All instances are at the same probability, just show one number.
+					Percentage = DecimalToPercent(probabilities[0]);
+				}
+				else
+				{
+					Percentage = String.Join(" / ", probabilities.Select(prob => DecimalToPercent(prob)));
+				}
+
+				Opacity = opacity;
 			}
 
 			public string Percentage { get; private set; }
+
+			public double Opacity { get; private set; }
+
+			private static string DecimalToPercent(decimal value) =>
+				Math.Truncate(value * 100).ToString() + "%";
 		}
 	}
 }
