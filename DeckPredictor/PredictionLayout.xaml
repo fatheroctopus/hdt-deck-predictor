@@ -17,18 +17,32 @@
 			<ItemsControl Name="PercentageList" Grid.IsSharedSizeScope="True">
 				<ItemsControl.ItemTemplate>
 					<DataTemplate>
-						<Border BorderBrush="Black" BorderThickness="1">
-							<Grid Height="32" Background="Gray" Opacity="{Binding Opacity}">
+						<Border BorderBrush="Black" BorderThickness="1" Visibility="{Binding ItemVisibility}">
+							<Grid Height="32" Background="Gray" Opacity="{Binding ItemOpacity}">
 								<Grid.ColumnDefinitions>
-									<ColumnDefinition SharedSizeGroup="GroupName"/>
+									<ColumnDefinition SharedSizeGroup="GroupName1"/>
+									<ColumnDefinition SharedSizeGroup="GroupName2"/>
 								</Grid.ColumnDefinitions>
 								<TextBlock
+										Grid.Column="0"
 										Text="{Binding Percentage}"
 										FontFamily="/HearthstoneDeckTracker;component/Resources/#Chunkfive"
 										VerticalAlignment="Center"
 										FontSize="17"
 										Padding="5,0,5,0"
 										Foreground="AntiqueWhite"/>
+								<Image
+										Grid.Column="1"
+										Visibility="{Binding CoinVisibility}"
+										Width="16"
+										Margin="0,0,5,0"
+										Source="Resources/icon_coin.png"/>
+								<Image
+										Grid.Column="1"
+										Visibility="{Binding StarVisibility}"
+										Width="16"
+										Margin="0,0,5,0"
+										Source="Resources/icon_star.png"/>
 							</Grid>
 						</Border>
 					</DataTemplate>

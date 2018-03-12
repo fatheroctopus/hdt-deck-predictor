@@ -21,7 +21,11 @@ namespace DeckPredictor
 			// Set all the cards' IsPlayable values based on availableMana.
 			PredictedCards.Concat(RunnerUpCards).ToList().ForEach(cardInfo =>
 				{
-					cardInfo.IsPlayable = cardInfo.Card.Cost <= availableMana;
+					// TODO: need to set state for AtAvailableManaWithCoin
+					cardInfo.Playability =
+						cardInfo.Card.Cost < availableMana ? PlayableType.BelowAvailableMana :
+						(cardInfo.Card.Cost == availableMana ? PlayableType.AtAvailableMana :
+						PlayableType.AboveAvailableMana);
 				});
 		}
 
@@ -54,7 +58,10 @@ namespace DeckPredictor
 			public Card Card { get; }
 			public List<decimal> Probabilities { get; }
 			public int NumPlayed { get; }
-			public bool IsPlayable { get; set; }
+			public PlayableType Playability { get; set; }
+
+			// TODO: remove this once fully moved to PlayableType property
+			public bool IsPlayable => Playability != PlayableType.AboveAvailableMana;
 
 			public CardInfo(Card card, List<decimal> probabilities, int numPlayed)
 			{
@@ -93,4 +100,7 @@ namespace DeckPredictor
 			}
 		}
 	}
+
+	public enum PlayableType {
+		BelowAvailableMana, AtAvailableMana, AtAvailableManaWithCoin, AboveAvailableMana };
 }

@@ -80,6 +80,12 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icon_star.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icon_coin.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /Y "$(TargetDir)$(TargetName).dll" "C:\Users\Geoff\AppData\Roaming\HearthstoneDeckTracker\Plugins\DeckPredictor\$(TargetName).dll"

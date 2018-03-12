@@ -33,10 +33,8 @@ namespace DeckPredictor
 				{
 					// Lookup probabilities for any cards not already played.
 					var nextProbabilities = cardInfo.Probabilities.Skip(cardInfo.NumPlayed).ToList();
-					// Hide cards that no longer can be played, dim ones that aren't playable yet.
-					var opacity = cardInfo.Card.Count - cardInfo.NumPlayed <= 0 ? 0 :
-						(cardInfo.IsPlayable ? 1 : .5);
-					return new PercentageItem(nextProbabilities, opacity);
+					bool alreadyPlayed = (cardInfo.Card.Count - cardInfo.NumPlayed <= 0);
+					return new PercentageItem(nextProbabilities, cardInfo.Playability, alreadyPlayed);
 				}).ToList();
 
 			// Additional stats
@@ -47,7 +45,7 @@ namespace DeckPredictor
 
 		public class PercentageItem
 		{
-			public PercentageItem(List<decimal> probabilities, double opacity)
+			public PercentageItem(List<decimal> probabilities, PlayableType playability, bool alreadyPlayed)
 			{
 				if (probabilities.Count == 0)
 				{
@@ -63,12 +61,28 @@ namespace DeckPredictor
 					Percentage = String.Join(" / ", probabilities.Select(prob => DecimalToPercent(prob)));
 				}
 
-				Opacity = opacity;
+				// Hide cards that have already been played.
+				ItemVisibility = (alreadyPlayed ? Visibility.Hidden : Visibility.Visible);
+
+				// Dim cards that aren't playable yet.
+				ItemOpacity = (playability == PlayableType.AboveAvailableMana ? .5 : 1);
+
+				// Show a star if this card is at opponent's available mana.
+				StarVisibility =
+					(playability == PlayableType.AtAvailableMana ? Visibility.Visible : Visibility.Collapsed);
+				// Show a coin if the opponent can play this by using their coin.
+				CoinVisibility = (playability == PlayableType.AtAvailableManaWithCoin ?
+					Visibility.Visible : Visibility.Collapsed);
 			}
 
 			public string Percentage { get; private set; }
 
-			public double Opacity { get; private set; }
+			public double ItemOpacity { get; private set; }
+
+			public Visibility ItemVisibility { get; private set; }
+
+			public Visibility CoinVisibility { get; private set; }
+			public Visibility StarVisibility { get; private set; }
 
 			private static string DecimalToPercent(decimal value) =>
 				Math.Truncate(value * 100).ToString() + "%";
