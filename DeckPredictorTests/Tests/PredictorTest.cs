@@ -319,6 +319,21 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
+		public void GetPredictedCards_IncludeCardIfPlayable()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			var opponent = new MockOpponent("Hunter");
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+			predictor.ProbabilityIncludeIfPlayable = .50m;
+			opponent.Mana = 5;
+			predictor.CheckOpponentMana();
+
+			// Deadly Shot has a 50% chance and is playable.
+			Assert.AreEqual(2, predictor.PredictedCards.Count);
+		}
+
+		[TestMethod]
 		public void GetNextPredictedCards_EmptyByDefault()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Alleycat"});

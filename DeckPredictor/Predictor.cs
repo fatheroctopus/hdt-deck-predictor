@@ -15,11 +15,6 @@ namespace DeckPredictor
 	public class Predictor
 	{
 		private const int DeckSize = 30;
-		// We only show cards below this probability if their cost is close to the opponent's available mana
-		// next turn.
-		private const decimal ProbabilitySoftCutoff = .65m;
-		// We never show cards below this probability.
-		private const decimal ProbabilityHardCutoff = .30m;
 
 		private List<Deck> _possibleDecks;
 		private Dictionary<string, CardInfo> _possibleCards =
@@ -37,6 +32,13 @@ namespace DeckPredictor
 			CheckOpponentClass();
 			CheckOpponentMana();
 		}
+
+		// We always show a card at this probability or higher.
+		public decimal ProbabilityAlwaysInclude { get; set; } = .65m;
+		// We show a card at this probability if the opponent has enough mana to play them.
+		public decimal ProbabilityIncludeIfPlayable { get; set; } = .5m;
+		// We show a card at this probability if the opponent could play it and spend all their mana.
+		public decimal ProbabilityIncludeIfOptimal { get; set; } = .30m;
 
 		public int AvailableMana { get; private set; } = 0;
 		public int AvailableManaWithCoin { get; private set; } = 0;
@@ -180,16 +182,14 @@ namespace DeckPredictor
 				.ToList();
 
 			// If our list is greater than the Deck Size, find the probability of the first card that won't
-			// make the cut.  All other cards we predict have to be strictly greater than that probability.
+			// make the cut.  All other cards have to be strictly greater than that probability.
 			// We do this so none of the top 30 are there for an arbitrary reason.
-			// Additionally, each card must make the soft cutoff to get an automatic include.
 			decimal insufficientProbability = sortedPossibleCards.Count > DeckSize
 				? sortedPossibleCards.ElementAt(DeckSize).Probability
 				: 0;
 			_predictedCards = sortedPossibleCards
 				.TakeWhile(predictedCard => predictedCard.Probability > insufficientProbability &&
-					predictedCard.Probability >= ProbabilitySoftCutoff &&
-					predictedCard.Probability >= ProbabilityHardCutoff)
+					predictedCard.Probability >= ProbabilityAlwaysInclude)
 				.ToList();
 
 			// Now go through the remaining possible cards to fill out the deck with picks.
@@ -197,12 +197,19 @@ namespace DeckPredictor
 			_nextPredictedCards = new List<CardInfo>();
 			sortedPossibleCards.Skip(_predictedCards.Count).ToList().ForEach(possibleCard =>
 				{
-					// A speculative card is only added if the opponent can play it on their next turn,
-					// spending all their mana or with one left over.
-					// Go until the deck is filled, but include all cards at the same probability.
-					if (possibleCard.Card.Cost <= AvailableManaWithCoin &&
-						possibleCard.Card.Cost >= AvailableManaWithCoin - 1 &&
-						possibleCard.Probability >= ProbabilityHardCutoff &&
+					// A speculative card is only added if its probability is high enough and it passes
+					// the check based on the opponent's available mana.
+					// Cards are playable if they are less than or equal to available mana.
+					// Cards are optimal if they are equal to available mana with and without the coin.
+					bool isPlayable = possibleCard.Card.Cost <= AvailableManaWithCoin;
+					bool playableCheck = isPlayable &&
+						possibleCard.Probability >= ProbabilityIncludeIfPlayable;
+					bool isOptimal = (possibleCard.Card.Cost == AvailableMana ||
+						possibleCard.Card.Cost == AvailableManaWithCoin);
+					bool optimalCheck = isOptimal &&
+						possibleCard.Probability >= ProbabilityIncludeIfOptimal;
+					// Go until the deck is filled, but allow in all valid cards at the same probability.
+					if ((playableCheck || optimalCheck) &&
 						(_predictedCards.Count < DeckSize || possibleCard.Probability >= lastPickProbability))
 					{
 						_predictedCards.Add(possibleCard);
