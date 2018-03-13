@@ -69,7 +69,7 @@ namespace DeckPredictor
 				.ThenBy(cardInfo => cardInfo.Card.Name)
 				.ThenByDescending(cardInfo => cardInfo.Card.IsCreated)
 				.ToList();
-			var prediction = new PredictionInfo(1, 2, 4, cardList, new List<PredictionInfo.CardInfo> {});
+			var prediction = new PredictionInfo(1, 2, 3, 4, cardList, new List<PredictionInfo.CardInfo> {});
 			SetEnabled(true);
 			OnPredictionUpdate(prediction);
 		}

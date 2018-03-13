@@ -16,10 +16,10 @@ namespace DeckPredictor
 		// List of all cards known to be in the opponent's deck.
 		List<Card> KnownCards { get; }
 
-		// Return how much mana the opponent will have on the next turn.
-		// Takes overload into account, and whether the opponent still has the coin.
+		// Return how much mana the opponent will have on the next turn. Takes overload into account.
+		// If considerCoin is true, value will be greater by 1 if the opponent has the coin.
 		// Returns -1 if API has not yet initialized the opponent state.
 		// Valid values will always be in [0, 10]
-		int AvailableManaNextTurn { get; }
+		int GetAvailableManaNextTurn(bool considerCoin);
 	}
 }

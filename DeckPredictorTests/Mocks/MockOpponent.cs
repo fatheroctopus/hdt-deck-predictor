@@ -16,14 +16,24 @@ namespace DeckPredictorTests.Mocks
 		{
 			Class = className;
 			KnownCards = new List<Card>();
-			AvailableManaNextTurn = 1;
+			Mana = 1;
 		}
 
 		public string Class { get; set; }
 
 		public List<Card> KnownCards { get; set; }
 
-		public int AvailableManaNextTurn { get; set; }
+		public int Mana { get; set; }
+		public bool HasCoin { get; set; }
 
+		public int GetAvailableManaNextTurn(bool considerCoin)
+		{
+			int mana = Mana;
+			if (considerCoin && HasCoin)
+			{
+				mana++;
+			}
+			return mana;
+		}
 	}
 }

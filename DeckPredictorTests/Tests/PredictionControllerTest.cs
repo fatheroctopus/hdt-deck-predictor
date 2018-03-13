@@ -231,11 +231,11 @@ namespace DeckPredictorTests.Tests
 		public void OnTurnStart_UpdatesAvailableManaOnPlayerTurn()
 		{
 			var opponent = new MockOpponent("Hunter");
-			opponent.AvailableManaNextTurn = 1;
+			opponent.Mana = 1;
 			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
 			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
-			opponent.AvailableManaNextTurn = 2;
+			opponent.Mana = 2;
 			controller.OnTurnStart(ActivePlayer.Player);
 
 			var info = GetPredictionInfo(controller);
@@ -246,11 +246,11 @@ namespace DeckPredictorTests.Tests
 		public void OnTurnStart_DoesNotUpdateAvailableManaOnOpponentTurn()
 		{
 			var opponent = new MockOpponent("Hunter");
-			opponent.AvailableManaNextTurn = 1;
+			opponent.Mana = 1;
 			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Bear Trap"});
 			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
-			opponent.AvailableManaNextTurn = 2;
+			opponent.Mana = 2;
 			controller.OnTurnStart(ActivePlayer.Opponent);
 
 			var info = GetPredictionInfo(controller);
@@ -258,23 +258,46 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
-		public void CardIsPlayableIfAtAvailableManaForNextTurn()
+		public void CardPlayabilityAtAvailableManaForNextTurn()
 		{
 			var opponent = new MockOpponent("Hunter");
 			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
 			var info = GetPredictionInfo(controller);
-			Assert.IsTrue(info.PredictedCards[0].IsPlayable);
+			Assert.AreEqual(PlayableType.AtAvailableMana, info.PredictedCards[0].Playability);
 		}
 
 		[TestMethod]
-		public void CardIsNotPlayableIfAboveAvailableManaForNextTurn()
+		public void CardPlayabilityAboveAvailableManaForNextTurn()
 		{
 			var opponent = new MockOpponent("Hunter");
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
 			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
 			var info = GetPredictionInfo(controller);
-			Assert.IsFalse(info.PredictedCards[0].IsPlayable);
+			Assert.AreEqual(PlayableType.AboveAvailableMana, info.PredictedCards[0].Playability);
+		}
+
+		[TestMethod]
+		public void CardPlayabilityBelowAvailableManaForNextTurn()
+		{
+			var opponent = new MockOpponent("Hunter");
+			opponent.Mana = 5;
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
+			var info = GetPredictionInfo(controller);
+			Assert.AreEqual(PlayableType.BelowAvailableMana, info.PredictedCards[0].Playability);
+		}
+
+		[TestMethod]
+		public void CardPlayabilityAtAvailableManaWithCoinForNextTurn()
+		{
+			var opponent = new MockOpponent("Hunter");
+			opponent.Mana = 2;
+			opponent.HasCoin = true;
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
+			var info = GetPredictionInfo(controller);
+			Assert.AreEqual(PlayableType.AtAvailableManaWithCoin, info.PredictedCards[0].Playability);
 		}
 	}
 }

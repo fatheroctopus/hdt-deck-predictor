@@ -247,7 +247,7 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Bear Trap", "Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Alleycat", "Tracking"});
 			var opponent = new MockOpponent("Hunter");
-			opponent.AvailableManaNextTurn = 2;
+			opponent.Mana = 2;
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 			var firstPredictedCard = predictor.PredictedCards.ElementAt(1);
 			Assert.AreEqual("Tracking", firstPredictedCard.Card.Name);
@@ -283,7 +283,7 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			_metaDecks[1].Cards[0].Count = 40;
 			var opponent = new MockOpponent("Hunter");
-			opponent.AvailableManaNextTurn = 1;
+			opponent.Mana = 1;
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 			// All the Deadly Shots are at the same probability and can't yet be played,
 			// so don't include any of them.
@@ -296,7 +296,7 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			var opponent = new MockOpponent("Hunter");
-			opponent.AvailableManaNextTurn = 1;
+			opponent.Mana = 1;
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 			// Deadly Shot only has a 50% chance and can't be played next turn.
 			Assert.AreEqual(1, predictor.PredictedCards.Count);
@@ -333,7 +333,7 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			_metaDecks[1].Cards[0].Count = 40;
 			var opponent = new MockOpponent("Hunter");
-			opponent.AvailableManaNextTurn = 1;
+			opponent.Mana = 1;
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 			// All 40 Deadly Shots
 			Assert.AreEqual(40, predictor.GetNextPredictedCards(40).Count);
@@ -346,7 +346,7 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			_metaDecks[1].Cards[0].Count = 40;
 			var opponent = new MockOpponent("Hunter");
-			opponent.AvailableManaNextTurn = 1;
+			opponent.Mana = 1;
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 			Assert.AreEqual(10, predictor.GetNextPredictedCards(10).Count);
 		}
@@ -361,7 +361,7 @@ namespace DeckPredictorTests.Tests
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat",});
 			_metaDecks[2].Cards[0].Count = 40;
 			var opponent = new MockOpponent("Hunter");
-			opponent.AvailableManaNextTurn = 1;
+			opponent.Mana = 1;
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
 			var nextPredictedCards = predictor.GetNextPredictedCards(50);

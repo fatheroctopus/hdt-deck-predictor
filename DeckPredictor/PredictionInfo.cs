@@ -12,20 +12,20 @@ namespace DeckPredictor
 	public class PredictionInfo
 	{
 		public PredictionInfo(int numPossibleDecks, int numPossibleCards, int availableMana,
-			List<CardInfo> predictedCards, List<CardInfo> runnerUpCards)
+			int availableManaWithCoin, List<CardInfo> predictedCards, List<CardInfo> runnerUpCards)
 		{
 			NumPossibleDecks = numPossibleDecks;
 			NumPossibleCards = numPossibleCards;
 			PredictedCards = predictedCards;
 			RunnerUpCards = runnerUpCards;
-			// Set all the cards' IsPlayable values based on availableMana.
+			// Set all the cards' Playability values based on availableMana.
 			PredictedCards.Concat(RunnerUpCards).ToList().ForEach(cardInfo =>
 				{
-					// TODO: need to set state for AtAvailableManaWithCoin
 					cardInfo.Playability =
 						cardInfo.Card.Cost < availableMana ? PlayableType.BelowAvailableMana :
 						(cardInfo.Card.Cost == availableMana ? PlayableType.AtAvailableMana :
-						PlayableType.AboveAvailableMana);
+						(cardInfo.Card.Cost == availableManaWithCoin ? PlayableType.AtAvailableManaWithCoin :
+						PlayableType.AboveAvailableMana));
 				});
 		}
 
@@ -60,9 +60,6 @@ namespace DeckPredictor
 			public int NumPlayed { get; }
 			public PlayableType Playability { get; set; }
 
-			// TODO: remove this once fully moved to PlayableType property
-			public bool IsPlayable => Playability != PlayableType.AboveAvailableMana;
-
 			public CardInfo(Card card, List<decimal> probabilities, int numPlayed)
 			{
 				Card = card;
@@ -82,7 +79,24 @@ namespace DeckPredictor
 
 			public override string ToString()
 			{
-				var costString = "[" + Card.Cost + (IsPlayable ? "" : "X") + "] ";
+				string playabilityChar = "";
+				switch (Playability)
+				{
+					case PlayableType.BelowAvailableMana:
+						playabilityChar = "-";
+						break;
+					case PlayableType.AtAvailableMana:
+						playabilityChar = "*";
+						break;
+					case PlayableType.AtAvailableManaWithCoin:
+						playabilityChar = "o";
+						break;
+					case PlayableType.AboveAvailableMana:
+						playabilityChar = "+";
+						break;
+				}
+
+				var costString = "[" + Card.Cost + playabilityChar + "] ";
 				var createdString = Card.IsCreated ? "[C]" : "";
 				return costString + Card.Name + "(" + Card.Count + ")" +
 					createdString + " - " + GetPercentageString();

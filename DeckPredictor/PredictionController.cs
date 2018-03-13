@@ -146,8 +146,8 @@ namespace DeckPredictor
 				}).ToList();
 
 			var predictionInfo = new PredictionInfo(
-				_predictor.PossibleDecks.Count, _predictor.PossibleCards.Count, _predictor.AvailableMana,
-				predictedCards, runnerUps);
+				_predictor.PossibleDecks.Count, _predictor.PossibleCards.Count,
+				_predictor.AvailableMana, _predictor.AvailableManaWithCoin, predictedCards, runnerUps);
 			OnPredictionUpdate.ForEach(callback => callback.Invoke(predictionInfo));
 		}
 
