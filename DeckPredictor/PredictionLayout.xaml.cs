@@ -46,11 +46,13 @@ namespace DeckPredictor
 		{
 			public PercentageItem(List<decimal> probabilities, PlayableType playability, bool alreadyPlayed)
 			{
+				// TODO: setting?
+				bool onlyShowFirst = true;
 				if (probabilities.Count == 0)
 				{
 					Percentage = "";
 				}
-				else if (probabilities.All(prob => prob == probabilities[0]))
+				else if (onlyShowFirst || probabilities.All(prob => prob == probabilities[0]))
 				{
 					// All instances are at the same probability, just show one number.
 					Percentage = DecimalToPercent(probabilities[0]);
