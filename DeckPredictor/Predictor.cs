@@ -36,7 +36,7 @@ namespace DeckPredictor
 		// We always show a card at this probability or higher.
 		public decimal ProbabilityAlwaysInclude { get; set; } = .65m;
 		// We show a card at this probability if the opponent has enough mana to play them.
-		public decimal ProbabilityIncludeIfPlayable { get; set; } = .5m;
+		public decimal ProbabilityIncludeIfPlayable { get; set; } = .50m;
 		// We show a card at this probability if the opponent could play it and spend all their mana.
 		public decimal ProbabilityIncludeIfOptimal { get; set; } = .30m;
 

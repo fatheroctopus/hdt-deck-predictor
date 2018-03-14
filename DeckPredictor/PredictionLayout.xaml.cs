@@ -26,7 +26,6 @@ namespace DeckPredictor
 			// Show each card at its unplayed count.
 			var cards =
 				prediction.PredictedCards.Select(cardInfo => cardInfo.GetCardWithUnplayedCount()).ToList();
-			Visibility = cards.Count <= 0 ? Visibility.Hidden : Visibility.Visible;
 			CardList.Update(cards, true);
 
 			PercentageList.ItemsSource = prediction.PredictedCards.Select(cardInfo =>

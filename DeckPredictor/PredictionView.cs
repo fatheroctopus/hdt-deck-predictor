@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Collections.ObjectModel;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
+﻿using HearthMirror;
 using Hearthstone_Deck_Tracker.Hearthstone;
 using Hearthstone_Deck_Tracker;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows;
+using System;
 using Core = Hearthstone_Deck_Tracker.API.Core;
 
 namespace DeckPredictor
@@ -16,25 +17,31 @@ namespace DeckPredictor
 	{
 		private PredictionLayout _layout = new PredictionLayout();
 		private bool _lastHideOpponentCards;
+		private bool _enabled;
+		private bool _firstUpdateReceived;
+		private User32.MouseInput _mouseInput;
 
 		public PredictionView()
 		{
+			_mouseInput = new User32.MouseInput();
+			_mouseInput.LmbUp += MouseInputOnLmbUp;
 			// TestView();
 		}
 
 		public void SetEnabled(bool enabled)
 		{
-			if (enabled)
+			_enabled = enabled;
+			if (_enabled)
 			{
 				Log.Debug("Adding Layout to OverlayCanvas");
 				Core.OverlayCanvas.Children.Add(_layout);
 				Canvas.SetBottom(_layout, Core.OverlayWindow.Height * 20 / 100);
 				Canvas.SetLeft(_layout, Core.OverlayWindow.Width * .5 / 100);
-				_layout.Dispatcher.Invoke(() => _layout.Visibility = Visibility.Hidden);
 
 				// Turn off the regular Opponent card list and restore the value later.
 				_lastHideOpponentCards = Config.Instance.HideOpponentCards;
 				Config.Instance.HideOpponentCards = true;
+				_firstUpdateReceived = false;
 			}
 			else
 			{
@@ -42,6 +49,7 @@ namespace DeckPredictor
 				Core.OverlayCanvas.Children.Remove(_layout);
 				Config.Instance.HideOpponentCards = _lastHideOpponentCards;
 			}
+			UpdateShowing();
 		}
 
 		public void OnPredictionUpdate(PredictionInfo prediction)
@@ -50,6 +58,26 @@ namespace DeckPredictor
 				{
 					_layout.Update(prediction);
 				});
+			_firstUpdateReceived = true;
+			UpdateShowing();
+		}
+
+		private void UpdateShowing()
+		{
+			if (!_enabled)
+			{
+				return;
+			}
+			bool shouldShow = _enabled && _firstUpdateReceived && !Reflection.IsFriendsListVisible();
+			Log.Debug("Update PredictionLayout visibility: " + shouldShow);
+			_layout.Dispatcher.Invoke(() =>
+				_layout.Visibility = shouldShow ? Visibility.Visible : Visibility.Hidden);
+		}
+
+		private async void MouseInputOnLmbUp(object sender, EventArgs eventArgs)
+		{
+			await Task.Delay(100);
+			UpdateShowing();
 		}
 
 		private void TestView()
