@@ -133,6 +133,7 @@ namespace DeckPredictor
 		public void OnUnload()
 		{
 			_config.Save();
+			_view.OnUnload();
 		}
 
 		public void OnUpdate()

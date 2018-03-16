@@ -18,6 +18,7 @@ namespace DeckPredictor
 		private PredictionLayout _layout = new PredictionLayout();
 		private bool _lastHideOpponentCards;
 		private bool _enabled;
+		private bool _showing;
 		private bool _firstUpdateReceived;
 		private User32.MouseInput _mouseInput;
 
@@ -25,7 +26,14 @@ namespace DeckPredictor
 		{
 			_mouseInput = new User32.MouseInput();
 			_mouseInput.LmbUp += MouseInputOnLmbUp;
+			_mouseInput.MouseMoved += MouseInputOnMouseMoved;
 			// TestView();
+		}
+
+		public void OnUnload()
+		{
+			SetEnabled(false);
+			_mouseInput.Dispose();
 		}
 
 		public void SetEnabled(bool enabled)
@@ -45,7 +53,7 @@ namespace DeckPredictor
 			}
 			else
 			{
-				Log.Debug("Removing List View from OverlayCanvas");
+				Log.Debug("Removing Layout from OverlayCanvas");
 				Core.OverlayCanvas.Children.Remove(_layout);
 				Config.Instance.HideOpponentCards = _lastHideOpponentCards;
 			}
@@ -64,14 +72,14 @@ namespace DeckPredictor
 
 		private void UpdateShowing()
 		{
-			if (!_enabled)
-			{
-				return;
-			}
 			bool shouldShow = _enabled && _firstUpdateReceived && !Reflection.IsFriendsListVisible();
-			Log.Debug("Update PredictionLayout visibility: " + shouldShow);
+			if (shouldShow != _showing)
+			{
+				Log.Debug("Set Layout Showing: " + shouldShow);
+			}
+			_showing = shouldShow;
 			_layout.Dispatcher.Invoke(() =>
-				_layout.Visibility = shouldShow ? Visibility.Visible : Visibility.Hidden);
+				_layout.Visibility = _showing ? Visibility.Visible : Visibility.Hidden);
 		}
 
 		private async void MouseInputOnLmbUp(object sender, EventArgs eventArgs)
@@ -80,24 +88,44 @@ namespace DeckPredictor
 			UpdateShowing();
 		}
 
+		private void MouseInputOnMouseMoved(object sender, EventArgs eventArgs)
+		{
+			if (!_showing)
+			{
+				return;
+			}
+			var pos = User32.GetMousePos();
+			_layout.Dispatcher.Invoke(() =>
+				{
+					if (_layout.IsLoaded)
+					{
+						_layout.UpdateCardToolTip(new Point(pos.X, pos.Y));
+					}
+				});
+		}
+
 		private void TestView()
 		{
-			// TODO: AnimatedCardList seems to flipping the order of Create/Uncreated items.
-			var card1 = Database.GetCardFromName("Greater Healing Potion");
-			card1.Count = 2;
-			var cardInfo1 = new PredictionInfo.CardInfo(card1, new List<decimal> {1, 1}, 0);
-			var card2 = Database.GetCardFromName("Greater Healing Potion");
-			card2.Count = 1;
-			card2.IsCreated = true;
-			var cardInfo2 = new PredictionInfo.CardInfo(card2, 1);
-			var card3 = Database.GetCardFromName("Inner Fire");
-			var cardList = new List<PredictionInfo.CardInfo> {cardInfo1, cardInfo2};
+			// TODO: AnimatedCardList seems to be flipping the order of Create/Uncreated items.
+			var cardList = new List<PredictionInfo.CardInfo>();
+			for (int n = 0; n < 10; n++)
+			{
+				var card1 = Database.GetCardFromName("Ice Block");
+				card1.Count = 2;
+				var cardInfo1 = new PredictionInfo.CardInfo(card1, new List<decimal> {1, 1}, 0);
+				var card2 = Database.GetCardFromName("Ice Block");
+				card2.Count = 1;
+				card2.IsCreated = true;
+				var cardInfo2 = new PredictionInfo.CardInfo(card2, 1);
+				cardList.Add(cardInfo1);
+				cardList.Add(cardInfo2);
+			}
 			cardList = cardList
 				.OrderBy(cardInfo => cardInfo.Card.Cost)
 				.ThenBy(cardInfo => cardInfo.Card.Name)
 				.ThenByDescending(cardInfo => cardInfo.Card.IsCreated)
 				.ToList();
-			var prediction = new PredictionInfo(1, 2, 3, 4, cardList, new List<PredictionInfo.CardInfo> {});
+			var prediction = new PredictionInfo(1, 30, 3, 4, cardList, new List<PredictionInfo.CardInfo> {});
 			SetEnabled(true);
 			OnPredictionUpdate(prediction);
 		}

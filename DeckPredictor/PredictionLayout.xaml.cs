@@ -6,8 +6,10 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows.Controls;
 using System.Windows;
 using Hearthstone_Deck_Tracker;
+using Hearthstone_Deck_Tracker.Controls;
 using Hearthstone_Deck_Tracker.Hearthstone;
 
 #endregion
@@ -16,9 +18,44 @@ namespace DeckPredictor
 {
 	public partial class PredictionLayout
 	{
+		// Don't slide the tooltip past the bottom n cards in the list.
+		private const int ToolTipCardBuffer = 3;
+
 		public PredictionLayout()
 		{
 			InitializeComponent();
+		}
+
+		public void UpdateCardToolTip(Point mousePos)
+		{
+			// See if the mouse is inside the stack of card lists
+			Point relativePos = CardStackPanel.PointFromScreen(mousePos);
+			bool mouseInsideCardList = relativePos.X > 0 && relativePos.X < CardStackPanel.ActualWidth &&
+				relativePos.Y > 0 && relativePos.Y < CardStackPanel.ActualHeight;
+			if (mouseInsideCardList)
+			{
+				// Determine the actual card moused over.
+				var cardSize = CardList.ActualHeight / CardList.Items.Count;
+				var cardIndex = (int)(relativePos.Y / cardSize);
+				if (cardIndex < 0 || cardIndex >= CardList.Items.Count)
+				{
+					CardToolTip.Visibility = Visibility.Collapsed;
+					return;
+				}
+				CardToolTip.SetValue(
+					DataContextProperty, CardList.Items.Cast<AnimatedCard>().ElementAt(cardIndex).Card);
+
+				// Set the top margin on the tooltip so it appears next to the card.
+				// Keep a buffer on the bottom so we're not changing the height of the main stack.
+				var bottomBufferCards = Math.Max(0, CardList.Items.Count - ToolTipCardBuffer);
+				var topPos = Math.Min(cardSize * cardIndex, cardSize * bottomBufferCards);
+				CardToolTip.Margin = new Thickness(0, topPos, 0, 0);
+				CardToolTip.Visibility = Visibility.Visible;
+			}
+			else
+			{
+				CardToolTip.Visibility = Visibility.Collapsed;
+			}
 		}
 
 		public void Update(PredictionInfo prediction)

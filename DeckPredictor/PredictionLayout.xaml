@@ -1,12 +1,18 @@
-<UserControl x:Class="DeckPredictor.PredictionLayout"
+<ItemsControl x:Class="DeckPredictor.PredictionLayout"
 		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:controls="clr-namespace:Hearthstone_Deck_Tracker.Controls;assembly=HearthstoneDeckTracker"
 		Height="Auto" Width="Auto"
 		Background="Transparent">
-	<StackPanel Orientation="Vertical">
+	<ItemsControl.ItemsPanel>
+	   <ItemsPanelTemplate>
+	      <StackPanel Orientation="Horizontal"/>
+	   </ItemsPanelTemplate>
+	</ItemsControl.ItemsPanel>
+
+	<StackPanel Name="MainStackPanel" Orientation="Vertical">
 		<!-- Individual Cards -->
-		<StackPanel Orientation="Horizontal">
+		<StackPanel Name="CardStackPanel" Orientation="Horizontal">
 			<!-- Card List -->
 			<controls:AnimatedCardList x:Name="CardList" Background="Transparent" BorderThickness="0"
 					ScrollViewer.HorizontalScrollBarVisibility="Disabled" Width="221"
@@ -49,7 +55,7 @@
 				</ItemsControl.ItemTemplate>
 			</ItemsControl>
 		</StackPanel>
-		<!-- Additional Stats -->
+		<!-- Additional stats below the card list -->
 		<TextBlock
 				Name="PossibleCards"
 				FontFamily="/HearthstoneDeckTracker;component/Resources/#Chunkfive"
@@ -67,4 +73,7 @@
 				Margin="0,2"
 				Foreground="AntiqueWhite"/>
 	</StackPanel>
-</UserControl>
+	<!-- Tool Tip appears to the right of the main stack -->
+	<controls:CardToolTipControl x:Name="CardToolTip" Height="auto" Panel.ZIndex="100" VerticalAlignment="Top"
+	                   Visibility="Hidden"/>
+</ItemsControl>
