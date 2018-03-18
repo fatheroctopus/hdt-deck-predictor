@@ -10,7 +10,7 @@
 	   </ItemsPanelTemplate>
 	</ItemsControl.ItemsPanel>
 
-	<StackPanel Name="MainStackPanel" Orientation="Vertical">
+	<StackPanel Orientation="Vertical">
 		<!-- Individual Cards -->
 		<StackPanel Name="CardStackPanel" Orientation="Horizontal">
 			<!-- Card List -->

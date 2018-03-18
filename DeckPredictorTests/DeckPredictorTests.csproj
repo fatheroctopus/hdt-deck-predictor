@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Mocks\MockOpponent.cs" />
+    <Compile Include="Tests\CardProximityRankerTest.cs" />
     <Compile Include="Tests\LogTest.cs" />
     <Compile Include="Tests\PluginConfigTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

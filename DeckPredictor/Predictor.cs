@@ -16,6 +16,7 @@ namespace DeckPredictor
 	{
 		private const int DeckSize = 30;
 
+		private List<Deck> _classDecks;
 		private List<Deck> _possibleDecks;
 		private Dictionary<string, CardInfo> _possibleCards =
 			new Dictionary<string, CardInfo>();
@@ -23,10 +24,12 @@ namespace DeckPredictor
 		private List<CardInfo> _nextPredictedCards;
 		private IOpponent _opponent;
 		private bool _classDetected;
+		private CardProximityRanker _proximityRanker;
 
 		public Predictor(IOpponent opponent, ReadOnlyCollection<Deck> metaDecks)
 		{
 			Log.Debug("Copying possible decks from the meta");
+			_classDecks = new List<Deck>(metaDecks);
 			_possibleDecks = new List<Deck>(metaDecks);
 			_opponent = opponent;
 			CheckOpponentClass();
@@ -83,44 +86,46 @@ namespace DeckPredictor
 				return;
 			}
 			// Only want decks for the opponent's class.
-			_possibleDecks = _possibleDecks.Where(x => x.Class == _opponent.Class).ToList();
 			_classDetected = true;
+			_classDecks = _possibleDecks.Where(x => x.Class == _opponent.Class).ToList();
+			_proximityRanker = new CardProximityRanker(_classDecks);
+			_possibleDecks = new List<Deck>(_classDecks);
 			Log.Info(_possibleDecks.Count + " possible decks for class " + _opponent.Class);
 			UpdatePredictedCards();
 		}
 
 		public void CheckOpponentCards()
 		{
+			if (!_classDetected)
+			{
+				Log.Warn("Cannot CheckOpponentCards before opponent class has been detected");
+				return;
+			}
+
+			_possibleDecks = new List<Deck>(_classDecks);
+			var knownCards = _opponent.KnownCards.Where(card => !card.IsCreated && card.Collectible).ToList();
 			var missingCards = new HashSet<Card>();
 			var insufficientCards = new HashSet<Card>();
-			_possibleDecks = _possibleDecks
-				.Where(possibleDeck =>
-				{
-					foreach (Card knownCard in _opponent.KnownCards)
+			foreach (Card orderedCard in _proximityRanker.RankCards(knownCards))
+			{
+				_possibleDecks = _possibleDecks.Where(possibleDeck =>
 					{
-						if (knownCard.IsCreated)
-						{
-							continue;
-						}
-						if (!knownCard.Collectible)
-						{
-							continue;
-						}
 						var cardInPossibleDeck =
-							possibleDeck.Cards.FirstOrDefault(x => x.Id == knownCard.Id);
+							possibleDeck.Cards.FirstOrDefault(x => x.Id == orderedCard.Id);
 						if (cardInPossibleDeck == null)
 						{
-							missingCards.Add(knownCard);
+							missingCards.Add(orderedCard);
 							return false;
 						}
-						if (knownCard.Count > cardInPossibleDeck.Count)
+						if (orderedCard.Count > cardInPossibleDeck.Count)
 						{
-							insufficientCards.Add(knownCard);
+							insufficientCards.Add(orderedCard);
 							return false;
 						}
-					}
-					return true;
-				}).ToList();
+						return true;
+					}).ToList();
+			}
+
 			// If PossibleDecks have changed.
 			if (missingCards.Any() || insufficientCards.Any())
 			{
@@ -148,7 +153,10 @@ namespace DeckPredictor
 					"(" + availableManaWithCoin + ")");
 				AvailableMana = availableMana;
 				AvailableManaWithCoin = availableManaWithCoin;
-				UpdatePredictedCards();
+				if (_classDetected)
+				{
+					UpdatePredictedCards();
+				}
 			}
 		}
 
@@ -156,6 +164,7 @@ namespace DeckPredictor
 		{
 			// Determine which cards are possible.
 			_possibleCards.Clear();
+
 			foreach (Deck deck in _possibleDecks)
 			{
 				foreach (Card card in deck.Cards)
