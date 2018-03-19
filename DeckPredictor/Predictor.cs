@@ -102,9 +102,16 @@ namespace DeckPredictor
 				return;
 			}
 
-			_possibleDecks = new List<Deck>(_classDecks);
+			// For prediction, we only care about cards that could have started in the opponent's deck.
 			var knownCards = _opponent.KnownCards.Where(card => !card.IsCreated && card.Collectible).ToList();
-			foreach (Card orderedCard in _proximityRanker.RankCards(knownCards))
+			bool hasNewRanking = _proximityRanker.UpdateCards(knownCards);
+			if (!hasNewRanking)
+			{
+				return;
+			}
+
+			_possibleDecks = new List<Deck>(_classDecks);
+			foreach (Card orderedCard in _proximityRanker.RankedCards)
 			{
 				_possibleDecks = _possibleDecks.Where(possibleDeck =>
 					{
@@ -176,7 +183,7 @@ namespace DeckPredictor
 					predictedCard.Probability >= ProbabilityAlwaysInclude)
 				.ToList();
 
-			// Now go through the remaining possible cards to fill out the deck with picks.
+			// Now go through the remaining possible cards to fill out the deck with speculative picks.
 			decimal lastPickProbability = 1;
 			_nextPredictedCards = new List<CardInfo>();
 			sortedPossibleCards.Skip(_predictedCards.Count).ToList().ForEach(possibleCard =>

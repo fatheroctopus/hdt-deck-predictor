@@ -146,6 +146,20 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
+		public void GetPossibleDecks_UnchangedIfCheckOpponentCardsCalledTwice()
+		{
+			var opponent = new MockOpponent("Hunter");
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+
+			opponent.KnownCards.Add(Database.GetCardFromName("Deadly Shot"));
+			predictor.CheckOpponentCards();
+			predictor.CheckOpponentCards();
+			Assert.AreEqual(1, predictor.PossibleDecks.Count);
+		}
+
+		[TestMethod]
 		public void GetPredictedCards_EmptyByDefault()
 		{
 			var predictor = new Predictor(new MockOpponent("Hunter"), _metaDecks.AsReadOnly());

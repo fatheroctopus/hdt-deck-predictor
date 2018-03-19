@@ -24,13 +24,17 @@ namespace DeckPredictor
 			_proximityLog.Write();
 		}
 
-		// Ranks the provided cards by their proximity to each other based on possible decks and returns
-		// a list ordered by this ranking. (Closest proximity first)
-		// In the parameter list, Card.Count represents the number of copies of that Card.
-		// In the return list, multiple copies of each card are split up where Card.Count is the copy count.
-		public List<Card> RankCards(List<Card> cards)
+		// The current list of cards ranked by closest proximity to the other cards in the list.
+		// Multiple copies of each card are split up where Card.Count is the copy count.
+		public List<Card> RankedCards => _rankedCards.Select(ratedCard => ratedCard.Card).ToList();
+
+		// Updates the current list of cards that should be ranked by proximity.
+		// For each card, Card.Count represents the number of copies of that Card.
+		// Returns true if this changes the current state of RankedCards.
+		public bool UpdateCards(List<Card> cards)
 		{
 			// Iterate over each card and copy to find the ones we haven't rated yet.
+			bool newCardFound = false;
 			foreach (Card newCard in cards)
 			{
 				for (int copyCount = 1; copyCount <= newCard.Count; copyCount++)
@@ -41,6 +45,7 @@ namespace DeckPredictor
 					{
 						Card cardByCopy = Database.GetCardFromId(newCard.Id);
 						cardByCopy.Count = copyCount;
+						newCardFound = true;
 						Log.Debug("Ranking new card: " + cardByCopy);
 
 						// Find the decks that contain this new card.
@@ -74,7 +79,7 @@ namespace DeckPredictor
 				.ThenBy(ratedCard => ratedCard.Card.Count)
 				.ToList();
 			_proximityLog.Write();
-			return _rankedCards.Select(ratedCard => ratedCard.Card).ToList();
+			return newCardFound;
 		}
 
 		public void OnWrite(TextWriter writer)

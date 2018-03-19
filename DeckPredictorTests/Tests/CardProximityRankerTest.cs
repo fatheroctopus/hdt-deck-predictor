@@ -41,8 +41,9 @@ namespace DeckPredictorTests.Tests
 		{
 			var ranker = new CardProximityRanker(_decks);
 			var cards = CardList(new List<string> {"Alleycat", "Deadly Shot"});
+			ranker.UpdateCards(cards);
 			CollectionAssert.AreEqual(CardList(new List<string> {"Alleycat", "Deadly Shot"}),
-				ranker.RankCards(cards));
+				ranker.RankedCards);
 		}
 
 		[TestMethod]
@@ -51,8 +52,9 @@ namespace DeckPredictorTests.Tests
 			AddDeck(new List<string> {"Deadly Shot"});
 			var ranker = new CardProximityRanker(_decks);
 			var cards = CardList(new List<string> {"Alleycat", "Deadly Shot"});
+			ranker.UpdateCards(cards);
 			CollectionAssert.AreEqual(CardList(new List<string> {"Deadly Shot", "Alleycat"}),
-				ranker.RankCards(cards));
+				ranker.RankedCards);
 		}
 
 		[TestMethod]
@@ -61,9 +63,8 @@ namespace DeckPredictorTests.Tests
 			AddDeck(new List<string> {"Alleycat", "Deadly Shot"});
 			AddDeck(new List<string> {"Bear Trap", "Deadly Shot"});
 			var ranker = new CardProximityRanker(_decks);
-			var rankedCards =
-				ranker.RankCards(CardList(new List<string> {"Alleycat", "Bear Trap", "Deadly Shot"}));
-			Assert.AreEqual("Deadly Shot", rankedCards[0].Name);
+			ranker.UpdateCards(CardList(new List<string> {"Alleycat", "Bear Trap", "Deadly Shot"}));
+			Assert.AreEqual("Deadly Shot", ranker.RankedCards[0].Name);
 		}
 
 		[TestMethod]
@@ -73,9 +74,9 @@ namespace DeckPredictorTests.Tests
 			AddDeck(new List<string> {"Bear Trap", "Tracking", "Deadly Shot"});
 			AddDeck(new List<string> {"Tracking", "Deadly Shot"});
 			var ranker = new CardProximityRanker(_decks);
-			var rankedCards = ranker.RankCards(
+			ranker.UpdateCards(
 				CardList(new List<string> {"Alleycat", "Bear Trap", "Tracking", "Deadly Shot"}));
-			Assert.AreEqual("Alleycat", rankedCards[3].Name);
+			Assert.AreEqual("Alleycat", ranker.RankedCards[3].Name);
 		}
 
 		[TestMethod]
@@ -84,9 +85,9 @@ namespace DeckPredictorTests.Tests
 			AddDeck(new List<string> {"Alleycat", "Bear Trap"});
 			AddDeck(new List<string> {"Bear Trap", "Tracking", "Deadly Shot"});
 			var ranker = new CardProximityRanker(_decks);
-			var rankedCards = ranker.RankCards(
+			ranker.UpdateCards(
 				CardList(new List<string> {"Alleycat", "Bear Trap", "Tracking", "Deadly Shot"}));
-			Assert.AreEqual("Alleycat", rankedCards[3].Name);
+			Assert.AreEqual("Alleycat", ranker.RankedCards[3].Name);
 		}
 
 		[TestMethod]
@@ -94,8 +95,8 @@ namespace DeckPredictorTests.Tests
 		{
 			AddDeck(new List<string> {"Alleycat"}, new List<int> {2});
 			var ranker = new CardProximityRanker(_decks);
-			var rankedCards = ranker.RankCards(CardList(new List<string> {"Alleycat"}, new List<int> {2}));
-			Assert.AreEqual(1, rankedCards[0].Count);
+			ranker.UpdateCards(CardList(new List<string> {"Alleycat"}, new List<int> {2}));
+			Assert.AreEqual(1, ranker.RankedCards[0].Count);
 		}
 
 		[TestMethod]
@@ -104,8 +105,38 @@ namespace DeckPredictorTests.Tests
 			AddDeck(new List<string> {"Alleycat"}, new List<int> {2});
 			AddDeck(new List<string> {"Alleycat", "Deadly Shot"}, new List<int> {2, 1});
 			var ranker = new CardProximityRanker(_decks);
-			var rankedCards = ranker.RankCards(CardList(new List<string> {"Alleycat", "Deadly Shot"}));
-			Assert.AreEqual("Alleycat", rankedCards[0].Name);
+			ranker.UpdateCards(CardList(new List<string> {"Alleycat", "Deadly Shot"}));
+			Assert.AreEqual("Alleycat", ranker.RankedCards[0].Name);
+		}
+
+		[TestMethod]
+		public void UpdateCards_ReturnsFalseIfNoCards()
+		{
+			var ranker = new CardProximityRanker(_decks);
+			Assert.IsFalse(ranker.UpdateCards(new List<Card>()));
+		}
+
+		[TestMethod]
+		public void UpdateCards_ReturnsTrueIfCardsNonEmpty()
+		{
+			var ranker = new CardProximityRanker(_decks);
+			Assert.IsTrue(ranker.UpdateCards(CardList(new List<string> {"Alleycat"})));
+		}
+
+		[TestMethod]
+		public void UpdateCards_ReturnsFalseIfCardsUnchangedFromPreviousCall()
+		{
+			var ranker = new CardProximityRanker(_decks);
+			ranker.UpdateCards(CardList(new List<string> {"Alleycat"}));
+			Assert.IsFalse(ranker.UpdateCards(CardList(new List<string> {"Alleycat"})));
+		}
+
+		[TestMethod]
+		public void UpdateCards_ReturnsTrueIfCardsChangedFromPreviousCall()
+		{
+			var ranker = new CardProximityRanker(_decks);
+			ranker.UpdateCards(CardList(new List<string> {"Alleycat"}));
+			Assert.IsTrue(ranker.UpdateCards(CardList(new List<string> {"Alleycat", "Deadly Shot"})));
 		}
 	}
 }
