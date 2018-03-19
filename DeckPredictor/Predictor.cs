@@ -104,42 +104,17 @@ namespace DeckPredictor
 
 			_possibleDecks = new List<Deck>(_classDecks);
 			var knownCards = _opponent.KnownCards.Where(card => !card.IsCreated && card.Collectible).ToList();
-			var missingCards = new HashSet<Card>();
-			var insufficientCards = new HashSet<Card>();
 			foreach (Card orderedCard in _proximityRanker.RankCards(knownCards))
 			{
 				_possibleDecks = _possibleDecks.Where(possibleDeck =>
 					{
 						var cardInPossibleDeck =
 							possibleDeck.Cards.FirstOrDefault(x => x.Id == orderedCard.Id);
-						if (cardInPossibleDeck == null)
-						{
-							missingCards.Add(orderedCard);
-							return false;
-						}
-						if (orderedCard.Count > cardInPossibleDeck.Count)
-						{
-							insufficientCards.Add(orderedCard);
-							return false;
-						}
-						return true;
+						return cardInPossibleDeck != null && orderedCard.Count <= cardInPossibleDeck.Count;
 					}).ToList();
 			}
 
-			// If PossibleDecks have changed.
-			if (missingCards.Any() || insufficientCards.Any())
-			{
-				foreach (Card card in missingCards)
-				{
-					Log.Debug("Filtering out decks missing card: " + card);
-				}
-				foreach (Card card in insufficientCards)
-				{
-					Log.Debug("Filtering out decks that don't run enough copies of "+ card);
-				}
-				Log.Info(_possibleDecks.Count + " possible decks");
-				UpdatePredictedCards();
-			}
+			UpdatePredictedCards();
 		}
 
 		public void CheckOpponentMana()

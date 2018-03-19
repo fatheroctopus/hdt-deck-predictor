@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CardProximityRanker.cs" />
+    <Compile Include="CustomLog.cs" />
     <Compile Include="IOpponent.cs" />
     <Compile Include="Opponent.cs" />
     <Compile Include="PredictionInfo.cs" />

@@ -3,19 +3,25 @@ using Hearthstone_Deck_Tracker.Hearthstone;
 using Hearthstone_Deck_Tracker;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System;
 
 namespace DeckPredictor
 {
-	public class CardProximityRanker
+	public class CardProximityRanker : CustomLog.ILogProvider
 	{
+		private const string LogName = "proximity.txt";
 		private List<Deck> _decks;
 		private Dictionary<string, CardInfo> _ratedCards = new Dictionary<string, CardInfo>();
+		private List<CardInfo> _rankedCards = new List<CardInfo>();
+		private CustomLog _proximityLog;
 
 		public CardProximityRanker(List<Deck> decks)
 		{
 			_decks = decks;
+			_proximityLog = new CustomLog(LogName, this);
+			_proximityLog.Write();
 		}
 
 		// Ranks the provided cards by their proximity to each other based on possible decks and returns
@@ -35,6 +41,7 @@ namespace DeckPredictor
 					{
 						Card cardByCopy = Database.GetCardFromId(newCard.Id);
 						cardByCopy.Count = copyCount;
+						Log.Debug("Ranking new card: " + cardByCopy);
 
 						// Find the decks that contain this new card.
 						var decks = FilterDecksByCard(_decks, newCard);
@@ -61,19 +68,40 @@ namespace DeckPredictor
 			}
 
 			// Sort our rated cards first by best proximity rating, then by its solo rating.
-			return _ratedCards
-				.Values
+			_rankedCards = _ratedCards.Values
 				.OrderByDescending(ratedCard => ratedCard.ProximityRating)
 				.ThenByDescending(ratedCard => ratedCard.SoloRating)
-				.Select(ratedCard => ratedCard.Card)
 				.ToList();
+			_proximityLog.Write();
+			return _rankedCards.Select(ratedCard => ratedCard.Card).ToList();
+		}
+
+		public void OnWrite(TextWriter writer)
+		{
+			writer.WriteLine(_decks.Count + " decks in proximity space");
+			writer.WriteLine("");
+			writer.WriteLine(_rankedCards.Count + " cards ranked:");
+			foreach (CardInfo cardInfo in _rankedCards)
+			{
+				writer.WriteLine(cardInfo.ProximityRating + " - " + cardInfo.Card.ToString());
+				List<string> statStrings = new List<string>();
+				statStrings.Add("Solo: " + cardInfo.SoloRating);
+				if (cardInfo.ProximityByCard.Values.Count > 0)
+				{
+					statStrings.Add(
+						"Avg: " + string.Format("{0:0.00}", cardInfo.ProximityByCard.Values.Average()));
+					statStrings.Add("Min: " + cardInfo.ProximityByCard.Values.Min());
+					statStrings.Add("Max: " + cardInfo.ProximityByCard.Values.Max());
+				}
+				writer.WriteLine("     " + String.Join(" / ", statStrings));
+			}
 		}
 
 		private static List<Deck> FilterDecksByCard(List<Deck> decks, Card card) =>
 			decks.Where(deck =>
 				{
 					var cardInDeck = deck.Cards.FirstOrDefault(x => x.Id == card.Id);
-					return cardInDeck != null && cardInDeck.Count <= card.Count;
+					return cardInDeck != null && card.Count <= cardInDeck.Count;
 				}).ToList();
 
 		private class CardInfo

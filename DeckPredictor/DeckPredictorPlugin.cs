@@ -15,6 +15,7 @@ namespace DeckPredictor
 	public class DeckPredictorPlugin : IPlugin
 	{
 		public static readonly string DataDirectory = Path.Combine(Config.AppDataPath, "DeckPredictor");
+		private static readonly string LogDirectory = Path.Combine(DataDirectory, "Logs");
 
 		private PluginConfig _config;
 		private ReadOnlyCollection<Deck> _metaDecks;
@@ -59,6 +60,7 @@ namespace DeckPredictor
 			{
 				Directory.CreateDirectory(DataDirectory);
 			}
+			CustomLog.Initialize(LogDirectory);
 
 			_config = PluginConfig.Load();
 			_predictionLog = new PredictionLog();
