@@ -71,6 +71,7 @@ namespace DeckPredictor
 			_rankedCards = _ratedCards.Values
 				.OrderByDescending(ratedCard => ratedCard.ProximityRating)
 				.ThenByDescending(ratedCard => ratedCard.SoloRating)
+				.ThenBy(ratedCard => ratedCard.Card.Count)
 				.ToList();
 			_proximityLog.Write();
 			return _rankedCards.Select(ratedCard => ratedCard.Card).ToList();

@@ -14,10 +14,10 @@ namespace DeckPredictorTests.Tests
 	{
 		private List<Deck> _decks = new List<Deck>();
 
-		private void AddDeck(List<string> cardNames)
+		private void AddDeck(List<string> cardNames, List<int> counts = null)
 		{
 			var deck = new Deck();
-			CardList(cardNames).ForEach(card => deck.Cards.Add(card));
+			CardList(cardNames, counts).ForEach(card => deck.Cards.Add(card));
 			_decks.Add(deck);
 		}
 
@@ -87,6 +87,25 @@ namespace DeckPredictorTests.Tests
 			var rankedCards = ranker.RankCards(
 				CardList(new List<string> {"Alleycat", "Bear Trap", "Tracking", "Deadly Shot"}));
 			Assert.AreEqual("Alleycat", rankedCards[3].Name);
+		}
+
+		[TestMethod]
+		public void FirstCardIsFirstCopyIfSameDecksInCommon()
+		{
+			AddDeck(new List<string> {"Alleycat"}, new List<int> {2});
+			var ranker = new CardProximityRanker(_decks);
+			var rankedCards = ranker.RankCards(CardList(new List<string> {"Alleycat"}, new List<int> {2}));
+			Assert.AreEqual(1, rankedCards[0].Count);
+		}
+
+		[TestMethod]
+		public void FirstCardIsFirstCopyIfMostDecksInCommon()
+		{
+			AddDeck(new List<string> {"Alleycat"}, new List<int> {2});
+			AddDeck(new List<string> {"Alleycat", "Deadly Shot"}, new List<int> {2, 1});
+			var ranker = new CardProximityRanker(_decks);
+			var rankedCards = ranker.RankCards(CardList(new List<string> {"Alleycat", "Deadly Shot"}));
+			Assert.AreEqual("Alleycat", rankedCards[0].Name);
 		}
 	}
 }
