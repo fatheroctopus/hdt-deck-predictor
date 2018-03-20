@@ -70,7 +70,8 @@ namespace DeckPredictor
 					// Lookup probabilities for any cards not already played.
 					var nextProbabilities = cardInfo.Probabilities.Skip(cardInfo.NumPlayed).ToList();
 					bool alreadyPlayed = (cardInfo.Card.Count - cardInfo.NumPlayed <= 0);
-					return new PercentageItem(nextProbabilities, cardInfo.Playability, alreadyPlayed);
+					return new PercentageItem(
+						nextProbabilities, cardInfo.Playability, alreadyPlayed, cardInfo.OffMeta);
 				}).ToList();
 
 			// Additional stats
@@ -81,7 +82,8 @@ namespace DeckPredictor
 
 		public class PercentageItem
 		{
-			public PercentageItem(List<decimal> probabilities, PlayableType playability, bool alreadyPlayed)
+			public PercentageItem(
+				List<decimal> probabilities, PlayableType playability, bool alreadyPlayed, bool offMeta)
 			{
 				// TODO: setting?
 				bool onlyShowFirst = true;
@@ -99,18 +101,20 @@ namespace DeckPredictor
 					Percentage = String.Join(" / ", probabilities.Select(prob => DecimalToPercent(prob)));
 				}
 
-				// Hide cards that have already been played.
-				ItemVisibility = (alreadyPlayed ? Visibility.Hidden : Visibility.Visible);
+				// Hide stats for cards that have already been played, unless they're off-meta
+				ItemVisibility = (alreadyPlayed && !offMeta ? Visibility.Hidden : Visibility.Visible);
 
-				// Dim cards that aren't playable yet.
-				ItemOpacity = (playability == PlayableType.AboveAvailableMana ? .5 : 1);
+				// Dim stats for cards that aren't playable yet or have already been played.
+				ItemOpacity = ((playability == PlayableType.AboveAvailableMana || alreadyPlayed) ? .5 : 1);
 
 				// Show a star if this card is at opponent's available mana.
-				StarVisibility =
-					(playability == PlayableType.AtAvailableMana ? Visibility.Visible : Visibility.Collapsed);
+				StarVisibility = (!alreadyPlayed && playability == PlayableType.AtAvailableMana)
+					? Visibility.Visible : Visibility.Collapsed;
 				// Show a coin if the opponent can play this by using their coin.
-				CoinVisibility = (playability == PlayableType.AtAvailableManaWithCoin ?
-					Visibility.Visible : Visibility.Collapsed);
+				CoinVisibility = (!alreadyPlayed && playability == PlayableType.AtAvailableManaWithCoin)
+					? Visibility.Visible : Visibility.Collapsed;
+				// Show an X if this card does not fit into this deck according to the current meta.
+				XVisibility = offMeta ? Visibility.Visible : Visibility.Collapsed;
 			}
 
 			public string Percentage { get; private set; }
@@ -121,6 +125,7 @@ namespace DeckPredictor
 
 			public Visibility CoinVisibility { get; private set; }
 			public Visibility StarVisibility { get; private set; }
+			public Visibility XVisibility { get; private set; }
 
 			private static string DecimalToPercent(decimal value) =>
 				Math.Truncate(value * 100).ToString() + "%";

@@ -111,14 +111,22 @@ namespace DeckPredictor
 			}
 
 			_possibleDecks = new List<Deck>(_classDecks);
+			// Go through each ranked card and filter the decks down.
 			foreach (Card orderedCard in _proximityRanker.RankedCards)
 			{
-				_possibleDecks = _possibleDecks.Where(possibleDeck =>
+				var possibleDecks = _possibleDecks.Where(possibleDeck =>
 					{
 						var cardInPossibleDeck =
 							possibleDeck.Cards.FirstOrDefault(x => x.Id == orderedCard.Id);
 						return cardInPossibleDeck != null && orderedCard.Count <= cardInPossibleDeck.Count;
 					}).ToList();
+				// If this card filters possidlbe decks down to zero, back up and ignore the remaining cards.
+				// Those cards will be considered "off-meta".
+				if (possibleDecks.Count == 0)
+				{
+					break;
+				}
+				_possibleDecks = possibleDecks;
 			}
 
 			UpdatePredictedCards();

@@ -77,6 +77,8 @@ namespace DeckPredictor
 				return card;
 			}
 
+			public bool OffMeta => !Card.IsCreated && Card.Collectible && NumPlayed > Probabilities.Count;
+
 			public override string ToString()
 			{
 				string playabilityChar = "";
@@ -96,21 +98,27 @@ namespace DeckPredictor
 						break;
 				}
 
-				var costString = "[" + Card.Cost + playabilityChar + "] ";
-				var createdString = Card.IsCreated ? "[C]" : "";
-				return costString + Card.Name + "(" + Card.Count + ")" +
-					createdString + " - " + GetPercentageString();
-			}
-
-			private string GetPercentageString()
-			{
 				List<string> probStrings = new List<string>();
-				for (int n = 0; n < Probabilities.Count; n++)
+				for (int n = 0; n < Probabilities.Count || n < NumPlayed; n++)
 				{
-					probStrings.Add(n + 1 <= NumPlayed ? "XX"
-						: Math.Truncate(Probabilities[n] * 100) + "%");
+					if (n < Probabilities.Count)
+					{
+						string probString = Math.Truncate(Probabilities[n] * 100) + "%";
+						string playedString = n < NumPlayed ? "(P)" : "";
+						probStrings.Add(probString + playedString);
+					}
+					else if (OffMeta)
+					{
+						// Off-meta
+						probStrings.Add("XX");
+					}
 				}
-				return String.Join(" / ", probStrings);
+				string percentageString = String.Join(" / ", probStrings);
+
+				string costString = "[" + Card.Cost + playabilityChar + "] ";
+				string createdString = Card.IsCreated || !Card.Collectible ? "[C]" : "";
+				return costString + Card.Name + "(" + Card.Count + ")" +
+					createdString + " - " + percentageString;
 			}
 		}
 	}

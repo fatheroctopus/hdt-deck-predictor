@@ -299,5 +299,15 @@ namespace DeckPredictorTests.Tests
 			var info = GetPredictionInfo(controller);
 			Assert.AreEqual(PlayableType.AtAvailableManaWithCoin, info.PredictedCards[0].Playability);
 		}
+
+		[TestMethod]
+		public void CardPlayedNotInMetaDecksIsMarkedOffMeta()
+		{
+			var opponent = new MockOpponent("Hunter");
+			opponent.KnownCards = CardList(new List<string> {"Alleycat"});
+			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
+			var info = GetPredictionInfo(controller);
+			Assert.IsTrue(info.PredictedCards[0].OffMeta);
+		}
 	}
 }

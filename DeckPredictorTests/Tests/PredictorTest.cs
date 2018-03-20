@@ -14,12 +14,31 @@ namespace DeckPredictorTests.Tests
 	{
 		private List<Deck> _metaDecks = new List<Deck>();
 
-		private void AddMetaDeck(string className, List<string> cardNames = null)
+		private void AddMetaDeck(string className, List<string> cardNames = null, List<int> counts = null)
 		{
 			var deck = new Deck();
 			deck.Class = className;
-			cardNames?.ForEach(cardName => deck.Cards.Add(Database.GetCardFromName(cardName)));
+			CardList(cardNames, counts).ForEach(card => deck.Cards.Add(card));
 			_metaDecks.Add(deck);
+		}
+
+		private List<Card> CardList(List<string> cardNames, List<int> counts = null)
+		{
+			if (cardNames == null)
+			{
+				return new List<Card>();
+			}
+			if (counts == null)
+			{
+				counts = Enumerable.Repeat(1, cardNames.Count).ToList();
+			}
+			return cardNames.Zip(counts, (cardName, count) =>
+				{
+					var card = Database.GetCardFromName(cardName);
+					card.Count = count;
+					return card;
+				})
+				.ToList();
 		}
 
 		private string Key(string cardName, int copyCount)
@@ -55,12 +74,13 @@ namespace DeckPredictorTests.Tests
 		public void CheckOpponentCards_MissingCardFiltersDeck()
 		{
 			var opponent = new MockOpponent("Hunter");
-			AddMetaDeck("Hunter");
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
 			opponent.KnownCards.Add(Database.GetCardFromName("Deadly Shot"));
 			predictor.CheckOpponentCards();
-			Assert.AreEqual(0, predictor.PossibleDecks.Count);
+			Assert.AreEqual(1, predictor.PossibleDecks.Count);
 		}
 
 		[TestMethod]
@@ -68,12 +88,13 @@ namespace DeckPredictorTests.Tests
 		{
 			var opponent = new MockOpponent("Hunter");
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
 			opponent.KnownCards.Add(Database.GetCardFromName("Deadly Shot"));
 			opponent.KnownCards.Add(Database.GetCardFromName("Alleycat"));
 			predictor.CheckOpponentCards();
-			Assert.AreEqual(0, predictor.PossibleDecks.Count);
+			Assert.AreEqual(1, predictor.PossibleDecks.Count);
 		}
 
 		[TestMethod]
@@ -81,33 +102,36 @@ namespace DeckPredictorTests.Tests
 		{
 			var opponent = new MockOpponent("Hunter");
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
 			var hunterCard = Database.GetCardFromName("Deadly Shot");
 			opponent.KnownCards.Add(hunterCard);
 			predictor.CheckOpponentCards();
-			Assert.AreEqual(1, predictor.PossibleDecks.Count);
+			Assert.AreEqual(2, predictor.PossibleDecks.Count);
 		}
 
 		[TestMethod]
 		public void GetPossibleDecks_MissingCreatedCardDoesNotFilter()
 		{
 			var opponent = new MockOpponent("Hunter");
-			AddMetaDeck("Hunter");
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
 			var hunterCard = Database.GetCardFromName("Deadly Shot");
 			hunterCard.IsCreated = true;
 			opponent.KnownCards.Add(hunterCard);
 			predictor.CheckOpponentCards();
-			Assert.AreEqual(1, predictor.PossibleDecks.Count);
+			Assert.AreEqual(2, predictor.PossibleDecks.Count);
 		}
 
 		[TestMethod]
 		public void GetPossibleDecks_MissingSecondCardAfterCreatedCardFiltersDeck()
 		{
 			var opponent = new MockOpponent("Hunter");
-			AddMetaDeck("Hunter");
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
 			var hunterCard = Database.GetCardFromName("Deadly Shot");
@@ -115,7 +139,7 @@ namespace DeckPredictorTests.Tests
 			opponent.KnownCards.Add(hunterCard);
 			opponent.KnownCards.Add(Database.GetCardFromName("Deadly Shot"));
 			predictor.CheckOpponentCards();
-			Assert.AreEqual(0, predictor.PossibleDecks.Count);
+			Assert.AreEqual(1, predictor.PossibleDecks.Count);
 		}
 
 		[TestMethod]
@@ -136,13 +160,14 @@ namespace DeckPredictorTests.Tests
 		{
 			var opponent = new MockOpponent("Hunter");
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
 
 			var hunterCard2Copies = Database.GetCardFromName("Deadly Shot");
 			hunterCard2Copies.Count = 2;
 			opponent.KnownCards.Add(hunterCard2Copies);
 			predictor.CheckOpponentCards();
-			Assert.AreEqual(0, predictor.PossibleDecks.Count);
+			Assert.AreEqual(1, predictor.PossibleDecks.Count);
 		}
 
 		[TestMethod]
@@ -155,6 +180,18 @@ namespace DeckPredictorTests.Tests
 
 			opponent.KnownCards.Add(Database.GetCardFromName("Deadly Shot"));
 			predictor.CheckOpponentCards();
+			predictor.CheckOpponentCards();
+			Assert.AreEqual(1, predictor.PossibleDecks.Count);
+		}
+
+		[TestMethod]
+		public void GetPossibleDecks_IgnoresOffMetaCard()
+		{
+			var opponent = new MockOpponent("Hunter");
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot"});
+			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
+
+			opponent.KnownCards = CardList(new List<string> {"Deadly Shot", "Alleycat"});
 			predictor.CheckOpponentCards();
 			Assert.AreEqual(1, predictor.PossibleDecks.Count);
 		}
@@ -185,15 +222,16 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
-		public void GetPredictedCards_EmptyAfterDeckFiltered()
+		public void GetPredictedCards_FewerAfterDeckFiltered()
 		{
 			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Alleycat"});
+			AddMetaDeck("Hunter", new List<string> {"Deadly Shot", "Bear Trap"});
 
 			var opponent = new MockOpponent("Hunter");
 			var predictor = new Predictor(opponent, _metaDecks.AsReadOnly());
-			opponent.KnownCards.Add(Database.GetCardFromName("Savannah Highmane"));
+			opponent.KnownCards.Add(Database.GetCardFromName("Alleycat"));
 			predictor.CheckOpponentCards();
-			Assert.AreEqual(0, predictor.PredictedCards.Count);
+			Assert.AreEqual(2, predictor.PredictedCards.Count);
 		}
 
 		[TestMethod]
