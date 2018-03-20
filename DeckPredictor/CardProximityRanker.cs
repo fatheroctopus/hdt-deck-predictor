@@ -84,9 +84,9 @@ namespace DeckPredictor
 
 		public void OnWrite(TextWriter writer)
 		{
-			writer.WriteLine(_decks.Count + " decks in proximity space");
+			writer.WriteLine(_decks.Count + " deck(s) in proximity space");
 			writer.WriteLine("");
-			writer.WriteLine(_rankedCards.Count + " cards ranked:");
+			writer.WriteLine(_rankedCards.Count + " card(s) ranked:");
 			foreach (CardInfo cardInfo in _rankedCards)
 			{
 				writer.WriteLine(cardInfo.ProximityRating + " - " + cardInfo.Card.ToString());
@@ -96,6 +96,7 @@ namespace DeckPredictor
 				{
 					statStrings.Add(
 						"Avg: " + string.Format("{0:0.00}", cardInfo.ProximityByCard.Values.Average()));
+					statStrings.Add("Med: " + string.Format("{0:0.00}", cardInfo.MedianProximity));
 					statStrings.Add("Min: " + cardInfo.ProximityByCard.Values.Min());
 					statStrings.Add("Max: " + cardInfo.ProximityByCard.Values.Max());
 				}
@@ -129,6 +130,25 @@ namespace DeckPredictor
 			public string Key() => Key(Card, Card.Count);
 
 			public int ProximityRating => ProximityByCard.Values.Sum();
+
+			public double MedianProximity
+			{
+				get
+				{
+					int count = ProximityByCard.Count();
+					var orderedProximities = ProximityByCard.Values.OrderBy(prox => prox).ToList();
+					if (count % 2 == 1)
+					{
+						return orderedProximities[count / 2];
+					}
+					else
+					{
+						double median = orderedProximities[count / 2] + orderedProximities[(count - 1) / 2];
+						median /= 2;
+						return median;
+					}
+				}
+			}
 		}
 	}
 }
