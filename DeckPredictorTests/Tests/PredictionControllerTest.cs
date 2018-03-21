@@ -216,15 +216,27 @@ namespace DeckPredictorTests.Tests
 		}
 
 		[TestMethod]
-		public void DoesNotAddJoustedCards()
+		public void JoustedCardsAreAddedButPlayedCountIsZero()
 		{
 			var opponent = new MockOpponent("Hunter");
 			AddMetaDeck("Hunter", new List<string> {});
-			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
 			opponent.KnownCards = CardList(new List<string> {"Alleycat"});
 			opponent.KnownCards[0].Jousted = true;
+			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
 			var info = GetPredictionInfo(controller);
-			Assert.AreEqual(0, info.PredictedCards.Count);
+			Assert.AreEqual(0, info.PredictedCards[0].NumPlayed);
+		}
+
+		[TestMethod]
+		public void JoustedCardCanBeOffMeta()
+		{
+			var opponent = new MockOpponent("Hunter");
+			AddMetaDeck("Hunter", new List<string> {});
+			opponent.KnownCards = CardList(new List<string> {"Alleycat"});
+			opponent.KnownCards[0].Jousted = true;
+			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
+			var info = GetPredictionInfo(controller);
+			Assert.IsTrue(info.PredictedCards[0].OffMeta);
 		}
 
 		[TestMethod]

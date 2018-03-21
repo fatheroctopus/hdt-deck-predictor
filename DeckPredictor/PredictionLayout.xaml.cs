@@ -75,7 +75,7 @@ namespace DeckPredictor
 				}).ToList();
 
 			// Additional stats
-			PossibleCards.Text = "Showing " +
+			PossibleCards.Text = "Predicting " +
 				prediction.NumPredictedCards + " / " + prediction.NumPossibleCards + " Possible Cards";
 			PossibleDecks.Text = prediction.NumPossibleDecks.ToString() + " Matching Decks";
 		}
@@ -108,13 +108,13 @@ namespace DeckPredictor
 				ItemOpacity = ((playability == PlayableType.AboveAvailableMana || alreadyPlayed) ? .5 : 1);
 
 				// Show a star if this card is at opponent's available mana.
-				StarVisibility = (!alreadyPlayed && playability == PlayableType.AtAvailableMana)
-					? Visibility.Visible : Visibility.Collapsed;
+				bool showStar = (!alreadyPlayed && playability == PlayableType.AtAvailableMana);
+				StarVisibility = showStar ? Visibility.Visible : Visibility.Collapsed;
 				// Show a coin if the opponent can play this by using their coin.
-				CoinVisibility = (!alreadyPlayed && playability == PlayableType.AtAvailableManaWithCoin)
-					? Visibility.Visible : Visibility.Collapsed;
+				bool showCoin = (!alreadyPlayed && playability == PlayableType.AtAvailableManaWithCoin);
+				CoinVisibility = showCoin ? Visibility.Visible : Visibility.Collapsed;
 				// Show an X if this card does not fit into this deck according to the current meta.
-				XVisibility = offMeta ? Visibility.Visible : Visibility.Collapsed;
+				XVisibility = offMeta && !showStar && !showCoin ? Visibility.Visible : Visibility.Collapsed;
 			}
 
 			public string Percentage { get; private set; }

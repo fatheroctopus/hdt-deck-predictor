@@ -97,13 +97,13 @@ namespace DeckPredictor
 		{
 			// Make CardInfos for all cards that have already been played
 			var cardInfos = _opponent.KnownCards
-				.Where(card => !card.Jousted) // Jousted cards have not yet been played
 				.Select(card =>
 				{
 					var playedCard = Database.GetCardFromId(card.Id);
 					playedCard.Count = card.Count;
 					playedCard.IsCreated = card.IsCreated;
-					return new PredictionInfo.CardInfo(playedCard, playedCard.Count);
+					var numPlayed = card.Jousted ? 0 : playedCard.Count;
+					return new PredictionInfo.CardInfo(playedCard, numPlayed);
 				}).ToList();
 
 			// Get the predicted cards from the original deck list and group them together by id.

@@ -77,7 +77,7 @@ namespace DeckPredictor
 				return card;
 			}
 
-			public bool OffMeta => !Card.IsCreated && Card.Collectible && NumPlayed > Probabilities.Count;
+			public bool OffMeta => !Card.IsCreated && Card.Collectible && Card.Count > Probabilities.Count;
 
 			public override string ToString()
 			{
