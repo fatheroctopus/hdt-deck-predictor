@@ -15,7 +15,7 @@ namespace DeckPredictor
 {
 	public class PredictionController
 	{
-		private const string LogName = "proximity.txt";
+		private const string LogName = "prediction.txt";
 		private IOpponent _opponent;
 		private Predictor _predictor;
 		private bool _firstOpponentDraw = true;
