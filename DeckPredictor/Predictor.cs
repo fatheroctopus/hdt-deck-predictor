@@ -18,6 +18,7 @@ namespace DeckPredictor
 
 		private List<Deck> _classDecks;
 		private List<Deck> _possibleDecks;
+		private int _numIgnoredCards;
 		private Dictionary<string, CardInfo> _possibleCards =
 			new Dictionary<string, CardInfo>();
 		private List<CardInfo> _predictedCards;
@@ -75,6 +76,8 @@ namespace DeckPredictor
 			return null;
 		}
 
+		private int PredictionSize => DeckSize - _numIgnoredCards;
+
 		public void CheckOpponentClass()
 		{
 			if (_classDetected)
@@ -112,7 +115,9 @@ namespace DeckPredictor
 
 			_possibleDecks = new List<Deck>(_classDecks);
 			// Go through each ranked card and filter the decks down.
-			foreach (Card orderedCard in _proximityRanker.RankedCards)
+			var rankedCards = _proximityRanker.RankedCards;
+			_numIgnoredCards = rankedCards.Count;
+			foreach (Card orderedCard in rankedCards)
 			{
 				var possibleDecks = _possibleDecks.Where(possibleDeck =>
 					{
@@ -120,15 +125,15 @@ namespace DeckPredictor
 							possibleDeck.Cards.FirstOrDefault(x => x.Id == orderedCard.Id);
 						return cardInPossibleDeck != null && orderedCard.Count <= cardInPossibleDeck.Count;
 					}).ToList();
-				// If this card filters possidlbe decks down to zero, back up and ignore the remaining cards.
+				// If this card filters possible decks down to zero, back up and ignore the remaining cards.
 				// Those cards will be considered "off-meta".
 				if (possibleDecks.Count == 0)
 				{
 					break;
 				}
+				_numIgnoredCards--;
 				_possibleDecks = possibleDecks;
 			}
-
 			UpdatePredictedCards();
 		}
 
@@ -180,11 +185,11 @@ namespace DeckPredictor
 				.ThenBy(predictedCard => predictedCard.Card.Name)
 				.ToList();
 
-			// If our list is greater than the Deck Size, find the probability of the first card that won't
-			// make the cut.  All other cards have to be strictly greater than that probability.
+			// If our list is greater than the PredictionSize, find the probability of the first card that
+			// won't make the cut.  All other cards have to be strictly greater than that probability.
 			// We do this so none of the top 30 are there for an arbitrary reason.
-			decimal insufficientProbability = sortedPossibleCards.Count > DeckSize
-				? sortedPossibleCards.ElementAt(DeckSize).Probability
+			decimal insufficientProbability = sortedPossibleCards.Count > PredictionSize
+				? sortedPossibleCards.ElementAt(PredictionSize).Probability
 				: 0;
 			_predictedCards = sortedPossibleCards
 				.TakeWhile(predictedCard => predictedCard.Probability > insufficientProbability &&
@@ -209,7 +214,8 @@ namespace DeckPredictor
 						possibleCard.Probability >= ProbabilityIncludeIfOptimal;
 					// Go until the deck is filled, but allow in all valid cards at the same probability.
 					if ((playableCheck || optimalCheck) &&
-						(_predictedCards.Count < DeckSize || possibleCard.Probability >= lastPickProbability))
+						(_predictedCards.Count < PredictionSize ||
+							possibleCard.Probability >= lastPickProbability))
 					{
 						_predictedCards.Add(possibleCard);
 						lastPickProbability = possibleCard.Probability;
@@ -224,6 +230,7 @@ namespace DeckPredictor
 				.ThenBy(predictedCard => predictedCard.Card.Name)
 				.ToList();
 
+			Log.Debug("Target prediction size: " + PredictionSize);
 			Log.Debug(_possibleCards.Count + " possible cards");
 			Log.Debug(_predictedCards.Count + " predicted cards");
 		}
