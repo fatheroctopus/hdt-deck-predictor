@@ -9,7 +9,7 @@ using System;
 
 namespace DeckPredictor
 {
-	public class PredictionInfo
+	public class PredictionInfo : CustomLog.ILogProvider
 	{
 		public PredictionInfo(int numPossibleDecks, int numPossibleCards, int availableMana,
 			int availableManaWithCoin, List<CardInfo> predictedCards, List<CardInfo> runnerUpCards)
@@ -39,7 +39,7 @@ namespace DeckPredictor
 
 		public int NumPredictedCards => PredictedCards.Sum(cardInfo => cardInfo.Probabilities.Count);
 
-		public void WritePrediction(TextWriter writer)
+		public void OnWriteLog(TextWriter writer)
 		{
 			writer.WriteLine(NumPossibleDecks + " possible decks");
 			writer.WriteLine(NumPossibleCards + " possible cards");

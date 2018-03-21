@@ -15,14 +15,17 @@ namespace DeckPredictor
 {
 	public class PredictionController
 	{
+		private const string LogName = "proximity.txt";
 		private IOpponent _opponent;
 		private Predictor _predictor;
 		private bool _firstOpponentDraw = true;
+		private CustomLog _predictionLog;
 
 		public PredictionController(IOpponent opponent, ReadOnlyCollection<Deck> metaDecks)
 		{
 			_opponent = opponent;
 			_predictor = new Predictor(opponent, metaDecks);
+			_predictionLog = new CustomLog(LogName);
 		}
 
 		public List<Action<PredictionInfo>> OnPredictionUpdate = new List<Action<PredictionInfo>>();
@@ -148,6 +151,7 @@ namespace DeckPredictor
 			var predictionInfo = new PredictionInfo(
 				_predictor.PossibleDecks.Count, _predictor.PossibleCards.Count,
 				_predictor.AvailableMana, _predictor.AvailableManaWithCoin, predictedCards, runnerUps);
+			_predictionLog.Write(predictionInfo);
 			OnPredictionUpdate.ForEach(callback => callback.Invoke(predictionInfo));
 		}
 

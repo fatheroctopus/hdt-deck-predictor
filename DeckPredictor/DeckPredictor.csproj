@@ -66,7 +66,6 @@
     <Compile Include="IOpponent.cs" />
     <Compile Include="Opponent.cs" />
     <Compile Include="PredictionInfo.cs" />
-    <Compile Include="PredictionLog.cs" />
     <Compile Include="PredictionController.cs" />
     <Compile Include="PredictionView.cs" />
     <Compile Include="PredictionLayout.xaml.cs" />

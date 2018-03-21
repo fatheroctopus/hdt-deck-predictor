@@ -21,7 +21,6 @@ namespace DeckPredictor
 		private ReadOnlyCollection<Deck> _metaDecks;
 		private PredictionController _controller;
 		private PredictionView _view;
-		private PredictionLog _predictionLog;
 
 		public string Author
 		{
@@ -63,7 +62,6 @@ namespace DeckPredictor
 			CustomLog.Initialize(LogDirectory);
 
 			_config = PluginConfig.Load();
-			_predictionLog = new PredictionLog();
 
 			// Synchronously retrieve our meta decks and keep them in memory.
 			var metaRetriever = new MetaRetriever();
@@ -83,7 +81,6 @@ namespace DeckPredictor
 						var opponent = new Opponent(Hearthstone_Deck_Tracker.Core.Game);
 						_controller = new PredictionController(opponent, _metaDecks);
 						_view.SetEnabled(true);
-						_controller.OnPredictionUpdate.Add(_predictionLog.OnPredictionUpdate);
 						_controller.OnPredictionUpdate.Add(_view.OnPredictionUpdate);
 					}
 					else

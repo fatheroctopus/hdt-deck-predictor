@@ -20,8 +20,8 @@ namespace DeckPredictor
 		public CardProximityRanker(List<Deck> decks)
 		{
 			_decks = decks;
-			_proximityLog = new CustomLog(LogName, this);
-			_proximityLog.Write();
+			_proximityLog = new CustomLog(LogName);
+			_proximityLog.Write(this);
 		}
 
 		// The current list of cards ranked by closest proximity to the other cards in the list.
@@ -78,11 +78,11 @@ namespace DeckPredictor
 				.ThenByDescending(ratedCard => ratedCard.SoloRating)
 				.ThenBy(ratedCard => ratedCard.Card.Count)
 				.ToList();
-			_proximityLog.Write();
+			_proximityLog.Write(this);
 			return newCardFound;
 		}
 
-		public void OnWrite(TextWriter writer)
+		public void OnWriteLog(TextWriter writer)
 		{
 			writer.WriteLine(_decks.Count + " deck(s) in proximity space");
 			writer.WriteLine("");

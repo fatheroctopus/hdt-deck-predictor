@@ -15,7 +15,6 @@ namespace DeckPredictor
 		private static readonly string LogDirectory = Path.Combine(DeckPredictorPlugin.DataDirectory, "Logs");
 		private static string _logDirectory;
 		private string _logFile;
-		private ILogProvider _provider;
 
 		public static void Initialize(string logDirectory)
 		{
@@ -30,17 +29,16 @@ namespace DeckPredictor
 		{
 			// Log providers implement this to define the contents of a log.
 			// Triggered whenever CustomLog.Write is called.
-			void OnWrite(TextWriter writer);
+			void OnWriteLog(TextWriter writer);
 		}
 
-		public CustomLog(string logFileName, ILogProvider provider)
+		public CustomLog(string logFileName)
 		{
 			if (_logDirectory == null)
 			{
 				return;
 			}
 
-			_provider = provider;
 			_logFile = Path.Combine(_logDirectory, logFileName);
 			// Create file if it doesn't exist.
 			var fileInfo = new FileInfo(_logFile);
@@ -51,7 +49,7 @@ namespace DeckPredictor
 			}
 		}
 
-		public void Write()
+		public void Write(ILogProvider provider)
 		{
 			if (_logDirectory == null)
 			{
@@ -60,7 +58,7 @@ namespace DeckPredictor
 
 			using (StreamWriter sw = new StreamWriter(_logFile, false))
 			{
-				_provider.OnWrite(sw);
+				provider.OnWriteLog(sw);
 			}
 		}
 	}
