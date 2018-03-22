@@ -88,7 +88,7 @@ namespace DeckPredictor
 						Log.Info("No deck predictions for " + format + " " + mode + " game");
 					}
 				});
-			GameEvents.OnGameEnd.Add(() =>
+			GameEvents.OnInMenu.Add(() =>
 				{
 					if (_controller != null)
 					{
