@@ -107,7 +107,7 @@ namespace DeckPredictor
 		private void TestView()
 		{
 			var cardList = new List<PredictionInfo.CardInfo>();
-			for (int n = 0; n < 10; n++)
+			for (int n = 0; n < 3; n++)
 			{
 				var card1 = Database.GetCardFromName("Ice Block");
 				card1.Count = 2;
@@ -116,11 +116,11 @@ namespace DeckPredictor
 				card2.Count = 1;
 				card2.IsCreated = true;
 				var cardInfo2 = new PredictionInfo.CardInfo(card2, 1);
-				// var card3 = Database.GetCardFromName("Greater Healing Potion");
-				// var cardInfo3 = new PredictionInfo.CardInfo(card3, 1);
+				var card3 = Database.GetCardFromName("Flamestrike");
+				var cardInfo3 = new PredictionInfo.CardInfo(card3, new List<decimal> {1, 1}, 0);
 				cardList.Add(cardInfo1);
 				cardList.Add(cardInfo2);
-				// cardList.Add(cardInfo3);
+				cardList.Add(cardInfo3);
 			}
 			cardList = cardList
 				.OrderBy(cardInfo => cardInfo.Card.Cost)

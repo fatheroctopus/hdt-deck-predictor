@@ -124,7 +124,7 @@ namespace DeckPredictor
 					? Visibility.Hidden : Visibility.Visible;
 
 				// Dim stats for cards that aren't playable yet or have already been played.
-				ItemOpacity = ((playability == PlayableType.AboveAvailableMana || alreadyPlayed) ? .5 : 1);
+				ItemOpacity = ((playability == PlayableType.AboveAvailableMana || alreadyPlayed) ? .3 : 1);
 			}
 
 			public string Percentage { get; private set; }

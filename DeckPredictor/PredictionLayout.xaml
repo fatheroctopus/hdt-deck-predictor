@@ -1,6 +1,7 @@
 <ItemsControl x:Class="DeckPredictor.PredictionLayout"
 		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:hdt="clr-namespace:Hearthstone_Deck_Tracker;assembly=HearthstoneDeckTracker"
 		xmlns:controls="clr-namespace:Hearthstone_Deck_Tracker.Controls;assembly=HearthstoneDeckTracker"
 		Height="Auto" Width="Auto"
 		Background="Transparent">
@@ -24,19 +25,16 @@
 				<ItemsControl.ItemTemplate>
 					<DataTemplate>
 						<Border BorderBrush="Black" BorderThickness="1" Visibility="{Binding ItemVisibility}">
-							<Grid Height="32" Background="Gray" Opacity="{Binding ItemOpacity}">
+							<Grid Height="32" Background="SteelBlue" Opacity="{Binding ItemOpacity}">
 								<Grid.ColumnDefinitions>
 									<ColumnDefinition SharedSizeGroup="GroupName1"/>
 									<ColumnDefinition SharedSizeGroup="GroupName2"/>
 								</Grid.ColumnDefinitions>
-								<TextBlock
+								<hdt:HearthstoneTextBlock
 										Grid.Column="0"
 										Text="{Binding Percentage}"
-										FontFamily="/HearthstoneDeckTracker;component/Resources/#Chunkfive"
 										VerticalAlignment="Center"
-										FontSize="17"
-										Padding="5,0,5,0"
-										Foreground="AntiqueWhite"/>
+										Margin="5,0,5,0"/>
 								<Image
 										Grid.Column="1"
 										Visibility="{Binding CoinVisibility}"
@@ -62,22 +60,20 @@
 			</ItemsControl>
 		</StackPanel>
 		<!-- Additional stats below the card list -->
-		<TextBlock
-				Name="PossibleCards"
-				FontFamily="/HearthstoneDeckTracker;component/Resources/#Chunkfive"
-				TextAlignment="Center"
-				Background="Gray"
-				FontSize="16"
-				Margin="0,2"
-				Foreground="AntiqueWhite"/>
-		<TextBlock
-				Name="PossibleDecks"
-				FontFamily="/HearthstoneDeckTracker;component/Resources/#Chunkfive"
-				TextAlignment="Center"
-				Background="Gray"
-				FontSize="16"
-				Margin="0,2"
-				Foreground="AntiqueWhite"/>
+		<Border Margin="2,0,0,0" BorderBrush="Black" Background="SlateGray" BorderThickness="1">
+			<StackPanel>
+				<hdt:HearthstoneTextBlock
+						Name="PossibleCards"
+						TextAlignment="Center"
+						FontSize="16"
+						Margin="0,2"/>
+				<hdt:HearthstoneTextBlock
+						Name="PossibleDecks"
+						TextAlignment="Center"
+						FontSize="16"
+						Margin="0,2"/>
+			</StackPanel>
+		</Border>
 	</StackPanel>
 	<!-- Tool Tip appears to the right of the main stack -->
 	<controls:CardToolTipControl x:Name="CardToolTip" Height="auto" Panel.ZIndex="100" VerticalAlignment="Top"
