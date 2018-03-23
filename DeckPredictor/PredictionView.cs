@@ -106,7 +106,6 @@ namespace DeckPredictor
 
 		private void TestView()
 		{
-			// TODO: AnimatedCardList seems to be flipping the order of Create/Uncreated items.
 			var cardList = new List<PredictionInfo.CardInfo>();
 			for (int n = 0; n < 10; n++)
 			{
@@ -126,7 +125,7 @@ namespace DeckPredictor
 			cardList = cardList
 				.OrderBy(cardInfo => cardInfo.Card.Cost)
 				.ThenBy(cardInfo => cardInfo.Card.Name)
-				.ThenByDescending(cardInfo => cardInfo.Card.IsCreated)
+				.ThenBy(cardInfo => cardInfo.Card.IsCreated)
 				.ToList();
 			var prediction = new PredictionInfo(1, 30, 3, 4, cardList, new List<PredictionInfo.CardInfo> {});
 			SetEnabled(true);

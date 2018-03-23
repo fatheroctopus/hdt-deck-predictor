@@ -193,14 +193,14 @@ namespace DeckPredictorTests.Tests
 			opponent.KnownCards[0].IsCreated = true;
 			var info = GetPredictionInfo(controller);
 			Assert.AreEqual(2, info.PredictedCards.Count);
-			var createdCardInfo = info.PredictedCards[0];
-			Assert.AreEqual(1, createdCardInfo.NumPlayed);
-			Assert.AreEqual(1, createdCardInfo.Card.Count);
-			Assert.IsTrue(createdCardInfo.Card.IsCreated);
-			var originalCardInfo = info.PredictedCards[1];
+			var originalCardInfo = info.PredictedCards[0];
 			Assert.AreEqual(0, originalCardInfo.NumPlayed);
 			Assert.AreEqual(1, originalCardInfo.Card.Count);
 			Assert.IsFalse(originalCardInfo.Card.IsCreated);
+			var createdCardInfo = info.PredictedCards[1];
+			Assert.AreEqual(1, createdCardInfo.NumPlayed);
+			Assert.AreEqual(1, createdCardInfo.Card.Count);
+			Assert.IsTrue(createdCardInfo.Card.IsCreated);
 		}
 
 		[TestMethod]
@@ -213,6 +213,19 @@ namespace DeckPredictorTests.Tests
 			opponent.KnownCards[0].IsCreated = true;
 			var info = GetPredictionInfo(controller);
 			Assert.AreEqual("Alleycat", info.PredictedCards[0].Card.Name);
+		}
+
+		// This is necessary due to a workaround fix in PredictionLayout.xaml.cs
+		[TestMethod]
+		public void SortEntriesByCreated()
+		{
+			var opponent = new MockOpponent("Hunter");
+			AddMetaDeck("Hunter", new List<string> {"Bear Trap"});
+			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
+			opponent.KnownCards = CardList(new List<string> {"Bear Trap", "Bear Trap"});
+			opponent.KnownCards[0].IsCreated = true;
+			var info = GetPredictionInfo(controller);
+			Assert.IsFalse(info.PredictedCards[0].Card.IsCreated);
 		}
 
 		[TestMethod]

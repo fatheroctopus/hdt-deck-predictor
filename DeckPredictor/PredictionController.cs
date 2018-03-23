@@ -138,7 +138,7 @@ namespace DeckPredictor
 			var predictedCards = cardInfos
 					.OrderBy(cardInfo => cardInfo.Card.Cost)
 					.ThenBy(cardInfo => cardInfo.Card.Name)
-					.ThenByDescending(cardInfo => cardInfo.Card.IsCreated)
+					.ThenBy(cardInfo => cardInfo.Card.IsCreated)  // See HACK in PredictionLayout.xaml.cs
 					.ToList();
 			var runnerUps = _predictor.GetNextPredictedCards(30).Select(cardInfo =>
 				{
