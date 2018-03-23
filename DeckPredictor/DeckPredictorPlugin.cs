@@ -103,30 +103,36 @@ namespace DeckPredictor
 			// Events that reveal cards need a 100ms delay. This is because HDT takes some extra
 			// time to process all the tags we need, but it doesn't wait to send these callbacks.
 			int delayMs = 100;
-			GameEvents.OnOpponentPlay.Add(card =>
-				Task.Delay(delayMs)
-					.ContinueWith(_ => _controller?.OnOpponentPlay(card))
-					.Start());
-			GameEvents.OnOpponentHandDiscard.Add(card =>
-				Task.Delay(delayMs)
-					.ContinueWith(_ => _controller?.OnOpponentHandDiscard(card))
-					.Start());
-			GameEvents.OnOpponentDeckDiscard.Add(card =>
-				Task.Delay(delayMs)
-					.ContinueWith(_ => _controller?.OnOpponentDeckDiscard(card))
-					.Start());
-			GameEvents.OnOpponentSecretTriggered.Add(card =>
-				Task.Delay(delayMs)
-					.ContinueWith(_ => _controller?.OnOpponentSecretTriggered(card))
-					.Start());
-			GameEvents.OnOpponentJoustReveal.Add(card =>
-				Task.Delay(delayMs)
-					.ContinueWith(_ => _controller?.OnOpponentJoustReveal(card))
-					.Start());
-			GameEvents.OnOpponentDeckToPlay.Add(card =>
-				Task.Delay(delayMs)
-					.ContinueWith(_ => _controller?.OnOpponentDeckToPlay(card))
-					.Start());
+			GameEvents.OnOpponentPlay.Add(async card =>
+				{
+					await Task.Delay(delayMs);
+					_controller?.OnOpponentPlay(card);
+				});
+			GameEvents.OnOpponentHandDiscard.Add(async card =>
+				{
+					await Task.Delay(delayMs);
+					_controller?.OnOpponentHandDiscard(card);
+				});
+			GameEvents.OnOpponentDeckDiscard.Add(async card =>
+				{
+					await Task.Delay(delayMs);
+					_controller?.OnOpponentDeckDiscard(card);
+				});
+			GameEvents.OnOpponentSecretTriggered.Add(async card =>
+				{
+					await Task.Delay(delayMs);
+					_controller?.OnOpponentSecretTriggered(card);
+				});
+			GameEvents.OnOpponentJoustReveal.Add(async card =>
+				{
+					await Task.Delay(delayMs);
+					_controller?.OnOpponentJoustReveal(card);
+				});
+			GameEvents.OnOpponentDeckToPlay.Add(async card =>
+				{
+					await Task.Delay(delayMs);
+					_controller?.OnOpponentDeckToPlay(card);
+				});
 		}
 
 		public void OnUnload()

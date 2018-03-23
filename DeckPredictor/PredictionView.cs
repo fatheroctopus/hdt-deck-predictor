@@ -117,11 +117,11 @@ namespace DeckPredictor
 				card2.Count = 1;
 				card2.IsCreated = true;
 				var cardInfo2 = new PredictionInfo.CardInfo(card2, 1);
-				var card3 = Database.GetCardFromName("Greater Healing Potion");
-				var cardInfo3 = new PredictionInfo.CardInfo(card3, 1);
+				// var card3 = Database.GetCardFromName("Greater Healing Potion");
+				// var cardInfo3 = new PredictionInfo.CardInfo(card3, 1);
 				cardList.Add(cardInfo1);
 				cardList.Add(cardInfo2);
-				cardList.Add(cardInfo3);
+				// cardList.Add(cardInfo3);
 			}
 			cardList = cardList
 				.OrderBy(cardInfo => cardInfo.Card.Cost)
