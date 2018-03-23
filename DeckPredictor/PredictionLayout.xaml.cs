@@ -109,18 +109,18 @@ namespace DeckPredictor
 					Percentage = String.Join(" / ", probabilities.Select(prob => DecimalToPercent(prob)));
 				}
 
-				// Show a star if this card is at opponent's available mana.
-				bool showStar = (!alreadyPlayed && playability == PlayableType.AtAvailableMana);
-				StarVisibility = showStar ? Visibility.Visible : Visibility.Collapsed;
+				// Show the optimal icon if this card is at opponent's available mana.
+				bool showOptimal = (!alreadyPlayed && playability == PlayableType.AtAvailableMana);
+				OptimalVisibility = showOptimal ? Visibility.Visible : Visibility.Collapsed;
 				// Show a coin if the opponent can play this by using their coin.
 				bool showCoin = (!alreadyPlayed && playability == PlayableType.AtAvailableManaWithCoin);
 				CoinVisibility = showCoin ? Visibility.Visible : Visibility.Collapsed;
 				// Show an X if this card does not fit into this deck according to the current meta.
-				bool showX = (offMeta && !showStar && !showCoin);
+				bool showX = (offMeta && !showOptimal && !showCoin);
 				XVisibility = showX ? Visibility.Visible : Visibility.Collapsed;
 
 				// Hide stats for cards if there's nothing to show them.
-				ItemVisibility = (Percentage == "" && !showStar && !showCoin && !showX)
+				ItemVisibility = (Percentage == "" && !showOptimal && !showCoin && !showX)
 					? Visibility.Hidden : Visibility.Visible;
 
 				// Dim stats for cards that aren't playable yet or have already been played.
@@ -134,7 +134,7 @@ namespace DeckPredictor
 			public Visibility ItemVisibility { get; private set; }
 
 			public Visibility CoinVisibility { get; private set; }
-			public Visibility StarVisibility { get; private set; }
+			public Visibility OptimalVisibility { get; private set; }
 			public Visibility XVisibility { get; private set; }
 
 			private static string DecimalToPercent(decimal value) =>

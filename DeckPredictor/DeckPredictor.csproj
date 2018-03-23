@@ -83,13 +83,13 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\icon_star.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\icon_coin.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\icon_x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icon_optimal.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

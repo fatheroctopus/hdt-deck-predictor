@@ -118,9 +118,12 @@ namespace DeckPredictor
 				var cardInfo2 = new PredictionInfo.CardInfo(card2, 1);
 				var card3 = Database.GetCardFromName("Flamestrike");
 				var cardInfo3 = new PredictionInfo.CardInfo(card3, new List<decimal> {1, 1}, 0);
+				var card4 = Database.GetCardFromName("Polymorph");
+				var cardInfo4 = new PredictionInfo.CardInfo(card4, new List<decimal> {.5m, 1}, 0);
 				cardList.Add(cardInfo1);
 				cardList.Add(cardInfo2);
 				cardList.Add(cardInfo3);
+				cardList.Add(cardInfo4);
 			}
 			cardList = cardList
 				.OrderBy(cardInfo => cardInfo.Card.Cost)
