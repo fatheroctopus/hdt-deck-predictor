@@ -5,5 +5,9 @@ rem echo .
 "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe" ^
 DeckPredictor.sln /Property:Configuration=Debug
 set BUILD_STATUS=%ERRORLEVEL%
-if %BUILD_STATUS%==0 "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\Extensions\TestPlatform\VSTest.Console.exe" ^
-"DeckPredictorTests/bin/x86/Debug/DeckPredictorTests.dll" /Platform:x86
+if %BUILD_STATUS%==0 (
+	copy /Y "DeckPredictor\bin\x86\Debug\DeckPredictor.dll" "C:\Users\Geoff\AppData\Roaming\HearthstoneDeckTracker\Plugins\DeckPredictor\DeckPredictor.dll"
+	copy /Y "DeckPredictor\bin\x86\Debug\DeckPredictor.pdb" "C:\Users\Geoff\AppData\Roaming\HearthstoneDeckTracker\Plugins\DeckPredictor\DeckPredictor.pdb"
+	"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\Extensions\TestPlatform\VSTest.Console.exe" ^
+	"DeckPredictorTests/bin/x86/Debug/DeckPredictorTests.dll" /Platform:x86
+)
