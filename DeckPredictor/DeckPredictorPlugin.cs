@@ -24,7 +24,7 @@ namespace DeckPredictor
 
 		public string Author
 		{
-			get { return "gpitsch"; }
+			get { return "fatheroctopus.bandcamp.com"; }
 		}
 
 		public string ButtonText
