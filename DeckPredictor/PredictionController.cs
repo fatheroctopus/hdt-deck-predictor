@@ -124,7 +124,7 @@ namespace DeckPredictor
 					int numPredictedCards = probabilities.Count;
 					if (playedCardInfo != null)
 					{
-						playedCardInfo.Card.Count = numPredictedCards;
+						playedCardInfo.Card.Count = Math.Max(numPredictedCards, playedCardInfo.Card.Count);
 						playedCardInfo.Probabilities.AddRange(probabilities);
 					} else
 					{

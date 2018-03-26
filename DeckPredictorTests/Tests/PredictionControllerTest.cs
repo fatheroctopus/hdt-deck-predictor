@@ -334,5 +334,16 @@ namespace DeckPredictorTests.Tests
 			var info = GetPredictionInfo(controller);
 			Assert.IsTrue(info.PredictedCards[0].OffMeta);
 		}
+
+		[TestMethod]
+		public void SecondOffMetaCardIncludedInPrediction()
+		{
+			AddMetaDeck("Hunter", new List<string> {"Alleycat"});
+			var opponent = new MockOpponent("Hunter");
+			opponent.KnownCards = CardList(new List<string> {"Alleycat"}, new List<int> {2});
+			var controller = new PredictionController(opponent, _metaDecks.AsReadOnly());
+			var info = GetPredictionInfo(controller);
+			Assert.AreEqual(2, info.PredictedCards[0].Card.Count);
+		}
 	}
 }
