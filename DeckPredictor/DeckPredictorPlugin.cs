@@ -16,6 +16,8 @@ namespace DeckPredictor
 	{
 		public static readonly string DataDirectory = Path.Combine(Config.AppDataPath, "DeckPredictor");
 		private static readonly string LogDirectory = Path.Combine(DataDirectory, "Logs");
+		private static readonly string ReleaseUrl =
+			"https://github.com/fatheroctopus/hdt-deck-predictor/releases";
 
 		private PluginConfig _config;
 		private ReadOnlyCollection<Deck> _metaDecks;
@@ -25,11 +27,6 @@ namespace DeckPredictor
 		public string Author
 		{
 			get { return "fatheroctopus.bandcamp.com"; }
-		}
-
-		public string ButtonText
-		{
-			get { return "Settings"; }
 		}
 
 		public string Description
@@ -47,8 +44,14 @@ namespace DeckPredictor
 			get { return "Deck Predictor"; }
 		}
 
+		public string ButtonText
+		{
+			get { return "Latest Release"; }
+		}
+
 		public void OnButtonPress()
 		{
+			System.Diagnostics.Process.Start(ReleaseUrl);
 		}
 
 		public void OnLoad()
