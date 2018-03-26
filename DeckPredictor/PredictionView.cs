@@ -32,30 +32,33 @@ namespace DeckPredictor
 
 		public void OnUnload()
 		{
-			SetEnabled(false);
 			_mouseInput.Dispose();
+			SetEnabled(false);
 		}
 
 		public void SetEnabled(bool enabled)
 		{
-			_enabled = enabled;
-			if (_enabled)
+			if (enabled != _enabled)
 			{
-				Log.Debug("Adding Layout to OverlayCanvas");
-				Core.OverlayCanvas.Children.Add(_layout);
-				Canvas.SetBottom(_layout, Core.OverlayWindow.Height * 20 / 100);
-				Canvas.SetLeft(_layout, Core.OverlayWindow.Width * .5 / 100);
+				_enabled = enabled;
+				if (_enabled)
+				{
+					Log.Debug("Adding Layout to OverlayCanvas");
+					Core.OverlayCanvas.Children.Add(_layout);
+					Canvas.SetBottom(_layout, Core.OverlayWindow.Height * 20 / 100);
+					Canvas.SetLeft(_layout, Core.OverlayWindow.Width * .5 / 100);
 
-				// Turn off the regular Opponent card list and restore the value later.
-				_lastHideOpponentCards = Config.Instance.HideOpponentCards;
-				Config.Instance.HideOpponentCards = true;
-				_firstUpdateReceived = false;
-			}
-			else
-			{
-				Log.Debug("Removing Layout from OverlayCanvas");
-				Core.OverlayCanvas.Children.Remove(_layout);
-				Config.Instance.HideOpponentCards = _lastHideOpponentCards;
+					// Turn off the regular Opponent card list and restore the value later.
+					_lastHideOpponentCards = Config.Instance.HideOpponentCards;
+					Config.Instance.HideOpponentCards = true;
+					_firstUpdateReceived = false;
+				}
+				else
+				{
+					Log.Debug("Removing Layout from OverlayCanvas");
+					Core.OverlayCanvas.Children.Remove(_layout);
+					Config.Instance.HideOpponentCards = _lastHideOpponentCards;
+				}
 			}
 			UpdateShowing();
 		}
