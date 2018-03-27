@@ -41,7 +41,9 @@ When a deck goes off-meta, one or more cards are deemed outliers and ignored by 
 
 ## Known Issues
  - The plugin does not automatically update itself - fixing this is top-priority.
+ - There are still a few display bugs floating around when cards go back into the opponent's hand
  - Deck popularity is not currently available from the meta data. If it were, all probabilities would be weighted by popularity.
+ - Only works for Standard games at the moment since the meta data has no Wild stats.
  - Predictions do not account for cards with variable mana cost (e.g. Molten Giant, Crystal Lion)
  - Upgraded Spellstones are not correctly identified with the non-upgraded versions of their cards.
 
