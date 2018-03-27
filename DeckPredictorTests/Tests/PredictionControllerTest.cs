@@ -215,7 +215,6 @@ namespace DeckPredictorTests.Tests
 			Assert.AreEqual("Alleycat", info.PredictedCards[0].Card.Name);
 		}
 
-		// This is necessary due to a workaround fix in PredictionLayout.xaml.cs
 		[TestMethod]
 		public void SortEntriesByCreated()
 		{

@@ -61,16 +61,15 @@ namespace DeckPredictor
 		public void Update(PredictionInfo prediction)
 		{
 			// Show each card at its unplayed count.
-			// HACK - Because AnimatedCardList seems to reverse the order of created and uncreated cards,
-			// we have to reordered by descending while keeping the percentages ordered by ascending,
-			// which is enforced by the Controller.  This may need to be readdressed if AnimatedCardList's
-			// behavior changes.
+			// HACK - Because AnimatedCardList seems to reverse the order of cards with the same ID,
+			// we have to reverse their order here but preserve the original order for the percentages.
+			// This may need to be readdressed if AnimatedCardList's behavior changes.
 			var cards = prediction.PredictedCards
-				.Select(cardInfo => cardInfo.GetCardWithUnplayedCount())
-				.OrderBy(card => card.Cost)
-				.ThenBy(card => card.Name)
-				.ThenByDescending(card => card.IsCreated)
+				.GroupBy(cardInfo => cardInfo.Card.Id, cardInfo => cardInfo.GetCardWithUnplayedCount())
+				.Select(group => group.Reverse())
+				.SelectMany(x => x)
 				.ToList();
+
 			CardList.Update(cards, true);
 
 			PercentageList.ItemsSource = prediction.PredictedCards.Select(cardInfo =>

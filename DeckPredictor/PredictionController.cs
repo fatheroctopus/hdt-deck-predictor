@@ -126,7 +126,8 @@ namespace DeckPredictor
 					{
 						playedCardInfo.Card.Count = Math.Max(numPredictedCards, playedCardInfo.Card.Count);
 						playedCardInfo.Probabilities.AddRange(probabilities);
-					} else
+					}
+					else
 					{
 						// This predicted card hasn't been played yet.
 						var card = Database.GetCardFromId(group.Key);
@@ -138,7 +139,7 @@ namespace DeckPredictor
 			var predictedCards = cardInfos
 					.OrderBy(cardInfo => cardInfo.Card.Cost)
 					.ThenBy(cardInfo => cardInfo.Card.Name)
-					.ThenBy(cardInfo => cardInfo.Card.IsCreated)  // See HACK in PredictionLayout.xaml.cs
+					.ThenBy(cardInfo => cardInfo.Card.IsCreated)
 					.ToList();
 			var runnerUps = _predictor.GetNextPredictedCards(30).Select(cardInfo =>
 				{

@@ -110,30 +110,35 @@ namespace DeckPredictor
 		private void TestView()
 		{
 			var cardList = new List<PredictionInfo.CardInfo>();
-			for (int n = 0; n < 3; n++)
+			for (int n = 0; n < 2; n++)
 			{
+				var card0 = Database.GetCardFromName("Ice Block");
+				card0.Count = 3;
+				var cardInfo0 = new PredictionInfo.CardInfo(card0, 0); // OffMeta, Unplayed
 				var card1 = Database.GetCardFromName("Ice Block");
-				card1.Count = 2;
-				var cardInfo1 = new PredictionInfo.CardInfo(card1, new List<decimal> {1, 1}, 0);
+				var cardInfo1 = new PredictionInfo.CardInfo(card1, 1); // OffMeta, Played
 				var card2 = Database.GetCardFromName("Ice Block");
-				card2.Count = 1;
-				card2.IsCreated = true;
-				var cardInfo2 = new PredictionInfo.CardInfo(card2, 1);
-				var card3 = Database.GetCardFromName("Flamestrike");
-				var cardInfo3 = new PredictionInfo.CardInfo(card3, new List<decimal> {1, 1}, 0);
-				var card4 = Database.GetCardFromName("Polymorph");
-				var cardInfo4 = new PredictionInfo.CardInfo(card4, new List<decimal> {.5m, 1}, 0);
+				card2.Count = 2;
+				var cardInfo2 = new PredictionInfo.CardInfo(card2, new List<decimal> {1, 1}, 0); // Unplayed
+				var card3 = Database.GetCardFromName("Ice Block");
+				card3.IsCreated = true;
+				var cardInfo3 = new PredictionInfo.CardInfo(card3, 1); // Created and Played
+				var card4 = Database.GetCardFromName("Cryomancer");
+				var cardInfo4 = new PredictionInfo.CardInfo(card4, new List<decimal> {1, 1}, 0);
+				var card5 = Database.GetCardFromName("Polymorph");
+				var cardInfo5 = new PredictionInfo.CardInfo(card5, new List<decimal> {.5m, 1}, 0);
+				cardList.Add(cardInfo0);
 				cardList.Add(cardInfo1);
 				cardList.Add(cardInfo2);
 				cardList.Add(cardInfo3);
 				cardList.Add(cardInfo4);
+				cardList.Add(cardInfo5);
 			}
 			cardList = cardList
 				.OrderBy(cardInfo => cardInfo.Card.Cost)
 				.ThenBy(cardInfo => cardInfo.Card.Name)
-				.ThenBy(cardInfo => cardInfo.Card.IsCreated)
 				.ToList();
-			var prediction = new PredictionInfo(1, 30, 3, 4, cardList, new List<PredictionInfo.CardInfo> {});
+			var prediction = new PredictionInfo(1, 30, 4, 5, cardList, new List<PredictionInfo.CardInfo> {});
 			SetEnabled(true);
 			OnPredictionUpdate(prediction);
 		}

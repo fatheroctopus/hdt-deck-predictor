@@ -69,10 +69,12 @@ namespace DeckPredictor
 
 			public CardInfo(Card card, int numPlayed) : this(card, new List<decimal>(), numPlayed) {}
 
+			public int UnplayedCount => Card.Count - NumPlayed;
+
 			public Card GetCardWithUnplayedCount()
 			{
 				var card = Database.GetCardFromId(Card.Id);
-				card.Count = Card.Count - NumPlayed;
+				card.Count = UnplayedCount;
 				card.IsCreated = Card.IsCreated;
 				return card;
 			}
