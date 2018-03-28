@@ -45,7 +45,7 @@ namespace DeckPredictor
 
 		public void OnTurnStart(ActivePlayer player)
 		{
-			Log.Debug("OnTurnStart: " + player);
+			Log.Info("OnTurnStart: " + player);
 			// At the beginning of the player turn, update the opponent's available mana for the next turn.
 			if (player == ActivePlayer.Player)
 			{
@@ -56,42 +56,42 @@ namespace DeckPredictor
 
 		public void OnOpponentPlay(Card cardPlayed)
 		{
-			Log.Debug("cardPlayed: " + cardPlayed);
+			Log.Info("cardPlayed: " + cardPlayed);
 			_predictor.CheckOpponentCards();
 			UpdatePrediction();
 		}
 
 		public void OnOpponentHandDiscard(Card cardDiscarded)
 		{
-			Log.Debug("cardDiscarded: " + cardDiscarded);
+			Log.Info("cardDiscarded: " + cardDiscarded);
 			_predictor.CheckOpponentCards();
 			UpdatePrediction();
 		}
 
 		public void OnOpponentDeckDiscard(Card cardDiscarded)
 		{
-			Log.Debug("cardDiscarded: " + cardDiscarded);
+			Log.Info("cardDiscarded: " + cardDiscarded);
 			_predictor.CheckOpponentCards();
 			UpdatePrediction();
 		}
 
 		public void OnOpponentSecretTriggered(Card secretTriggered)
 		{
-			Log.Debug("secretTriggered: " + secretTriggered);
+			Log.Info("secretTriggered: " + secretTriggered);
 			_predictor.CheckOpponentCards();
 			UpdatePrediction();
 		}
 
 		public void OnOpponentJoustReveal(Card cardRevealed)
 		{
-			Log.Debug("cardRevealed: " + cardRevealed);
+			Log.Info("cardRevealed: " + cardRevealed);
 			_predictor.CheckOpponentCards();
 			UpdatePrediction();
 		}
 
 		public void OnOpponentDeckToPlay(Card cardPlayed)
 		{
-			Log.Debug("cardPlayed: " + cardPlayed);
+			Log.Info("cardPlayed: " + cardPlayed);
 			_predictor.CheckOpponentCards();
 			UpdatePrediction();
 		}
