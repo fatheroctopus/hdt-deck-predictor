@@ -150,7 +150,7 @@ namespace DeckPredictor
 
 		public Version Version
 		{
-			get { return new Version(0, 3); }
+			get { return new Version(0, 3, 0); }
 		}
 	}
 }

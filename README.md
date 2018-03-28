@@ -32,7 +32,7 @@ As the opponent plays cards, decks without those cards are filtered out, and eac
 The overlay does not display every possible card, but shows cards based on these heuristics:
  1. Around 30 cards should be shown.
  2. Cards that are sufficiently likely will usually be displayed.
- 3. Cards that are playable for the opponent's next turn will often be favored over unplayable cards.
+ 3. Cards that are playable on the opponent's next turn will often be favored over unplayable cards.
  4. Cards that are "optimal" for the opponent's next turn will often be favored over other playable cards.
 
 The first and second copy of a card are tracked separately, but when showing both copies, the overlay will only display the probability of the first copy.
