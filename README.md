@@ -1,11 +1,14 @@
 # HDT Deck Predictor
-A Plugin for Hearthstone Deck Tracker for predicting the opponent's decklist.
+
+[![GitHub release](https://img.shields.io/badge/prerelease-0.3.0-green.svg)](https://github.com/fatheroctopus/hdt-deck-predictor/releases/latest)
+
+A Plugin for Hearthstone Deck Tracker (HDT) that predicts the opponent's decklist.
 
 ## Installation
 - [Download and install HDT](https://hsdecktracker.net/).
-- [Download the Deck Predictor Plugin](https://github.com/fatheroctopus/hdt-deck-predictor/releases).
+- [Download the Deck Predictor Plugin](https://github.com/fatheroctopus/hdt-deck-predictor/releases/latest).
 - Extract the downloaded archive to your "Plugins" directory.
-  - This location can be found from within HDT: `Options -> Tracking -> Plugins -> Plugins Folder`.
+  - This location can be found from within HDT: `Options -> Tracker -> Plugins -> Plugins Folder`.
   - Your directory structure should look like `%AppData%/HearthstoneDeckTracker/Plugins/DeckPredictor/DeckPredictor.dll`.
 - Restart HDT and enable the plugin in `Options -> Tracker -> Plugins`.
 
@@ -14,26 +17,32 @@ While enabled, DeckPredictor will replace the standard HDT opponent deck list wi
 
 ![Overlay](Images/overlay.png)
 
-- Chance that this card started in the opponent's decklist.
-- Playing this card would spend all the opponent's available mana.
-- Playing this card would be possible if the opponent used the coin.
-- This played card is an outlier in the current meta and is being ignored by the Predictor.
-- Number of predicted cards currently shown in the overlay out of all possible cards that could be in the deck
-- Number of decks in the meta that match the opponent's already-played cards.
+<div>
+<img align="right" src="Images/closeup.png" hspace="30">
+</div>
 
-All stats update in real time as the opponent plays cards.
+### Deck Prediction Details:
+- All stats update in real time as the opponent plays cards.
+- Each predicted card shows the percentage chance that this card is in the opponent's deck or hand.
+- Percentages appear faded if the opponent cannot play this card on their next turn.
+- Mana crystal icon appears next to cards that would spend all the opponent's available mana next turn.
+- Coin icon apears next to cards that are playable next turn if the opponent uses their coin.
+- X icon appears next to played cards that are outliers in the current meta. These cards are currently being ignored by the Predictor.
+- Below the decklist, the overlay enumerates how many cards it is showing out of the total number of *Possible Cards* in the opponent's deck.
+- *Matching Decks* is how many decks in the meta contain all the cards that the opponent has played.
+- Like the HDT deck tracker, the overlay will also list Played, Created, and Jousted cards.
 
 ## How It Works
 
-Deck Predictor was originally inspired by [AdnanC's MetaDetector plugin](https://github.com/AdnanC/HDT.Plugins.MetaDetector) and uses its aggregate data from [MetaStats](http://metastats.net/).
+Deck Predictor uses the same aggregate data as [AdnanC's MetaDetector plugin](https://github.com/AdnanC/HDT.Plugins.MetaDetector) from [MetaStats](http://metastats.net/).
 
 As the opponent plays cards, decks without those cards are filtered out, and each possible card is assigned a probability based on how often it appears in the list of possible decks.
 
 The overlay does not display every possible card, but shows cards based on these heuristics:
- 1. Around 30 cards should be shown.
- 2. Cards that are sufficiently likely will usually be displayed.
- 3. Cards that are playable on the opponent's next turn will often be favored over unplayable cards.
- 4. Cards that are "optimal" for the opponent's next turn will often be favored over other playable cards.
+ 1. Cards that are sufficiently likely will usually be displayed.
+ 2. Cards that are playable on the opponent's next turn will often be favored over unplayable cards.
+ 3. Cards that are "optimal" for the opponent's next turn will often be favored over other playable cards.
+ 4. Around 30 cards should be shown.
 
 The first and second copy of a card are tracked separately, but when showing both copies, the overlay will only display the probability of the first copy.
 
@@ -49,8 +58,9 @@ When a deck goes off-meta, one or more cards are deemed outliers and ignored by 
 
 ## Feedback
 I'll respond to any issues opened for bugs or feature requests.
+This is my first time working in C# and WPF, so I'm also interested in any idioms or best practices I may have missed.
+
 For problems with prediction results, please attach a screenshot of the issue and zip up the Logs directory at `%AppData%/HearthstoneDeckTracker/DeckPredictor/Logs`.
 Try to do this immediately after the game finishes.
-This is my first time working in C# and WPF, so I'm also interested in any idioms or best practices I may have missed.
 
 Check out my music on [bandcamp](https://fatheroctopus.bandcamp.com).  It's free.
