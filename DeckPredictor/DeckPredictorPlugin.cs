@@ -8,6 +8,8 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Forms;
+using System.Windows;
 using System;
 
 namespace DeckPredictor
@@ -15,6 +17,8 @@ namespace DeckPredictor
 	public class DeckPredictorPlugin : IPlugin
 	{
 		public static readonly string DataDirectory = Path.Combine(Config.AppDataPath, "DeckPredictor");
+		public static readonly string PluginDirectory =
+			Path.Combine(Config.AppDataPath, "Plugins", "DeckPredictor");
 		private static readonly string LogDirectory = Path.Combine(DataDirectory, "Logs");
 		private static readonly string ReleaseUrl =
 			"https://github.com/fatheroctopus/hdt-deck-predictor/releases";
@@ -34,7 +38,7 @@ namespace DeckPredictor
 			get { return "Predicts the contents of the opponent's deck."; }
 		}
 
-		public MenuItem MenuItem
+		public System.Windows.Controls.MenuItem MenuItem
 		{
 			get { return null; }
 		}
@@ -65,6 +69,30 @@ namespace DeckPredictor
 			CustomLog.Initialize(LogDirectory);
 
 			_config = PluginConfig.Load();
+
+			// Synchronously check and install any updates to this plugin.
+			var updaterTask = Task.Run<bool>(async () => await AutoUpdater.CheckAutoUpdate(Version));
+			if (updaterTask.Result)
+			{
+				Log.Info("New version of Plugin installed, restart needed.");
+
+				// Show a dialog to prompt a restart.
+				string message =
+					"DeckPredictorPlugin has been updated. Restart HDT for changes to take effect?";
+				string caption = "DeckPredictorPlugin Updated";
+				MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+				DialogResult result = System.Windows.Forms.MessageBox.Show(message, caption, buttons);
+				if (result == System.Windows.Forms.DialogResult.Yes)
+				{
+					// Start the new process
+					System.Diagnostics.Process.Start(System.Windows.Application.ResourceAssembly.Location);
+
+					// Shutdown the old process
+					Hearthstone_Deck_Tracker.API.Core.MainWindow.Close();
+					System.Windows.Application.Current.Shutdown();
+					return;
+				}
+			}
 
 			// Synchronously retrieve our meta decks and keep them in memory.
 			var metaRetriever = new MetaRetriever();
