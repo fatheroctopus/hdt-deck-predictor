@@ -19,8 +19,8 @@ namespace DeckPredictor
 
 		public static async Task<bool> CheckAutoUpdate(Version currentVersion)
 		{
-			Log.Debug("Checking for new DeckPredictor version.");
-			var release = await GitHub.CheckForUpdate(GitHubUser, GitHubRepo, currentVersion);
+			Log.Debug("Checking for new DeckPredictor version, current version: " + currentVersion);
+			var release = await GitHub.CheckForUpdate(GitHubUser, GitHubRepo, currentVersion, true);
 			if (release == null)
 			{
 				Log.Debug("DeckPredictor is up-to-date.");
@@ -50,8 +50,7 @@ namespace DeckPredictor
 
 				Log.Info("Copying over new DeckPredictor...");
 				Log.Debug("From: " + TempPluginDirectory + " To: " + DeckPredictorPlugin.PluginDirectory);
-				// TODO
-				// CopyFiles(TempPluginDirectory, DeckPredictorPlugin.PluginDirectory);
+				CopyFiles(TempPluginDirectory, DeckPredictorPlugin.PluginDirectory);
 			}
 			catch (Exception e)
 			{
@@ -98,7 +97,9 @@ namespace DeckPredictor
 				string tempPath = Path.Combine(destDirName, file.Name);
 
 				// Copy the file.
-				file.CopyTo(tempPath, false);
+				file.CopyTo(tempPath, true);
+				// Touch each file b/c HDT caches each Plugin based on its last modified time.
+				System.IO.File.SetLastWriteTimeUtc(tempPath, DateTime.UtcNow);
 			}
 
 			// Copy the subdirectories.
