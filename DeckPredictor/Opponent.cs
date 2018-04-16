@@ -36,7 +36,7 @@ namespace DeckPredictor
 			bool hasCoin;
 			if (_game.GetTurnNumber() == 0)
 			{
-				// During the mulligan, the coin doesn't exist, but first player will get it next turn.
+				// During the mulligan, the coin doesn't exist, but second player will get it next turn.
 				hasCoin = !opponentEntity.HasTag(GameTag.FIRST_PLAYER);
 			}
 			else
