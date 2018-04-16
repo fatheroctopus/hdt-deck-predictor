@@ -49,7 +49,6 @@ The first and second copy of a card are tracked separately, but when showing bot
 When a deck goes off-meta, one or more cards are deemed outliers and ignored by the prediction. Cards that appear in fewer decks with the other played cards are more likely to be judged as outliers.
 
 ## Known Issues
- - The 2018 Rotation is nigh, and I have no clue as to how quickly the new meta data will be available, but expect some amount of latency there.
  - If you manage a service that aggregates statistics for the Hearthstone meta, I'd be interested in integrating with your data. Please create an issue or contact me directly.
  - There are still a few display bugs floating around when cards go back into the opponent's hand.
  - Deck popularity is not currently available from the meta data. If it were, all probabilities would be weighted by popularity.
