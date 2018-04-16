@@ -12,6 +12,12 @@ A Plugin for Hearthstone Deck Tracker (HDT) that predicts the opponent's decklis
   - Your directory structure should look like `%AppData%/HearthstoneDeckTracker/Plugins/DeckPredictor/DeckPredictor.dll`.
 - Restart HDT and enable the plugin in `Options -> Tracker -> Plugins`.
 
+## Disclaimer
+Blizzard's stance on acceptable mods is that they accomplish things that could be done with "pencil and paper".
+There's an argument to be made that a user could just have a tab open to an existing metagame site and use that to predict what cards the opponent may have in their deck.
+
+Be aware that Blizzard may change or clarify their policy in the future, and you use this mod at your own risk.
+
 ## Features
 While enabled, DeckPredictor will replace the standard HDT opponent deck list with a new overlay:
 
