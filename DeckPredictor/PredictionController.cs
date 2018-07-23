@@ -50,8 +50,9 @@ namespace DeckPredictor
 			if (player == ActivePlayer.Player)
 			{
 				_predictor.CheckOpponentMana();
-				UpdatePrediction();
 			}
+			_predictor.CheckOpponentCards();
+			UpdatePrediction();
 		}
 
 		public void OnOpponentPlay(Card cardPlayed)
