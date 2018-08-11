@@ -10,57 +10,58 @@
 	      <StackPanel Orientation="Horizontal"/>
 	   </ItemsPanelTemplate>
 	</ItemsControl.ItemsPanel>
-
 	<StackPanel Orientation="Vertical">
-		<!-- Individual Cards -->
-		<StackPanel Name="CardStackPanel" Orientation="Horizontal">
-			<!-- Card List -->
-			<controls:AnimatedCardList x:Name="CardList" Background="Transparent" BorderThickness="0"
-					ScrollViewer.HorizontalScrollBarVisibility="Disabled" Width="221"
-					ScrollViewer.VerticalScrollBarVisibility="Disabled" IsEnabled="False"
-					ScrollViewer.CanContentScroll="False">
-			</controls:AnimatedCardList>
-			<!-- Percentages List -->
-			<ItemsControl Name="PercentageList" Grid.IsSharedSizeScope="True">
-				<ItemsControl.ItemTemplate>
-					<DataTemplate>
-						<Border BorderBrush="Black" BorderThickness="1" Visibility="{Binding ItemVisibility}">
-							<Grid Height="32" Background="SteelBlue" Opacity="{Binding ItemOpacity}">
-								<Grid.ColumnDefinitions>
-									<ColumnDefinition SharedSizeGroup="GroupName1"/>
-									<ColumnDefinition SharedSizeGroup="GroupName2"/>
-								</Grid.ColumnDefinitions>
-								<hdt:HearthstoneTextBlock
-										Grid.Column="0"
-										Text="{Binding Percentage}"
-										VerticalAlignment="Center"
-										Margin="5,0,5,0"/>
-								<Image
-										Grid.Column="1"
-										Visibility="{Binding CoinVisibility}"
-										Width="16"
-										Margin="0,0,5,0"
-										Source="Resources/icon_coin.png"/>
-								<Image
-										Grid.Column="1"
-										Visibility="{Binding OptimalVisibility}"
-										Width="16"
-										Margin="0,0,5,0"
-										Source="Resources/icon_optimal.png"/>
-								<Image
-										Grid.Column="1"
-										Visibility="{Binding XVisibility}"
-										Width="16"
-										Margin="0,0,5,0"
-										Source="Resources/icon_x.png"/>
-							</Grid>
-						</Border>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
-		</StackPanel>
+		<!-- Viewbox used for scaling if card list gets too large -->
+		<Viewbox Name="CardStackPanel" Height="Auto">
+			<StackPanel Orientation="Horizontal">
+				<!-- Card List -->
+				<controls:AnimatedCardList x:Name="CardList" Background="Transparent" BorderThickness="0"
+						ScrollViewer.HorizontalScrollBarVisibility="Disabled" Width="221"
+						ScrollViewer.VerticalScrollBarVisibility="Disabled" IsEnabled="False"
+						ScrollViewer.CanContentScroll="False">
+				</controls:AnimatedCardList>
+				<!-- Percentages List -->
+				<ItemsControl Name="PercentageList" Grid.IsSharedSizeScope="True">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<Border BorderBrush="Black" BorderThickness="1" Visibility="{Binding ItemVisibility}">
+								<Grid Height="{Binding CardHeight}" Background="SteelBlue" Opacity="{Binding ItemOpacity}">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition SharedSizeGroup="GroupName1"/>
+										<ColumnDefinition SharedSizeGroup="GroupName2"/>
+									</Grid.ColumnDefinitions>
+									<hdt:HearthstoneTextBlock
+											Grid.Column="0"
+											Text="{Binding Percentage}"
+											VerticalAlignment="Center"
+											Margin="5,0,5,0"/>
+									<Image
+											Grid.Column="1"
+											Visibility="{Binding CoinVisibility}"
+											Width="16"
+											Margin="0,0,5,0"
+											Source="Resources/icon_coin.png"/>
+									<Image
+											Grid.Column="1"
+											Visibility="{Binding OptimalVisibility}"
+											Width="16"
+											Margin="0,0,5,0"
+											Source="Resources/icon_optimal.png"/>
+									<Image
+											Grid.Column="1"
+											Visibility="{Binding XVisibility}"
+											Width="16"
+											Margin="0,0,5,0"
+											Source="Resources/icon_x.png"/>
+								</Grid>
+							</Border>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</StackPanel>
+		</Viewbox>
 		<!-- Additional stats below the card list -->
-		<Border Margin="2,0,0,0" BorderBrush="Black" Background="SlateGray" BorderThickness="1">
+		<Border Margin="2,0,0,0" BorderBrush="Black" Padding="10,0" Background="SlateGray" BorderThickness="1">
 			<StackPanel>
 				<hdt:HearthstoneTextBlock
 						Name="PossibleCards"

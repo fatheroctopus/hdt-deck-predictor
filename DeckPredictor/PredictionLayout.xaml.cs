@@ -20,6 +20,7 @@ namespace DeckPredictor
 	{
 		// Don't slide the tooltip past the bottom n cards in the list.
 		private const int ToolTipCardBuffer = 3;
+		private const int CardHeight = 32;
 
 		public PredictionLayout()
 		{
@@ -35,7 +36,7 @@ namespace DeckPredictor
 			if (mouseInsideCardList)
 			{
 				// Determine the actual card moused over.
-				var cardSize = CardList.ActualHeight / CardList.Items.Count;
+				var cardSize = CardStackPanel.ActualHeight / CardList.Items.Count;
 				var cardIndex = (int)(relativePos.Y / cardSize);
 				if (cardIndex < 0 || cardIndex >= CardList.Items.Count)
 				{
@@ -85,6 +86,17 @@ namespace DeckPredictor
 			PossibleCards.Text = "Predicting " +
 				prediction.NumPredictedCards + " / " + prediction.NumPossibleCards + " Possible Cards";
 			PossibleDecks.Text = prediction.NumPossibleDecks.ToString() + " Matching Decks";
+
+			// Enforce a maximum height on the Viewbox that contains the list of cards.
+			double maxHeight = SystemParameters.PrimaryScreenHeight * .55;
+			if (cards.Count * CardHeight > maxHeight)
+			{
+				CardStackPanel.Height = maxHeight;
+			}
+			else
+			{
+				CardStackPanel.Height = Double.NaN;
+			}
 		}
 
 		public class PercentageItem
@@ -135,6 +147,8 @@ namespace DeckPredictor
 			public Visibility CoinVisibility { get; private set; }
 			public Visibility OptimalVisibility { get; private set; }
 			public Visibility XVisibility { get; private set; }
+
+			public int CardHeight => PredictionLayout.CardHeight;
 
 			private static string DecimalToPercent(decimal value) =>
 				Math.Truncate(value * 100).ToString() + "%";
