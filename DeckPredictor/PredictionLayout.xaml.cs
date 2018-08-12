@@ -21,6 +21,7 @@ namespace DeckPredictor
 		// Don't slide the tooltip past the bottom n cards in the list.
 		private const int ToolTipCardBuffer = 3;
 		private const int CardHeight = 32;
+		private const double CardListHeightToScreenRatio = .5;
 
 		public PredictionLayout()
 		{
@@ -88,7 +89,7 @@ namespace DeckPredictor
 			PossibleDecks.Text = prediction.NumPossibleDecks.ToString() + " Matching Decks";
 
 			// Enforce a maximum height on the Viewbox that contains the list of cards.
-			double maxHeight = SystemParameters.PrimaryScreenHeight * .55;
+			double maxHeight = SystemParameters.PrimaryScreenHeight * CardListHeightToScreenRatio;
 			if (cards.Count * CardHeight > maxHeight)
 			{
 				CardStackPanel.Height = maxHeight;
