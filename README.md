@@ -1,6 +1,6 @@
 # HDT Deck Predictor
 
-[![GitHub release](https://img.shields.io/badge/release-1.0.0-green.svg)](https://github.com/fatheroctopus/hdt-deck-predictor/releases/latest)
+[![GitHub release](https://img.shields.io/badge/release-1.1.0-green.svg)](https://github.com/fatheroctopus/hdt-deck-predictor/releases/latest)
 
 A Plugin for Hearthstone Deck Tracker (HDT) that predicts the opponent's decklist.
 
