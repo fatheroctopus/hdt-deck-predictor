@@ -12,7 +12,7 @@
 	</ItemsControl.ItemsPanel>
 	<StackPanel Orientation="Vertical">
 		<!-- Viewbox used for scaling if card list gets too large -->
-		<Viewbox Name="CardStackPanel" Height="Auto">
+		<Viewbox Name="CardView" Height="Auto">
 			<StackPanel Orientation="Horizontal">
 				<!-- Card List -->
 				<controls:AnimatedCardList x:Name="CardList" Background="Transparent" BorderThickness="0"

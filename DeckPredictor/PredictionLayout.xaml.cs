@@ -31,13 +31,13 @@ namespace DeckPredictor
 		public void UpdateCardToolTip(Point mousePos)
 		{
 			// See if the mouse is inside the stack of card lists
-			Point relativePos = CardStackPanel.PointFromScreen(mousePos);
-			bool mouseInsideCardList = relativePos.X > 0 && relativePos.X < CardStackPanel.ActualWidth &&
-				relativePos.Y > 0 && relativePos.Y < CardStackPanel.ActualHeight;
+			Point relativePos = CardView.PointFromScreen(mousePos);
+			bool mouseInsideCardList = relativePos.X > 0 && relativePos.X < CardView.ActualWidth &&
+				relativePos.Y > 0 && relativePos.Y < CardView.ActualHeight;
 			if (mouseInsideCardList)
 			{
 				// Determine the actual card moused over.
-				var cardSize = CardStackPanel.ActualHeight / CardList.Items.Count;
+				var cardSize = CardView.ActualHeight / CardList.Items.Count;
 				var cardIndex = (int)(relativePos.Y / cardSize);
 				if (cardIndex < 0 || cardIndex >= CardList.Items.Count)
 				{
@@ -92,11 +92,11 @@ namespace DeckPredictor
 			double maxHeight = SystemParameters.PrimaryScreenHeight * CardListHeightToScreenRatio;
 			if (cards.Count * CardHeight > maxHeight)
 			{
-				CardStackPanel.Height = maxHeight;
+				CardView.Height = maxHeight;
 			}
 			else
 			{
-				CardStackPanel.Height = Double.NaN;
+				CardView.Height = Double.NaN;
 			}
 		}
 
