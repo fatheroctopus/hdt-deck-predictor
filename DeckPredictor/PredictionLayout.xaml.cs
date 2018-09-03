@@ -51,9 +51,9 @@ namespace DeckPredictor
 
 				// Set the top margin on the tooltip so it appears next to the card.
 				// Keep a buffer on the bottom so we're not changing the height of the main stack.
-				var bottomBufferCards = Math.Max(0, CardList.Items.Count - ToolTipCardBuffer);
-				var topPos = Math.Min(cardSize * cardIndex, cardSize * bottomBufferCards);
-				CardToolTip.Margin = new Thickness(0, topPos, 0, 0);
+				var cardTopPos = cardSize * cardIndex;
+				var toolTipTopPos = Math.Min(cardTopPos, CardView.ActualHeight - CardToolTip.ActualHeight);
+				CardToolTip.Margin = new Thickness(0, toolTipTopPos, 0, 0);
 				CardToolTip.Visibility = Visibility.Visible;
 			}
 			else
