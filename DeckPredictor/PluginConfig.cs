@@ -15,6 +15,7 @@ namespace DeckPredictor
 
 		public string CurrentMetaFileVersion { get; set;  }
 		public DateTime CurrentMetaFileDownloadTime { get; set; }
+		public bool FitDeckListToDisplay { get; set; } = true;
 
 		public static PluginConfig Load()
 		{
@@ -52,6 +53,7 @@ namespace DeckPredictor
 
 		public void Save()
 		{
+			Log.Debug("Saving config");
 			using (var writer = new StreamWriter(ConfigPath))
 			{
 				Save(writer);

@@ -11,6 +11,10 @@
 		BorderThickness="1"
 		Title="Settings" Width="350" SizeToContent="Height">
 	<StackPanel>
+	<CheckBox IsChecked="{Binding FitDeckListToDisplay}"
+	          Content="Resize predicted cards to fit display"
+	          ToolTip="Automatically shrinks cards when deck list is large enough to overlap other UI elements"
+	          HorizontalAlignment="Left" Margin="10,5" VerticalAlignment="Top"/>
 		<Button Margin="10,15" Click="ButtonReadme_Click">View Readme</Button>
 	</StackPanel>
 </controls:MetroWindow>

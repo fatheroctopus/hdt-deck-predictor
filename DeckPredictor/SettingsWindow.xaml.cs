@@ -15,14 +15,29 @@ namespace DeckPredictor
 {
 	public partial class SettingsWindow : MetroWindow
 	{
+		private PluginConfig _config;
+
 		public SettingsWindow(PluginConfig config)
 		{
+			_config = config;
 			InitializeComponent();
+			this.DataContext = this;
 		}
 
 		private void ButtonReadme_Click(object sender, RoutedEventArgs e)
 		{
 		    System.Diagnostics.Process.Start("https://github.com/fatheroctopus/hdt-deck-predictor");
+		}
+
+		public bool FitDeckListToDisplay
+		{
+			get {
+				return _config.FitDeckListToDisplay;
+			}
+			set {
+				_config.FitDeckListToDisplay = value;
+				_config.Save();
+			}
 		}
 	}
 }
