@@ -26,6 +26,8 @@ namespace DeckPredictor
 		private PredictionController _controller;
 		private PredictionView _view;
 
+		private SettingsWindow _settingsWindow;
+
 		public string Author
 		{
 			get { return "fatheroctopus.bandcamp.com"; }
@@ -48,12 +50,24 @@ namespace DeckPredictor
 
 		public string ButtonText
 		{
-			get { return "Readme"; }
+			get { return "Settings"; }
 		}
 
 		public void OnButtonPress()
 		{
-			System.Diagnostics.Process.Start("https://github.com/fatheroctopus/hdt-deck-predictor");
+			if (_settingsWindow == null)
+			{
+				_settingsWindow = new SettingsWindow(_config);
+				_settingsWindow.Closed += (sender, args) =>
+				{
+				    _settingsWindow = null;
+				};
+				_settingsWindow.Show();
+			}
+			else
+			{
+				_settingsWindow.Activate();
+			}
 		}
 
 		public void OnLoad()
@@ -166,6 +180,14 @@ namespace DeckPredictor
 
 		public void OnUnload()
 		{
+			if (_settingsWindow != null)
+			{
+			    if (_settingsWindow.IsVisible)
+			    {
+			        _settingsWindow.Close();
+			    }
+			    _settingsWindow = null;
+			}
 			_config.Save();
 			_view.OnUnload();
 		}
