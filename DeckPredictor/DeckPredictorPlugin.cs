@@ -111,7 +111,7 @@ namespace DeckPredictor
 			var retrieveTask =
 				Task.Run<List<Deck>>(async () => await metaRetriever.RetrieveMetaDecks(_config));
 			_metaDecks = new ReadOnlyCollection<Deck>(retrieveTask.Result);
-			_view = new PredictionView();
+			_view = new PredictionView(_config);
 
 			GameEvents.OnGameStart.Add(() =>
 				{

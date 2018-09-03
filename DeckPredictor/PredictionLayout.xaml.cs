@@ -22,9 +22,11 @@ namespace DeckPredictor
 		private const int ToolTipCardBuffer = 3;
 		private const int CardHeight = 32;
 		private const double CardListHeightToScreenRatio = .5;
+		private PluginConfig _config;
 
-		public PredictionLayout()
+		public PredictionLayout(PluginConfig config)
 		{
+			_config = config;
 			InitializeComponent();
 		}
 
@@ -89,8 +91,9 @@ namespace DeckPredictor
 			PossibleDecks.Text = prediction.NumPossibleDecks.ToString() + " Matching Decks";
 
 			// Enforce a maximum height on the Viewbox that contains the list of cards.
+			// (If the option is set in the config)
 			double maxHeight = SystemParameters.PrimaryScreenHeight * CardListHeightToScreenRatio;
-			if (cards.Count * CardHeight > maxHeight)
+			if (_config.FitDeckListToDisplay && cards.Count * CardHeight > maxHeight)
 			{
 				CardView.Height = maxHeight;
 			}

@@ -15,15 +15,16 @@ namespace DeckPredictor
 {
 	public class PredictionView
 	{
-		private PredictionLayout _layout = new PredictionLayout();
+		private PredictionLayout _layout;
 		private bool _lastHideOpponentCards;
 		private bool _enabled;
 		private bool _showing;
 		private bool _firstUpdateReceived;
 		private User32.MouseInput _mouseInput;
 
-		public PredictionView()
+		public PredictionView(PluginConfig _config)
 		{
+			_layout = new PredictionLayout(_config);
 			_mouseInput = new User32.MouseInput();
 			_mouseInput.LmbUp += MouseInputOnLmbUp;
 			_mouseInput.MouseMoved += MouseInputOnMouseMoved;
