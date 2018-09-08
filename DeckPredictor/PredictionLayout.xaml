@@ -7,9 +7,10 @@
 		Background="Transparent">
 	<ItemsControl.ItemsPanel>
 	   <ItemsPanelTemplate>
-	      <StackPanel Orientation="Horizontal"/>
+			<StackPanel Orientation="Horizontal"/>
 	   </ItemsPanelTemplate>
 	</ItemsControl.ItemsPanel>
+
 	<StackPanel Orientation="Vertical">
 		<!-- Viewbox used for scaling if card list gets too large -->
 		<Viewbox Name="CardView" Height="Auto">
@@ -77,6 +78,12 @@
 		</Border>
 	</StackPanel>
 	<!-- Tool Tip appears to the right of the main stack -->
-	<controls:CardToolTipControl x:Name="CardToolTip" Height="auto" Panel.ZIndex="100" VerticalAlignment="Top"
-	                   Visibility="Hidden"/>
+	<Canvas>
+		<controls:CardToolTipControl
+			x:Name="CardToolTip"
+			Height="auto"
+			Panel.ZIndex="100"
+			VerticalAlignment="Top"
+		   Visibility="Hidden"/>
+   </Canvas>
 </ItemsControl>

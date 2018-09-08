@@ -18,8 +18,6 @@ namespace DeckPredictor
 {
 	public partial class PredictionLayout
 	{
-		// Don't slide the tooltip past the bottom cards in the list.
-		private const int ToolTipBottomBuffer = 100;
 		private const int CardHeight = 32;
 		private const double FittedMaxHeightRatio = .55;
 		private const double AbsoluteMaxHeightRatio = .8;
@@ -57,11 +55,9 @@ namespace DeckPredictor
 				CardToolTip.SetValue(
 					DataContextProperty, CardList.Items.Cast<AnimatedCard>().ElementAt(cardIndex).Card);
 
-				// Set the top margin on the tooltip so it appears next to the card.
-				// Keep a buffer on the bottom so we're not changing the height of the main stack.
+				// Set the top of the tooltip so it appears next to the card.
 				var cardTopPos = cardSize * cardIndex;
-				var toolTipTopPos = Math.Min(cardTopPos, CardView.ActualHeight - ToolTipBottomBuffer);
-				CardToolTip.Margin = new Thickness(0, toolTipTopPos, 0, 0);
+				Canvas.SetTop(CardToolTip, cardTopPos);
 				CardToolTip.Visibility = Visibility.Visible;
 			}
 			else
