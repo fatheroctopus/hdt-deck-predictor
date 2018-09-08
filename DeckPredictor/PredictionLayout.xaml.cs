@@ -21,12 +21,20 @@ namespace DeckPredictor
 		// Don't slide the tooltip past the bottom cards in the list.
 		private const int ToolTipBottomBuffer = 100;
 		private const int CardHeight = 32;
-		private const double CardListHeightToScreenRatio = .5;
+		private const double FittedMaxHeightRatio = .55;
+		private const double AbsoluteMaxHeightRatio = .8;
+		private double _maxHeight;
 		private PluginConfig _config;
 
 		public PredictionLayout(PluginConfig config)
 		{
 			_config = config;
+			// Enforce a maximum height on layout.
+			// The FitDeckListToDisplay setting reduces the max further to prevent overlap of other
+			// UI elements.
+			double maxHeightRatio =
+				_config.FitDeckListToDisplay ? FittedMaxHeightRatio : AbsoluteMaxHeightRatio;
+			_maxHeight = maxHeightRatio * SystemParameters.PrimaryScreenHeight;
 			InitializeComponent();
 		}
 
@@ -90,12 +98,15 @@ namespace DeckPredictor
 				prediction.NumPredictedCards + " / " + prediction.NumPossibleCards + " Possible Cards";
 			PossibleDecks.Text = prediction.NumPossibleDecks.ToString() + " Matching Decks";
 
+			// Force a measure pass so we can know the actual height of the InfoBox
+			Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+			Arrange(new Rect(0, 0, DesiredSize.Width, DesiredSize.Height));
+
 			// Enforce a maximum height on the Viewbox that contains the list of cards.
-			// (If the option is set in the config)
-			double maxHeight = SystemParameters.PrimaryScreenHeight * CardListHeightToScreenRatio;
-			if (_config.FitDeckListToDisplay && cards.Count * CardHeight > maxHeight)
+			// Note that we only scale the cardlist, but factor the InfoBox into the max height calculation.
+			if (cards.Count * CardHeight > _maxHeight - InfoBox.ActualHeight)
 			{
-				CardView.Height = maxHeight;
+				CardView.Height = _maxHeight - InfoBox.ActualHeight;
 			}
 			else
 			{

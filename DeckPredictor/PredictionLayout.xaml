@@ -61,7 +61,7 @@
 			</StackPanel>
 		</Viewbox>
 		<!-- Additional stats below the card list -->
-		<Border Margin="2,0,0,0" BorderBrush="Black" Padding="10,0" Background="SlateGray" BorderThickness="1">
+		<Border Name="InfoBox" Margin="2,0,0,0" BorderBrush="Black" Padding="10,0" Background="SlateGray" BorderThickness="1">
 			<StackPanel>
 				<hdt:HearthstoneTextBlock
 						Name="PossibleCards"
