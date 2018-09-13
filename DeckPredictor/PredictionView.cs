@@ -46,8 +46,6 @@ namespace DeckPredictor
 				{
 					Log.Debug("Adding Layout to OverlayCanvas");
 					Core.OverlayCanvas.Children.Add(_layout);
-					Canvas.SetBottom(_layout, Core.OverlayWindow.Height * 20 / 100);
-					Canvas.SetLeft(_layout, Core.OverlayWindow.Width * .5 / 100);
 
 					// Turn off the regular Opponent card list and restore the value later.
 					_lastHideOpponentCards = Config.Instance.HideOpponentCards;

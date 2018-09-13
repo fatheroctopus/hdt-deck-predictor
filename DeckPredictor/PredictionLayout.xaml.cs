@@ -11,6 +11,7 @@ using System.Windows;
 using Hearthstone_Deck_Tracker;
 using Hearthstone_Deck_Tracker.Controls;
 using Hearthstone_Deck_Tracker.Hearthstone;
+using Core = Hearthstone_Deck_Tracker.API.Core;
 
 #endregion
 
@@ -21,18 +22,11 @@ namespace DeckPredictor
 		private const int CardHeight = 32;
 		private const double FittedMaxHeightRatio = .55;
 		private const double AbsoluteMaxHeightRatio = .8;
-		private double _maxHeight;
 		private PluginConfig _config;
 
 		public PredictionLayout(PluginConfig config)
 		{
 			_config = config;
-			// Enforce a maximum height on layout.
-			// The FitDeckListToDisplay setting reduces the max further to prevent overlap of other
-			// UI elements.
-			double maxHeightRatio =
-				_config.FitDeckListToDisplay ? FittedMaxHeightRatio : AbsoluteMaxHeightRatio;
-			_maxHeight = maxHeightRatio * SystemParameters.PrimaryScreenHeight;
 			InitializeComponent();
 		}
 
@@ -100,14 +94,23 @@ namespace DeckPredictor
 
 			// Enforce a maximum height on the Viewbox that contains the list of cards.
 			// Note that we only scale the cardlist, but factor the InfoBox into the max height calculation.
-			if (cards.Count * CardHeight > _maxHeight - InfoBox.ActualHeight)
+			// The FitDeckListToDisplay setting reduces the max further to prevent overlap of other
+			// UI elements.
+			double maxHeightRatio =
+				_config.FitDeckListToDisplay ? FittedMaxHeightRatio : AbsoluteMaxHeightRatio;
+			double maxHeight = maxHeightRatio * Core.OverlayWindow.Height;
+			if (cards.Count * CardHeight > maxHeight - InfoBox.ActualHeight)
 			{
-				CardView.Height = _maxHeight - InfoBox.ActualHeight;
+				CardView.Height = maxHeight - InfoBox.ActualHeight;
 			}
 			else
 			{
 				CardView.Height = Double.NaN;
 			}
+
+			// Reposition on canvas, in case window has been resized.
+			Canvas.SetBottom(this, Core.OverlayWindow.Height * 20 / 100);
+			Canvas.SetLeft(this, Core.OverlayWindow.Width * .5 / 100);
 		}
 
 		public class PercentageItem
