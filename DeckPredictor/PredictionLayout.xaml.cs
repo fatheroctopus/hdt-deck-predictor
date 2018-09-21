@@ -20,8 +20,10 @@ namespace DeckPredictor
 	public partial class PredictionLayout
 	{
 		private const int CardHeight = 32;
+		private const double BottomFromScreenRatio = .2;
+		private const double LeftFromScreenRatio = .005;
 		private const double FittedMaxHeightRatio = .55;
-		private const double AbsoluteMaxHeightRatio = .8;
+		private const double AbsoluteMaxHeightRatio = 1 - BottomFromScreenRatio;
 		private PluginConfig _config;
 
 		public PredictionLayout(PluginConfig config)
@@ -98,7 +100,9 @@ namespace DeckPredictor
 			// UI elements.
 			double maxHeightRatio =
 				_config.FitDeckListToDisplay ? FittedMaxHeightRatio : AbsoluteMaxHeightRatio;
-			double maxHeight = maxHeightRatio * Core.OverlayWindow.Height;
+			double displayHeight =
+				Core.OverlayWindow.Height - System.Windows.SystemParameters.WindowCaptionHeight;
+			double maxHeight = maxHeightRatio * displayHeight;
 			if (cards.Count * CardHeight > maxHeight - InfoBox.ActualHeight)
 			{
 				CardView.Height = maxHeight - InfoBox.ActualHeight;
@@ -109,8 +113,8 @@ namespace DeckPredictor
 			}
 
 			// Reposition on canvas, in case window has been resized.
-			Canvas.SetBottom(this, Core.OverlayWindow.Height * 20 / 100);
-			Canvas.SetLeft(this, Core.OverlayWindow.Width * .5 / 100);
+			Canvas.SetBottom(this, Core.OverlayWindow.Height * BottomFromScreenRatio);
+			Canvas.SetLeft(this, Core.OverlayWindow.Width * LeftFromScreenRatio);
 		}
 
 		public class PercentageItem
