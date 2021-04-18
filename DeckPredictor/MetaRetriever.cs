@@ -1,98 +1,131 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
-using Hearthstone_Deck_Tracker;
 using Hearthstone_Deck_Tracker.Hearthstone;
+using HearthDb;
+using AngleSharp.Dom;
+using AngleSharp.Html.Dom;
+using AngleSharp.Html.Parser;
+using System.Net.Http;
+using System.Threading;
 
 namespace DeckPredictor
 {
-	class MetaRetriever
+    class MetaRetriever
 	{
-		// How many days we wait before updating the meta since the last download.
-		private const double RecentDownloadTimeoutDays = 1;
-		private const string MetaVersionUrl = "http://metastats.net/metadetector/metaversion.php";
-		private const string MetaFileUrl = "https://s3.amazonaws.com/metadetector/metaDecks.xml.gz";
-		private static readonly string MetaFilePath =
-				Path.Combine(DeckPredictorPlugin.DataDirectory, @"metaDecks.xml");
-		private static readonly string MetaArchivePath = MetaFilePath + ".gz";
+        private static string siteUrl = "http://metastats.net/hearthstone/class/decks/";
+        public static string[] Classes { get; } = { "DemonHunter", "Druid", "Hunter", "Mage", "Paladin", "Priest", "Rogue", "Shaman", "Warlock", "Warrior" };
 
-		public async Task<List<Deck>> RetrieveMetaDecks(PluginConfig config)
-		{
-			// First check if we need to download the meta file.
-			string newMetaVersion = "";
-			if (!File.Exists(MetaFilePath))
-			{
-				Log.Info("No meta file found.");
-				using (WebClient client = new WebClient())
-				{
-					newMetaVersion = await client.DownloadStringTaskAsync(MetaVersionUrl);
-				}
-			}
-			else
-			{
-				double daysSinceLastDownload = (DateTime.Now - config.CurrentMetaFileDownloadTime).TotalDays;
-				if (daysSinceLastDownload > RecentDownloadTimeoutDays)
-				{
-					Log.Info(daysSinceLastDownload +
-							" days since meta file has been updated, checking for new version.");
-					using (WebClient client = new WebClient())
-					{
-						newMetaVersion = await client.DownloadStringTaskAsync(MetaVersionUrl);
-					}
-					if (newMetaVersion.Trim() != "" && newMetaVersion != config.CurrentMetaFileVersion)
-					{
-						Log.Info("New version detected: " + newMetaVersion +
-								", old version: " + config.CurrentMetaFileVersion);
-					}
-					else
-					{
-						Log.Debug("Newest version of meta file matches cached version: " + newMetaVersion);
-						newMetaVersion = "";
-					}
-				}
-				else
-				{
-					Log.Debug("Cached meta file is only " + daysSinceLastDownload + " days old.");
-				}
-			}
+        public async Task<List<Deck>> RetrieveMetaDecks(PluginConfig config)
+        {
+            List<Deck> metaDecks = new List<Deck>();
 
-			if (newMetaVersion != "")
-			{
-				Log.Info("Downloading new meta file.");
-				using (WebClient client = new WebClient())
-				{
-					await client.DownloadFileTaskAsync(MetaFileUrl, MetaArchivePath);
-				}
+            try
+            {
+                CancellationTokenSource cancellationToken = new CancellationTokenSource();
+                HttpClient httpClient = new HttpClient();
+                foreach (var className in Classes)
+                {
+                    Log.Info(className);
+                    HttpResponseMessage request = await httpClient.GetAsync(siteUrl + className);
+                    cancellationToken.Token.ThrowIfCancellationRequested();
 
-				Log.Info("Meta file downloaded, unzipping...");
-				FileInfo archiveFile = new FileInfo(MetaArchivePath);
+                    Stream response = await request.Content.ReadAsStreamAsync();
+                    cancellationToken.Token.ThrowIfCancellationRequested();
 
-				using (FileStream archiveFileStream = archiveFile.OpenRead())
-				{
-					using (FileStream unzippedFileStream = File.Create(MetaFilePath))
-					{
-						using (GZipStream unzipStream =
-								new GZipStream(archiveFileStream, CompressionMode.Decompress))
-						{
-							unzipStream.CopyTo(unzippedFileStream);
-						}
-					}
-				}
+                    HtmlParser parser = new HtmlParser();
+                    IHtmlDocument document = parser.ParseDocument(response);
 
-				config.CurrentMetaFileVersion = newMetaVersion;
-				config.CurrentMetaFileDownloadTime = DateTime.Now;
-				config.Save();
-			}
+                    metaDecks.AddRange(ParseDoc(document, className));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+            }
 
-			Log.Debug("Loading meta file");
-			List<Deck> metaDecks = XmlManager<List<Deck>>.Load(MetaFilePath);
-			Log.Info("Meta retrieved, " + metaDecks.Count + " decks loaded.");
-			return metaDecks;
+            return metaDecks;
 		}
-	}
+
+        static private List<Deck> ParseDoc(IHtmlDocument document, string className)
+        {
+            List<Deck> metaDecks = new List<Deck>();
+
+            IEnumerable<IElement> decks = document.All.Where(x => x.ClassName == "decklist");
+
+            foreach (var deck in decks)
+            {
+                Deck d = new Deck();
+                IElement atag = deck.QuerySelectorAll("a").Eq(0);
+                d.Class = className;
+                d.Name = atag.Text();
+                d.Name = d.Name.Substring(0, d.Name.LastIndexOf("#")).Trim();
+                d.Url = atag.GetAttribute("href").Trim();
+                IElement divtag = deck.QuerySelectorAll("div").Eq(1);
+                var games = divtag.Text().Trim().Replace("#Games: ", "").Trim();
+                d.Note = games.Substring(0, games.IndexOf("\n", 0)).Trim(); // used to store the number of games played with the deck
+                var cards = deck.QuerySelectorAll(".card-list-item");
+
+                foreach (var card in cards)
+                {
+                    IElement img = card.QuerySelectorAll("img").Eq(0);
+                    String src = img.GetAttribute("src");
+                    String name = card.QuerySelectorAll(".hover-img").Eq(0).Text().Trim();
+                    var id = src.Substring(src.LastIndexOf("/") + 1).Trim();
+                    var quantity = Int32.Parse(card.QuerySelectorAll(".card-quantity").Eq(0).Text().Replace("x", "").Trim());
+                    // Looking up key in HearthDb
+                    HearthDb.Card HearthDbCard;
+                    try {
+                        HearthDbCard = Cards.All[id];
+                    } catch {
+                        // Failed to find card id in database, looking up by name
+                        if (name == "Lord Jaraxxus") {
+                            // NOTE: Jaraxxus is a special case that fails all other lookups
+                            HearthDbCard = Cards.All["CORE_EX1_323"];
+                        } else {
+                            HearthDbCard = HearthDb.Cards.GetFromName(name, HearthDb.Enums.Locale.enUS);
+                            if (HearthDbCard.Id.Substring(0, 4) != "CORE")
+                            {
+                                HearthDbCard = null;
+                                // Failed to find CORE card on name lookup, doing brute force search...
+                                var keys = HearthDb.Cards.Collectible.Keys.ToList(); keys.Sort();
+                                foreach (var key in keys)
+                                {
+                                    var val = HearthDb.Cards.Collectible[key];
+                                    if (val.Name.Trim() == name && val.Id.Substring(0, 4) == "CORE") {
+                                        HearthDbCard = val;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (HearthDbCard == null) {
+                        Log.Error("Error: failed to find card id " + id + " with name: " + name);
+                    } else {
+                        Hearthstone_Deck_Tracker.Hearthstone.Card c = new Hearthstone_Deck_Tracker.Hearthstone.Card(HearthDbCard);
+                        c.Count = quantity;
+                        d.Cards.Add(c);
+                        Log.Info(className + ", " + d.Name + ", " + c.Count + "x " + c.Name);
+                    }
+                }
+                metaDecks.Add(d);
+            }
+            return metaDecks;
+        }
+
+        static public void PrintResults(List<Deck> decks)
+        {
+            foreach (var deck in decks)
+            {
+                Log.Info(deck.Name + " " + deck.Url);
+                foreach (var card in deck.Cards)
+                {
+                    Log.Info(card.Id + " " + card.Name);
+                }
+            }
+        }
+    }
 }
