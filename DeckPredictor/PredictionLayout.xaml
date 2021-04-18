@@ -2,6 +2,7 @@
 		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:hdt="clr-namespace:Hearthstone_Deck_Tracker;assembly=HearthstoneDeckTracker"
+        xmlns:utility="clr-namespace:Hearthstone_Deck_Tracker.Utility;assembly=HearthstoneDeckTracker"
 		xmlns:controls="clr-namespace:Hearthstone_Deck_Tracker.Controls;assembly=HearthstoneDeckTracker"
 		Height="Auto" Width="Auto"
 		Background="Transparent">
@@ -10,7 +11,11 @@
 			<StackPanel Orientation="Horizontal"/>
 	   </ItemsPanelTemplate>
 	</ItemsControl.ItemsPanel>
-
+    <ItemsControl.Resources>
+        <ResourceDictionary>
+            <utility:ConfigWrapper x:Key="ConfigWrapper"/>
+        </ResourceDictionary>
+    </ItemsControl.Resources>
 	<StackPanel Orientation="Vertical">
 		<!-- Viewbox used for scaling if card list gets too large -->
 		<Viewbox Name="CardView" Height="Auto">
@@ -77,13 +82,15 @@
 			</StackPanel>
 		</Border>
 	</StackPanel>
-	<!-- Tool Tip appears to the right of the main stack -->
-	<Canvas>
-		<controls:CardToolTipControl
-			x:Name="CardToolTip"
+    <!-- Tool Tip appears to the right of the main stack -->
+    <!--
+    <Canvas Style="{StaticResource ConfigWrapper}">
+        <controls:CardImage
+			x:Name="ToolTipCardBlock"
 			Height="auto"
 			Panel.ZIndex="100"
 			VerticalAlignment="Top"
 		   Visibility="Hidden"/>
-   </Canvas>
+    </Canvas>
+    -->
 </ItemsControl>

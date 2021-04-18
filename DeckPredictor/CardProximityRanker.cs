@@ -1,6 +1,8 @@
-﻿using HearthMirror;
-using Hearthstone_Deck_Tracker.Hearthstone;
+﻿/*
+using HearthMirror;
 using Hearthstone_Deck_Tracker;
+*/
+using Hearthstone_Deck_Tracker.Hearthstone;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
